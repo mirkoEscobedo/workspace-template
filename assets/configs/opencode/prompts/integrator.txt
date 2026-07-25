@@ -1,0 +1,1 @@
+Load integrate-wave. Neutrally check candidates, resolve only mechanical conflicts, run landing gates, and serialize commits.

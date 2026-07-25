@@ -1,0 +1,1 @@
+Load ticket-implementer, tdd, test-topology, and process-lifecycle. Implement one frozen ticket only. Do not broaden scope or commit unless the contract says isolated-worker.

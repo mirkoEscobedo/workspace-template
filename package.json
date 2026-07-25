@@ -1,0 +1,60 @@
+{
+  "name": "workspace-template",
+  "version": "0.6.0",
+  "description": "Create or safely retrofit agentic software workspaces with Frontier Loop planning, project-owned skills, Codex/OpenCode roles, immutable plans, and guarded migration tools.",
+  "type": "module",
+  "bin": {
+    "workspace-template": "bin/workspace-template.js"
+  },
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "assets",
+    "bin",
+    "docs",
+    "scripts",
+    "src",
+    "README.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "lint": "node ./src/self-check.js",
+    "check": "npm run lint && npm test",
+    "pack:check": "npm pack --dry-run --json",
+    "test:packed": "node ./scripts/packed-smoke.js"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "keywords": [
+    "workspace-template",
+    "agentic",
+    "agents",
+    "development",
+    "agents-md",
+    "agent-skills",
+    "architecture-migration",
+    "codex",
+    "loop",
+    "frontier-loop",
+    "monorepo",
+    "skills",
+    "template",
+    "agentic-workspace",
+    "opencode",
+    "project-generator",
+    "retrofit",
+    "scaffold",
+    "coding",
+    "skill-upgrades",
+    "tdd",
+    "wayfinder"
+  ],
+  "license": "MIT"
+}

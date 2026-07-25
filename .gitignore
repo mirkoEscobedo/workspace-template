@@ -1,0 +1,17 @@
+node_modules/
+*.tgz
+coverage/
+.DS_Store
+.tmp/
+dist/
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+.agentic/transactions/
+.agent/leases/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*

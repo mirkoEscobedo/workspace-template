@@ -1,0 +1,32 @@
+{
+  "description": "Frontier Loop process-leak completion gates.",
+  "hooks": {
+    "SubagentStop": [
+      {
+        "matcher": "frontier_.*|ticket_.*|reviewer_.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$(git rev-parse --show-toplevel)/.agents/skills/process-lifecycle/scripts/codex_stop_guard.py\" --lease-dir \"$(git rev-parse --show-toplevel)/.agent/leases\"",
+            "commandWindows": "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"$root=(git rev-parse --show-toplevel).Trim(); py -3 (Join-Path $root '.agents/skills/process-lifecycle/scripts/codex_stop_guard.py') --lease-dir (Join-Path $root '.agent/leases')\"",
+            "timeout": 30,
+            "statusMessage": "Checking owned process cleanup"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$(git rev-parse --show-toplevel)/.agents/skills/process-lifecycle/scripts/codex_stop_guard.py\" --lease-dir \"$(git rev-parse --show-toplevel)/.agent/leases\"",
+            "commandWindows": "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"$root=(git rev-parse --show-toplevel).Trim(); py -3 (Join-Path $root '.agents/skills/process-lifecycle/scripts/codex_stop_guard.py') --lease-dir (Join-Path $root '.agent/leases')\"",
+            "timeout": 30,
+            "statusMessage": "Checking owned process cleanup"
+          }
+        ]
+      }
+    ]
+  }
+}

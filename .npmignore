@@ -1,0 +1,9 @@
+.github/
+.tmp/
+coverage/
+test/
+node_modules/
+*.tgz
+**/__pycache__/**
+**/*.pyc
+.agentic/transactions/

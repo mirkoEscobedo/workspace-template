@@ -1,0 +1,1 @@
+Use Wayfinder to resolve route-changing decisions, capture durable planning artifacts, and compile a bounded Frontier ticket graph. Do not implement product code.
