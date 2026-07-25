@@ -32,11 +32,15 @@ function testStrategy(project) {
   };
 }
 
-export function createProfile({ project, style, tdd, agents, mode = "generated" }) {
+export function createProfile({ project, style, tdd, agents, mode = "generated", presetState }) {
   const selected = style === "preserve" ? undefined : STYLE_SETTINGS[style];
   if (style !== "preserve" && !selected) throw new Error(`Unsupported implementation style: ${style}`);
 
   const generated = mode === "generated";
+  const summary = (role) => ({
+    model: role.targets?.codex ?? role.targets?.opencode,
+    reasoningEffort: role.reasoningEffort,
+  });
   const preferredArchitecture = selected?.architecture ?? null;
   const architecture = generated
     ? {
@@ -86,9 +90,11 @@ export function createProfile({ project, style, tdd, agents, mode = "generated" 
     complexityBudget: "minimum-architecture-that-protects-the-current-change",
     execution: {
       method: "frontier-loop",
-      coordinator: { model: "gpt-5.6-sol", reasoningEffort: "high" },
-      planner: { model: "gpt-5.6-sol", reasoningEffort: "high" },
-      workers: { model: "gpt-5.3-codex", reasoningEffort: "high" },
+      preset: presetState,
+      coordinator: summary(presetState.roles.coordinator),
+      planner: summary(presetState.roles.planner),
+      workers: summary(presetState.roles.implementer),
+      routing: presetState.roles,
       defaultWriters: 1,
       maxConcurrentSubagents: 3,
       landing: "serial",

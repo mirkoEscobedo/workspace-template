@@ -1,6 +1,6 @@
 name = "frontier_scout"
 description = "Read-only codebase scout for seams, tests, write sets, conflict keys, and verification commands."
-model = "gpt-5.3-codex"
+model = "preset-rendered"
 model_reasoning_effort = "high"
 sandbox_mode = "read-only"
 developer_instructions = """

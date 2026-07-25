@@ -95,19 +95,30 @@ The coordinator may continue through all ordinary local tickets in one conversat
 - **Compile Master Plan** converts a stable route into vertical ticket contracts with dependencies, conflict keys, risk lanes, verification levels, architecture budgets, and stop conditions.
 - **Execute Frontier** runs the ready local frontier. Read-only investigation and independent reviews may be parallel; overlapping mutation and authority transitions remain serialized.
 
-### Default model routing
+### Swappable agent presets
 
-| Role | Model | Reasoning |
-|---|---|---|
-| Coordinator/orchestrator | `gpt-5.6-sol` | high |
-| Wayfinder/planner | `gpt-5.6-sol` | high |
-| Scout | `gpt-5.3-codex` | high |
-| Implementer | `gpt-5.3-codex` | high |
-| Spec/authority reviewer | `gpt-5.3-codex` | high |
-| Code/test reviewer | `gpt-5.3-codex` | high |
-| Operations/security reviewer | `gpt-5.3-codex` | high |
-| Repairer | `gpt-5.3-codex` | high |
-| Integrator | `gpt-5.3-codex` | high |
+Every created or adopted repository receives the complete built-in preset
+catalog. `sol-only` is active by default; `sol-codex` preserves the original
+Sol coordinator/planner and Codex worker split. Selecting a preset changes only
+the active routing—it does not remove inactive presets.
+
+```bash
+workspace-template preset list .
+workspace-template preset plan . --preset sol-codex --plan-out ../sol-codex-plan.json
+workspace-template preset apply . --apply-plan ../sol-codex-plan.json
+workspace-template preset status .
+```
+
+Repository-owned experimental definitions live in
+`.agentic/presets/local/`. Built-ins live in `.agentic/presets/builtin/`, and
+the expanded active policy lives in `.agentic/policies/model-routing.yaml`.
+Start a new agent session after switching because an existing session retains
+the configuration it loaded at startup.
+
+For fair A/B experiments, create sibling branches or worktrees from the same
+feature baseline, activate a different preset on each, and run equivalent
+tasks and verification. Switching a preset never resets code or commits from a
+previous attempt.
 
 Generated Codex roles are under `.codex/agents/`; generated OpenCode role prompts are under `.opencode/prompts/frontier-loop/`. Planners and reviewers are read-only. Write access is limited to implementation, repair, and integration roles. The default child-agent cap is three.
 
@@ -166,6 +177,9 @@ workspace-template adopt|retrofit [directory]
 workspace-template sync [directory]
 workspace-template doctor [directory]
 workspace-template verify [directory] --scope root|module|affected|all
+workspace-template preset list|status [directory]
+workspace-template preset plan [directory] --preset <id> --plan-out <file>
+workspace-template preset apply [directory] --apply-plan <file>
 
 workspace-template tooling plan [directory] ...
 workspace-template tooling install [directory] --apply-plan <file> ...

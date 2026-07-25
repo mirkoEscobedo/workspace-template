@@ -29,13 +29,6 @@ export const AGENT_TARGETS = [
 // Frontier Loop defaults. Other projections remain opt-in.
 export const DEFAULT_AGENTS = ["codex", "opencode"];
 
-export const MODEL_ROUTING = Object.freeze({
-  coordinator: Object.freeze({ model: "gpt-5.6-sol", reasoningEffort: "high" }),
-  planner: Object.freeze({ model: "gpt-5.6-sol", reasoningEffort: "high" }),
-  worker: Object.freeze({ model: "gpt-5.3-codex", reasoningEffort: "high" }),
-  maxConcurrentSubagents: 3,
-});
-
 export const DEPENDENCY_SNAPSHOT = Object.freeze({
   capturedAt: "2026-07-11",
   typescript: "7.0.2",

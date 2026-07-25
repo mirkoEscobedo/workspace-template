@@ -1,6 +1,6 @@
 name = "frontier_integrator"
 description = "Neutrally checks and serially lands passed ticket candidates."
-model = "gpt-5.3-codex"
+model = "preset-rendered"
 model_reasoning_effort = "high"
 sandbox_mode = "workspace-write"
 developer_instructions = """

@@ -8,6 +8,7 @@ import {
   readJson,
 } from "./fs-utils.js";
 import { projectionStatus } from "./sync.js";
+import { CODEX_ROLE_FILES, PREFERRED_ROLE_IDS } from "./presets/render.js";
 
 function unquote(value) {
   const trimmed = value.trim();
@@ -294,26 +295,33 @@ function managed(manifest, relative) {
 
 async function validateHarnessConfiguration(root, config, managedFiles, report) {
   const targets = new Set(config?.agentTargets ?? []);
+  const preset = config?.execution?.preset;
+  const routes = preset?.roles ?? config?.execution?.routing;
+  const overridden = (target) => new Set((preset?.overrides ?? []).filter((item) => item.target === target).map((item) => item.pointer));
   if (targets.has("codex")) {
     const relative = ".codex/config.toml";
     const file = path.join(root, relative);
     if (!(await exists(file))) {
       report.errors.push(`Codex is selected but ${relative} is missing`);
-    } else if (managed(managedFiles, relative)) {
+    } else if (managed(managedFiles, relative) || managedFiles?.settings?.[relative]) {
       const content = await readFile(file, "utf8");
       const required = [
-        'model = "gpt-5.6-sol"',
-        'model_reasoning_effort = "high"',
-        'default_subagent_model = "gpt-5.3-codex"',
-        'default_subagent_reasoning_effort = "high"',
-        "max_concurrent_threads_per_session = 3",
-      ];
-      for (const value of required) {
+        ["/model", `model = "${routes?.coordinator?.targets?.codex}"`],
+        ["/model_reasoning_effort", `model_reasoning_effort = "${routes?.coordinator?.reasoningEffort}"`],
+        ["/agents/default_subagent_model", `default_subagent_model = "${routes?.implementer?.targets?.codex}"`],
+        ["/agents/default_subagent_reasoning_effort", `default_subagent_reasoning_effort = "${routes?.implementer?.reasoningEffort}"`],
+        ["/agents/max_concurrent_threads_per_session", "max_concurrent_threads_per_session = 3"],
+      ].filter(([, value]) => !value.includes("undefined"));
+      const codexOverrides = overridden("codex");
+      for (const [pointer, value] of required) {
+        if (codexOverrides.has(pointer)) continue;
         if (!content.includes(value)) report.errors.push(`${relative} is missing required Frontier setting: ${value}`);
       }
       const roleDirectory = path.join(root, ".codex", "agents");
-      for (const role of ["planner", "scout", "implementer", "reviewer-spec", "reviewer-code", "reviewer-ops", "repairer", "integrator"]) {
-        if (!(await exists(path.join(roleDirectory, `${role}.toml`)))) report.errors.push(`missing .codex/agents/${role}.toml`);
+      for (const [role, defaultFile] of Object.entries(CODEX_ROLE_FILES)) {
+        const id = preset?.roleIds?.codex?.[role] ?? PREFERRED_ROLE_IDS.codex[role];
+        const fileName = id === PREFERRED_ROLE_IDS.codex[role] ? defaultFile : `${id}.toml`;
+        if (!(await exists(path.join(roleDirectory, fileName)))) report.errors.push(`missing .codex/agents/${fileName}`);
       }
     } else {
       report.warnings.push("custom Codex configuration is preserved; review the Frontier proposal/model split manually");
@@ -325,21 +333,18 @@ async function validateHarnessConfiguration(root, config, managedFiles, report) 
     const file = path.join(root, relative);
     if (!(await exists(file))) {
       report.errors.push("OpenCode is selected but opencode.json is missing");
-    } else if (managed(managedFiles, relative)) {
+    } else if (managed(managedFiles, relative) || managedFiles?.settings?.[relative]) {
       const value = await readJsonForDoctor(file, report, "OpenCode configuration");
       if (value) {
-        if (value.agent?.["frontier-orchestrator"]?.model !== "openai/gpt-5.6-sol") {
-          report.errors.push("opencode.json frontier-orchestrator must use openai/gpt-5.6-sol");
-        }
-        if (value.agent?.["frontier-planner"]?.model !== "openai/gpt-5.6-sol") {
-          report.errors.push("opencode.json frontier-planner must use openai/gpt-5.6-sol");
-        }
-        for (const [name, agent] of Object.entries(value.agent ?? {})) {
-          if (["frontier-orchestrator", "frontier-planner"].includes(name)) continue;
-          if (agent.model !== "openai/gpt-5.3-codex") {
-            report.errors.push(`opencode.json ${name} must use openai/gpt-5.3-codex`);
+        for (const [role, route] of Object.entries(routes ?? {})) {
+          const id = preset?.roleIds?.opencode?.[role] ?? PREFERRED_ROLE_IDS.opencode[role];
+          const agent = value.agent?.[id];
+          if (!agent) {
+            report.errors.push(`opencode.json is missing preset role ${id}`);
+            continue;
           }
-          if (agent.reasoningEffort !== "high") report.errors.push(`opencode.json ${name} must use high reasoning`);
+          if (agent.model !== route.targets?.opencode) report.errors.push(`opencode.json ${id} must use ${route.targets?.opencode}`);
+          if (agent.reasoningEffort !== route.reasoningEffort) report.errors.push(`opencode.json ${id} must use ${route.reasoningEffort} reasoning`);
         }
       }
     } else {
@@ -355,7 +360,7 @@ async function validateProfileAndConfig(root, report) {
   const profile = await readJsonForDoctor(profilePath, report, "implementation profile");
   if (!config || !profile) return { config, profile };
 
-  if (![1, 2].includes(config.version)) report.errors.push(`unsupported config version ${config.version}`);
+  if (![1, 2, 3].includes(config.version)) report.errors.push(`unsupported config version ${config.version}`);
   if (config.generator !== "workspace-template") report.errors.push("config generator identity is invalid");
   if (!["generated", "adopted", undefined].includes(config.mode)) report.errors.push(`invalid config mode '${config.mode}'`);
   if (![1, 2].includes(profile.version)) report.errors.push(`unsupported profile version ${profile.version}`);
@@ -369,10 +374,19 @@ async function validateProfileAndConfig(root, report) {
   if (profile.version === 2 && typeof profile.architecture !== "object") {
     report.errors.push("profile version 2 requires an architecture object");
   }
-  if (config.version === 2) {
-    if (config.execution?.coordinator?.model !== "gpt-5.6-sol") report.errors.push("config coordinator model must be gpt-5.6-sol");
-    if (config.execution?.planner?.model !== "gpt-5.6-sol") report.errors.push("config planner model must be gpt-5.6-sol");
-    if (config.execution?.workers?.model !== "gpt-5.3-codex") report.errors.push("config worker model must be gpt-5.3-codex");
+  if (config.execution?.preset) {
+    const roles = config.execution.preset.roles;
+    if (!roles?.coordinator || !roles?.planner || !roles?.implementer) report.errors.push("active preset routing is incomplete");
+    if (config.execution.coordinator?.model !== (roles?.coordinator?.targets?.codex ?? roles?.coordinator?.targets?.opencode)) report.errors.push("config coordinator does not match active preset");
+    if (config.execution.planner?.model !== (roles?.planner?.targets?.codex ?? roles?.planner?.targets?.opencode)) report.errors.push("config planner does not match active preset");
+    if (config.execution.workers?.model !== (roles?.implementer?.targets?.codex ?? roles?.implementer?.targets?.opencode)) report.errors.push("config worker does not match active preset");
+    if (config.execution.preset.status === "partial") {
+      report.warnings.push(`active agent preset is partial; ${config.execution.preset.overrides?.length ?? 0} user-owned setting(s) override routing`);
+    }
+  } else if (config.version === 2) {
+    if (config.execution?.coordinator?.model !== "gpt-5.6-sol") report.errors.push("legacy config coordinator model must be gpt-5.6-sol");
+    if (config.execution?.planner?.model !== "gpt-5.6-sol") report.errors.push("legacy config planner model must be gpt-5.6-sol");
+    if (config.execution?.workers?.model !== "gpt-5.3-codex") report.errors.push("legacy config worker model must be gpt-5.3-codex");
   }
 
   report.checks.project = config.project;

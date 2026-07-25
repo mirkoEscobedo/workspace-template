@@ -111,7 +111,7 @@ describe("adoptProject", () => {
     assert.equal([...paths].some((item) => item.startsWith("src/")), false);
   });
 
-  it("applies additively, preserves custom instructions, and installs the Sol/Codex role split", async () => {
+  it("applies additively, preserves custom instructions, and installs the complete preset catalog", async () => {
     const root = await existingTypeScriptRepo({ customAgents: true });
     const protectedPaths = ["package.json", "package-lock.json", "tsconfig.json", "README.md", "src/index.ts", "AGENTS.md"];
     const before = Object.fromEntries(await Promise.all(protectedPaths.map(async (relative) => [relative, await hashFile(path.join(root, relative))])));
@@ -130,16 +130,19 @@ describe("adoptProject", () => {
 
     const config = await readJson(path.join(root, ".agentic", "config.json"));
     assert.deepEqual(config.execution.coordinator, { model: "gpt-5.6-sol", reasoningEffort: "high" });
-    assert.deepEqual(config.execution.workers, { model: "gpt-5.3-codex", reasoningEffort: "high" });
+    assert.deepEqual(config.execution.workers, { model: "gpt-5.6-sol", reasoningEffort: "high" });
+    assert.equal(config.execution.preset.id, "sol-only");
+    assert.equal(await exists(path.join(root, ".agentic", "presets", "builtin", "sol-codex.json")), true);
+    assert.equal(await exists(path.join(root, ".agentic", "presets", "builtin", "sol-only.json")), true);
     assert.deepEqual(config.agentTargets, ["codex", "opencode"]);
 
     const codex = await readFile(path.join(root, ".codex", "config.toml"), "utf8");
     assert.match(codex, /model = "gpt-5\.6-sol"/);
-    assert.match(codex, /default_subagent_model = "gpt-5\.3-codex"/);
+    assert.match(codex, /default_subagent_model = "gpt-5\.6-sol"/);
     assert.match(codex, /default_subagent_reasoning_effort = "high"/);
     const opencode = await readJson(path.join(root, "opencode.json"));
     assert.equal(opencode.agent["frontier-orchestrator"].model, "openai/gpt-5.6-sol");
-    assert.equal(opencode.agent["ticket-implementer"].model, "openai/gpt-5.3-codex");
+    assert.equal(opencode.agent["ticket-implementer"].model, "openai/gpt-5.6-sol");
 
     const frontier = await readJson(path.join(root, "docs", "tickets", "current-push", "frontier.json"));
     assert.deepEqual(frontier.active, ["002"]);
@@ -147,6 +150,34 @@ describe("adoptProject", () => {
 
     const doctor = await doctorProject(root);
     assert.equal(doctor.ok, true, doctor.errors.join("\n"));
+  });
+
+  it("infers sol-codex when adopting a legacy generator-owned routing configuration", async () => {
+    const root = await existingTypeScriptRepo({ tickets: false });
+    await mkdir(path.join(root, ".agentic"), { recursive: true });
+    await writeFile(path.join(root, ".agentic", "config.json"), `${JSON.stringify({
+      version: 2,
+      generator: "workspace-template",
+      mode: "adopted",
+      project: "typescript",
+      style: "domain",
+      tdd: "mockist",
+      agentTargets: ["codex", "opencode"],
+      execution: {
+        coordinator: { model: "gpt-5.6-sol", reasoningEffort: "high" },
+        planner: { model: "gpt-5.6-sol", reasoningEffort: "high" },
+        workers: { model: "gpt-5.3-codex", reasoningEffort: "high" },
+      },
+    }, null, 2)}\n`);
+    git(root, ["add", ".agentic/config.json"]);
+    git(root, ["-c", "user.name=Test", "-c", "user.email=test@example.com", "commit", "-m", "legacy routing"]);
+
+    const execution = await adoptProject(adoptOptions(root, ["--no-tickets"]));
+    assert.equal(execution.result.ok, true, execution.result.doctor.errors.join("\n"));
+    const config = await readJson(path.join(root, ".agentic", "config.json"));
+    assert.equal(config.execution.preset.id, "sol-codex");
+    assert.equal(config.execution.workers.model, "gpt-5.3-codex");
+    assert.equal(await exists(path.join(root, ".agentic", "presets", "builtin", "sol-only.json")), true);
   });
 
   it("blocks a dirty Git worktree unless explicitly authorized", async () => {

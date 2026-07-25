@@ -1,6 +1,6 @@
 name = "ticket_repairer"
 description = "Repairs failed review axes against the unchanged ticket contract."
-model = "gpt-5.3-codex"
+model = "preset-rendered"
 model_reasoning_effort = "high"
 sandbox_mode = "workspace-write"
 developer_instructions = """

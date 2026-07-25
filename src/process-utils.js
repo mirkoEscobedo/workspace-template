@@ -1,4 +1,21 @@
 import { spawn, spawnSync } from "node:child_process";
+import { existsSync } from "node:fs";
+import path from "node:path";
+
+function spawnSpec(command, args, environment = process.env) {
+  if (process.platform !== "win32") return { command, args };
+  const base = path.basename(command).toLowerCase().replace(/\.(?:cmd|exe)$/u, "");
+  const nodeRoot = path.dirname(process.execPath);
+  const npmCli = base === "npm"
+    ? environment.npm_execpath ?? path.join(nodeRoot, "node_modules", "npm", "bin", "npm-cli.js")
+    : base === "npx"
+      ? path.join(nodeRoot, "node_modules", "npm", "bin", "npx-cli.js")
+      : ["pnpm", "pnpx", "yarn", "yarnpkg"].includes(base)
+        ? path.join(nodeRoot, "node_modules", "corepack", "dist", `${base}.js`)
+        : null;
+  if (!npmCli || !existsSync(npmCli)) return { command, args };
+  return { command: process.execPath, args: [npmCli, ...args] };
+}
 
 export function commandExists(command) {
   const probe = process.platform === "win32" ? "where" : "which";
@@ -7,9 +24,11 @@ export function commandExists(command) {
 }
 
 export function runCommandCapture(command, args, options = {}) {
-  const result = spawnSync(command, args, {
+  const environment = { ...process.env, ...options.env };
+  const executable = spawnSpec(command, args, environment);
+  const result = spawnSync(executable.command, executable.args, {
     cwd: options.cwd,
-    env: { ...process.env, ...options.env },
+    env: environment,
     stdio: "pipe",
     encoding: "utf8",
     shell: false,
@@ -51,9 +70,11 @@ export function runCommandAsync(command, args, options = {}) {
   return new Promise((resolve) => {
     const startedAt = Date.now();
     const maximum = options.maxOutputBytes ?? 100_000;
-    const child = spawn(command, args, {
+    const environment = { ...process.env, ...options.env };
+    const executable = spawnSpec(command, args, environment);
+    const child = spawn(executable.command, executable.args, {
       cwd: options.cwd,
-      env: { ...process.env, ...options.env },
+      env: environment,
       shell: false,
       stdio: [options.stdin === undefined ? "ignore" : "pipe", "pipe", "pipe"],
       detached: process.platform !== "win32",
@@ -103,9 +124,11 @@ export function runCommandAsync(command, args, options = {}) {
 }
 
 export function runCommand(command, args, options = {}) {
-  const result = spawnSync(command, args, {
+  const environment = { ...process.env, ...options.env };
+  const executable = spawnSpec(command, args, environment);
+  const result = spawnSync(executable.command, executable.args, {
     cwd: options.cwd,
-    env: { ...process.env, ...options.env },
+    env: environment,
     stdio: options.quiet ? "pipe" : "inherit",
     encoding: "utf8",
     shell: false,
@@ -125,9 +148,11 @@ export function runCommand(command, args, options = {}) {
 
 export function runCommandCaptureAsync(command, args, options = {}) {
   return new Promise((resolve) => {
-    const child = spawn(command, args, {
+    const environment = { ...process.env, ...options.env };
+    const executable = spawnSpec(command, args, environment);
+    const child = spawn(executable.command, executable.args, {
       cwd: options.cwd,
-      env: { ...process.env, ...options.env },
+      env: environment,
       shell: false,
       stdio: ["ignore", "pipe", "pipe"],
       detached: process.platform !== "win32" && options.detached !== false,

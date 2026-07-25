@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtemp, mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, unlink, writeFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 import os from "node:os";
 import path from "node:path";
 
@@ -44,10 +45,20 @@ async function readable(file) {
   }
 }
 
-const argument = process.argv[2];
+const npmCli = process.env.npm_execpath
+  ?? (process.platform === "win32"
+    ? path.join(path.dirname(process.execPath), "node_modules", "npm", "bin", "npm-cli.js")
+    : null);
+const runNpm = (args, options = {}) => run(npmCli ? process.execPath : "npm", npmCli ? [npmCli, ...args] : args, options);
+const runNpmJson = (args, options = {}) => runJson(npmCli ? process.execPath : "npm", npmCli ? [npmCli, ...args] : args, options);
+
+let argument = process.argv[2];
+let generatedTarball = false;
 if (!argument) {
-  console.error("Usage: node scripts/packed-smoke.js <workspace-template-*.tgz>");
-  process.exit(2);
+  const sourceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+  const result = runNpmJson(["pack", "--json"], { cwd: sourceRoot });
+  argument = path.join(sourceRoot, result[0].filename);
+  generatedTarball = true;
 }
 
 const tarball = path.resolve(argument);
@@ -55,7 +66,8 @@ const sandbox = await mkdtemp(path.join(os.tmpdir(), "caw-packed-smoke-"));
 const consumer = path.join(sandbox, "consumer");
 await mkdir(consumer, { recursive: true });
 await writeJson(path.join(consumer, "package.json"), { name: "packed-smoke-consumer", private: true });
-run("npm", ["install", "--ignore-scripts", "--no-audit", "--no-fund", "--package-lock=false", tarball], {
+const npmInstall = ["install", "--ignore-scripts", "--no-audit", "--no-fund", "--package-lock=false", tarball];
+runNpm(npmInstall, {
   cwd: consumer,
   timeout: 240_000,
 });
@@ -90,7 +102,23 @@ const generatedDoctor = invokeJson(["doctor", generated, "--json"]);
 assert.equal(generatedDoctor.ok, true, JSON.stringify(generatedDoctor.errors));
 const codexConfig = await readFile(path.join(generated, ".codex", "config.toml"), "utf8");
 assert.match(codexConfig, /model\s*=\s*"gpt-5\.6-sol"/);
-assert.match(codexConfig, /default_subagent_model\s*=\s*"gpt-5\.3-codex"/);
+assert.match(codexConfig, /default_subagent_model\s*=\s*"gpt-5\.6-sol"/);
+assert.equal(await readable(path.join(generated, ".agentic", "presets", "builtin", "sol-only.json")), true);
+assert.equal(await readable(path.join(generated, ".agentic", "presets", "builtin", "sol-codex.json")), true);
+const presetList = invokeJson(["preset", "list", generated, "--json"]);
+assert.equal(presetList.activeId, "sol-only");
+assert.equal(presetList.presets.length >= 2, true);
+
+const generatedPresetPlanPath = path.join(sandbox, "generated-sol-codex-plan.json");
+const generatedPresetPlan = invokeJson([
+  "preset", "plan", generated, "--preset", "sol-codex", "--plan-out", generatedPresetPlanPath, "--json",
+]);
+assert.equal(generatedPresetPlan.command, "preset");
+const generatedPresetApply = invokeJson([
+  "preset", "apply", generated, "--apply-plan", generatedPresetPlanPath, "--json",
+]);
+assert.equal(generatedPresetApply.ok, true);
+assert.equal(invokeJson(["preset", "status", generated, "--json"]).activeId, "sol-codex");
 
 // Existing-repository adoption round-trip from a persisted immutable plan.
 const existing = path.join(sandbox, "existing");
@@ -266,3 +294,4 @@ console.log(JSON.stringify({
     "manual-alignment-plan-and-stop-gate",
   ],
 }, null, 2));
+if (generatedTarball) await unlink(tarball);

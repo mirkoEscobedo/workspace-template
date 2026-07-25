@@ -1,12 +1,17 @@
 import { readFile } from "node:fs/promises";
-import { fileURLToPath } from "node:url";
 import path from "node:path";
-import { DEPENDENCY_SNAPSHOT, MODEL_ROUTING, PACKAGE_VERSION } from "./constants.js";
+import { DEPENDENCY_SNAPSHOT, PACKAGE_VERSION } from "./constants.js";
 import { hashBuffer, listFiles, toPosixPath } from "./fs-utils.js";
+export { assetsRoot, assetsSkills } from "./asset-paths.js";
+import { assetsRoot, assetsSkills } from "./asset-paths.js";
+import { presetCatalogArtifacts } from "./presets/catalog.js";
+import {
+  activePresetState,
+  modelRoutingYaml as renderModelRoutingYaml,
+  renderCodexArtifacts,
+  renderOpenCodeArtifacts,
+} from "./presets/render.js";
 
-const moduleDirectory = path.dirname(fileURLToPath(import.meta.url));
-export const assetsRoot = path.resolve(moduleDirectory, "..", "assets");
-export const assetsSkills = path.join(assetsRoot, "skills");
 
 export function agenticReadme(mode = "generated") {
   return `# Agentic workspace
@@ -33,7 +38,9 @@ Frontier Loop is local-file based. GitHub issues, webhooks, and repository watch
 `;
 }
 
-export function architectureNote({ project, style, tdd, mode }) {
+export function architectureNote({ project, style, tdd, mode, presetState }) {
+  const coordinator = presetState?.roles?.coordinator;
+  const implementer = presetState?.roles?.implementer;
   return `# Implementation profile
 
 Machine-readable policy: \`.agentic/profile.json\`.
@@ -43,8 +50,9 @@ Machine-readable policy: \`.agentic/profile.json\`.
 - Style: \`${style}\`
 - TDD mode: \`${tdd}\`
 - Execution: Frontier Loop
-- Coordinator/planner: \`${MODEL_ROUTING.coordinator.model}\`, ${MODEL_ROUTING.coordinator.reasoningEffort}
-- Workers/reviewers/repair/integration: \`${MODEL_ROUTING.worker.model}\`, ${MODEL_ROUTING.worker.reasoningEffort}
+- Active agent preset: \`${presetState?.id ?? "unresolved"}\` (${presetState?.status ?? "unresolved"})
+- Coordinator: \`${coordinator?.targets?.codex ?? coordinator?.targets?.opencode ?? "unresolved"}\`, ${coordinator?.reasoningEffort ?? "unresolved"}
+- Implementer: \`${implementer?.targets?.codex ?? implementer?.targets?.opencode ?? "unresolved"}\`, ${implementer?.reasoningEffort ?? "unresolved"}
 
 ## Decision rule
 
@@ -93,10 +101,15 @@ export function createAgenticConfig({
   originalTimestamp,
   docs = true,
   tickets = true,
+  presetState,
 }) {
+  const summary = (role) => ({
+    model: role.targets?.codex ?? role.targets?.opencode,
+    reasoningEffort: role.reasoningEffort,
+  });
   const timestampKey = mode === "adopted" ? "adoptedAt" : "createdAt";
   return {
-    version: 2,
+    version: 3,
     generator: "workspace-template",
     generatorVersion: PACKAGE_VERSION,
     mode,
@@ -110,10 +123,12 @@ export function createAgenticConfig({
     managedFiles: ".agentic/managed-files.json",
     execution: {
       method: "frontier",
-      coordinator: MODEL_ROUTING.coordinator,
-      planner: MODEL_ROUTING.planner,
-      workers: MODEL_ROUTING.worker,
-      maxConcurrentSubagents: MODEL_ROUTING.maxConcurrentSubagents,
+      preset: presetState,
+      coordinator: summary(presetState.roles.coordinator),
+      planner: summary(presetState.roles.planner),
+      workers: summary(presetState.roles.implementer),
+      routing: presetState.roles,
+      maxConcurrentSubagents: 3,
       defaultWriters: 1,
       landing: "serial",
     },
@@ -125,33 +140,6 @@ export function createAgenticConfig({
     },
     agentTargets: agents,
   };
-}
-
-export function modelRoutingYaml() {
-  return `schema_version: 1
-coordinator:
-  model: ${MODEL_ROUTING.coordinator.model}
-  reasoning_effort: ${MODEL_ROUTING.coordinator.reasoningEffort}
-planner:
-  model: ${MODEL_ROUTING.planner.model}
-  reasoning_effort: ${MODEL_ROUTING.planner.reasoningEffort}
-workers:
-  model: ${MODEL_ROUTING.worker.model}
-  reasoning_effort: ${MODEL_ROUTING.worker.reasoningEffort}
-roles:
-  scout: workers
-  implementer: workers
-  reviewer_spec_authority: workers
-  reviewer_code_test: workers
-  reviewer_operations_security: workers
-  repairer: workers
-  integrator: workers
-concurrency:
-  max_subagents: ${MODEL_ROUTING.maxConcurrentSubagents}
-  default_writers: 1
-  lane_3_writers: 1
-landing: serial
-`;
 }
 
 export async function readTree(sourceRoot, destinationPrefix) {
@@ -183,30 +171,18 @@ export async function scriptArtifacts() {
   return readTree(path.join(assetsRoot, "scripts"), ".agentic/scripts");
 }
 
-export async function harnessArtifacts(agents) {
+export async function harnessArtifacts(agents, resolvedPreset, roleIds) {
   const artifacts = [];
   if (agents.includes("codex")) {
-    artifacts.push(...(await readTree(path.join(assetsRoot, "configs", "codex", "agents"), ".codex/agents")));
-    artifacts.push({
-      path: ".codex/config.toml",
-      content: await readFile(path.join(assetsRoot, "configs", "codex", "config.toml")),
-    });
-    artifacts.push({
-      path: ".codex/hooks.json",
-      content: await readFile(path.join(assetsRoot, "configs", "codex", "hooks.json")),
-    });
+    artifacts.push(...await renderCodexArtifacts(resolvedPreset, roleIds));
   }
   if (agents.includes("opencode")) {
-    artifacts.push(...(await readTree(path.join(assetsRoot, "configs", "opencode", "prompts"), ".opencode/prompts/frontier-loop")));
-    artifacts.push({
-      path: "opencode.json",
-      content: await readFile(path.join(assetsRoot, "configs", "opencode", "opencode.json")),
-    });
+    artifacts.push(...await renderOpenCodeArtifacts(resolvedPreset, roleIds));
   }
   return artifacts.sort((left, right) => left.path.localeCompare(right.path));
 }
 
-export async function policyArtifacts() {
+export async function policyArtifacts(resolvedPreset, presetState = activePresetState(resolvedPreset, {})) {
   const compileAssets = path.join(assetsSkills, "compile-master-plan", "assets");
   const names = [
     ["architecture-budgets.yaml", "architecture-budgets.yaml"],
@@ -220,9 +196,11 @@ export async function policyArtifacts() {
       content: await readFile(path.join(compileAssets, sourceName)),
     });
   }
-  artifacts.push({ path: ".agentic/policies/model-routing.yaml", content: Buffer.from(modelRoutingYaml()) });
+  artifacts.push({ path: ".agentic/policies/model-routing.yaml", content: Buffer.from(renderModelRoutingYaml(resolvedPreset, presetState)) });
   return artifacts;
 }
+
+export { presetCatalogArtifacts };
 
 export const PROJECTION_ROOTS = Object.freeze({
   claude: ".claude/skills",

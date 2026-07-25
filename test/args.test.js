@@ -162,4 +162,16 @@ describe("parseArgs", () => {
     assert.throws(() => parseArgs(["align", "plan", ".", "--max-files", "0"]), /--max-files/);
   });
 
+  it("parses preset catalog and immutable switching commands", () => {
+    const plan = parseArgs(["preset", "plan", ".", "--preset", "sol-codex", "--plan-out", "../preset.json"]);
+    assert.equal(plan.command, "preset");
+    assert.equal(plan.subcommand, "plan");
+    assert.equal(plan.options.preset, "sol-codex");
+    assert.equal(plan.options.presetExplicit, true);
+    const status = parseArgs(["preset", "status", "."]);
+    assert.equal(status.subcommand, "status");
+    assert.throws(() => parseArgs(["preset", "plan", "."]), /requires --preset/);
+    assert.throws(() => parseArgs(["preset", "plan", ".", "--preset", "Bad ID"]), /kebab-case/);
+  });
+
 });

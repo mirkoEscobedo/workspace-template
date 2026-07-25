@@ -9,9 +9,9 @@
   },
   "agent": {
     "frontier-orchestrator": {
-      "description": "Primary Sol-high coordinator for continuous local Frontier execution.",
+      "description": "Primary coordinator for continuous local Frontier execution.",
       "mode": "primary",
-      "model": "openai/gpt-5.6-sol",
+      "model": "preset-rendered",
       "reasoningEffort": "high",
       "prompt": "{file:./.opencode/prompts/frontier-loop/orchestrator.txt}",
       "permission": {
@@ -30,7 +30,7 @@
     "frontier-planner": {
       "description": "Read-only Wayfinder and ticket-contract planner.",
       "mode": "subagent",
-      "model": "openai/gpt-5.6-sol",
+      "model": "preset-rendered",
       "reasoningEffort": "high",
       "prompt": "{file:./.opencode/prompts/frontier-loop/planner.txt}",
       "permission": {
@@ -44,7 +44,7 @@
     "frontier-scout": {
       "description": "Fast read-only codebase and test-topology scout.",
       "mode": "subagent",
-      "model": "openai/gpt-5.3-codex",
+      "model": "preset-rendered",
       "reasoningEffort": "high",
       "prompt": "{file:./.opencode/prompts/frontier-loop/scout.txt}",
       "permission": {
@@ -58,7 +58,7 @@
     "ticket-implementer": {
       "description": "One-ticket write-capable implementer.",
       "mode": "subagent",
-      "model": "openai/gpt-5.3-codex",
+      "model": "preset-rendered",
       "reasoningEffort": "high",
       "prompt": "{file:./.opencode/prompts/frontier-loop/implementer.txt}",
       "permission": {
@@ -72,7 +72,7 @@
     "reviewer-spec-authority": {
       "description": "Read-only specification and authority reviewer.",
       "mode": "subagent",
-      "model": "openai/gpt-5.3-codex",
+      "model": "preset-rendered",
       "reasoningEffort": "high",
       "prompt": "{file:./.opencode/prompts/frontier-loop/reviewer-spec.txt}",
       "permission": {
@@ -86,7 +86,7 @@
     "reviewer-code-test": {
       "description": "Read-only code and test architecture reviewer.",
       "mode": "subagent",
-      "model": "openai/gpt-5.3-codex",
+      "model": "preset-rendered",
       "reasoningEffort": "high",
       "prompt": "{file:./.opencode/prompts/frontier-loop/reviewer-code.txt}",
       "permission": {
@@ -100,7 +100,7 @@
     "reviewer-operations-security": {
       "description": "Read-only process, persistence, resource, and security reviewer.",
       "mode": "subagent",
-      "model": "openai/gpt-5.3-codex",
+      "model": "preset-rendered",
       "reasoningEffort": "high",
       "prompt": "{file:./.opencode/prompts/frontier-loop/reviewer-ops.txt}",
       "permission": {
@@ -114,7 +114,7 @@
     "ticket-repairer": {
       "description": "Write-capable targeted repairer.",
       "mode": "subagent",
-      "model": "openai/gpt-5.3-codex",
+      "model": "preset-rendered",
       "reasoningEffort": "high",
       "prompt": "{file:./.opencode/prompts/frontier-loop/repairer.txt}",
       "permission": {
@@ -128,7 +128,7 @@
     "frontier-integrator": {
       "description": "Serial landing and integration agent.",
       "mode": "subagent",
-      "model": "openai/gpt-5.3-codex",
+      "model": "preset-rendered",
       "reasoningEffort": "high",
       "prompt": "{file:./.opencode/prompts/frontier-loop/integrator.txt}",
       "permission": {

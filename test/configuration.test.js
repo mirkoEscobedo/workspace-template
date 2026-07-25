@@ -3,44 +3,35 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
+import { loadBuiltInPresets, resolvePreset } from "../src/presets/catalog.js";
+import { PREFERRED_ROLE_IDS, renderCodexArtifacts, renderOpenCodeArtifacts } from "../src/presets/render.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
-describe("Frontier harness defaults", () => {
-  it("uses Sol high only for the coordinator/planner and Codex 5.3 high for all other Codex roles", async () => {
-    const global = await readFile(path.join(root, "assets", "configs", "codex", "config.toml"), "utf8");
-    assert.match(global, /^model = "gpt-5\.6-sol"/m);
-    assert.match(global, /^model_reasoning_effort = "high"/m);
-    assert.match(global, /^default_subagent_model = "gpt-5\.3-codex"/m);
-    assert.match(global, /^default_subagent_reasoning_effort = "high"/m);
-    assert.match(global, /^max_concurrent_threads_per_session = 3/m);
-
-    const roles = [
-      "scout.toml",
-      "implementer.toml",
-      "reviewer-spec.toml",
-      "reviewer-code.toml",
-      "reviewer-ops.toml",
-      "repairer.toml",
-      "integrator.toml",
-    ];
-    for (const role of roles) {
-      const content = await readFile(path.join(root, "assets", "configs", "codex", "agents", role), "utf8");
-      assert.match(content, /^model = "gpt-5\.3-codex"/m, role);
-      assert.match(content, /^model_reasoning_effort = "high"/m, role);
-    }
-    const planner = await readFile(path.join(root, "assets", "configs", "codex", "agents", "planner.toml"), "utf8");
-    assert.match(planner, /^model = "gpt-5\.6-sol"/m);
+describe("Frontier harness preset rendering", () => {
+  it("keeps source harness templates model-neutral", async () => {
+    const codex = await readFile(path.join(root, "assets", "configs", "codex", "config.toml"), "utf8");
+    assert.match(codex, /^model = "preset-rendered"/m);
+    assert.match(codex, /^default_subagent_model = "preset-rendered"/m);
+    const opencode = JSON.parse(await readFile(path.join(root, "assets", "configs", "opencode", "opencode.json"), "utf8"));
+    for (const agent of Object.values(opencode.agent)) assert.equal(agent.model, "preset-rendered");
   });
 
-  it("contains the same role split in OpenCode", async () => {
-    const config = JSON.parse(await readFile(path.join(root, "assets", "configs", "opencode", "opencode.json"), "utf8"));
-    assert.equal(config.agent["frontier-orchestrator"].model, "openai/gpt-5.6-sol");
-    assert.equal(config.agent["frontier-planner"].model, "openai/gpt-5.6-sol");
-    for (const [name, agent] of Object.entries(config.agent)) {
-      if (["frontier-orchestrator", "frontier-planner"].includes(name)) continue;
-      assert.equal(agent.model, "openai/gpt-5.3-codex", name);
-      assert.equal(agent.reasoningEffort, "high", name);
+  it("renders sol-only and sol-codex consistently for Codex and OpenCode", async () => {
+    const presets = await loadBuiltInPresets();
+    for (const preset of presets) {
+      const resolved = resolvePreset(preset, ["codex", "opencode"]);
+      const roleIds = structuredClone(PREFERRED_ROLE_IDS);
+      const codex = await renderCodexArtifacts(resolved, roleIds);
+      const config = codex.find((item) => item.path === ".codex/config.toml").content.toString("utf8");
+      assert.match(config, new RegExp(`model = "${resolved.roles.coordinator.targets.codex}"`));
+      assert.match(config, new RegExp(`default_subagent_model = "${resolved.roles.implementer.targets.codex}"`));
+      const opencode = await renderOpenCodeArtifacts(resolved, roleIds);
+      const document = JSON.parse(opencode.find((item) => item.path === "opencode.json").content.toString("utf8"));
+      for (const [role, route] of Object.entries(resolved.roles)) {
+        assert.equal(document.agent[roleIds.opencode[role]].model, route.targets.opencode);
+        assert.equal(document.agent[roleIds.opencode[role]].reasoningEffort, route.reasoningEffort);
+      }
     }
   });
 });

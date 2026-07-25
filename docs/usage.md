@@ -1,6 +1,6 @@
 # Usage guide
 
-This guide covers new-project creation, safe repository adoption, local Frontier execution, workspace verification, explicit tooling changes, skill upgrades, source restructuring, and bounded architecture alignment.
+This guide covers new-project creation, safe repository adoption, swappable agent presets, local Frontier execution, workspace verification, explicit tooling changes, skill upgrades, source restructuring, and bounded architecture alignment.
 
 ## 1. Choose `create` or `adopt`
 
@@ -109,6 +109,7 @@ A changed Git HEAD, changed fingerprinted file, changed custom instruction, new 
 | `--tdd` | `preserve` | follow existing explicit policy; protect changed behavior pragmatically when no policy exists |
 | `--pm` | `auto` | infer lockfile/package-manager owner |
 | `--agents` | `codex,opencode` | install the default local harness role split |
+| `--preset` | `sol-only` | select the initial routing while installing the complete preset catalog |
 | `--conflict` | `propose` | preserve custom text and write a reviewable proposal |
 | dirty Git tree | refused | use `--allow-dirty` only for a known, fingerprinted state |
 | project verification | off | use `--verify` explicitly |
@@ -189,13 +190,21 @@ Frontier does not require an issue tracker. A repository may mirror contracts in
 
 ## 5. Configure Codex and OpenCode
 
-Generated defaults:
+Every workspace contains all built-ins under `.agentic/presets/builtin/`.
+`sol-only` is active by default and `sol-codex` preserves the original split.
+Repository-owned experimental presets live under `.agentic/presets/local/`.
 
-```text
-Coordinator/planner: GPT-5.6 Sol, high
-All other roles:     GPT-5.3-Codex, high
-Maximum subagents:   3
+```bash
+npx workspace-template preset list .
+npx workspace-template preset status .
+npx workspace-template preset plan . --preset sol-codex --plan-out ../preset-plan.json
+npx workspace-template preset apply . --apply-plan ../preset-plan.json
 ```
+
+The apply step changes only managed routing and reports preserved user-owned
+overrides as a partial activation. Start a fresh agent session after switching.
+For A/B experiments, prefer sibling branches or worktrees from the same base;
+switching presets never resets application changes.
 
 ### Codex
 

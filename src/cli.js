@@ -28,6 +28,12 @@ import {
   renderAlignmentTickets,
   resumeAlignmentPlan,
 } from "./align/index.js";
+import {
+  applyPresetPlan,
+  buildPresetPlan,
+  listPresets,
+  presetStatus,
+} from "./presets/index.js";
 
 function helpText() {
   return `workspace-template ${PACKAGE_VERSION}
@@ -44,6 +50,9 @@ Core commands:
   sync [directory]
   doctor [directory]
   verify [directory] [--scope all|module|affected|root]
+  preset list|status [directory]
+  preset plan [directory] --preset <id> --plan-out <file>
+  preset apply [directory] --apply-plan <file>
 
 Advanced commands:
   tooling plan [directory] --pack <name> [--plan-out <file>]
@@ -83,6 +92,7 @@ Shared advanced options:
   --dry-run                   Render without mutation
   --json                      Machine-readable output
   --timeout <milliseconds>    Bound a verification or executor command
+  --preset <id>              Select the initial or next active agent preset
 
 Tooling authority:
   --pack <name> --dependency <name[@version]> --kind development|runtime|build
@@ -108,9 +118,8 @@ Alignment authority:
 
 Frontier uses local repository files and one coordinator session; it does not require GitHub issues, webhooks, or a repository watcher.
 
-Default role routing:
-  Coordinator/planner: gpt-5.6-sol, high
-  All scouts/workers/reviewers/repair/integration: gpt-5.3-codex, high
+Default agent preset: sol-only. Every workspace receives the complete built-in
+preset catalog; --preset selects which routing is materialized.
 `;
 }
 
@@ -128,8 +137,7 @@ function printCreateResult(result) {
   console.log(`\nCreated ${result.context.project} project at ${result.root}`);
   console.log(`Style: ${result.context.style}; TDD: ${result.context.tdd}`);
   console.log("Execution: local Frontier Loop");
-  console.log("Coordinator/planner: gpt-5.6-sol high");
-  console.log("Other roles: gpt-5.3-codex high");
+  console.log(`Active agent preset: ${result.context.preset ?? "sol-only"}`);
   for (const warning of result.warnings) console.warn(`Warning: ${warning}`);
 }
 
@@ -248,6 +256,42 @@ export async function main(argv) {
     });
     if (!report.ok) process.exitCode = 1;
     return;
+  }
+
+  if (command === "preset") {
+    if (subcommand === "list") {
+      const report = await listPresets(root);
+      return emit(report, options, (value) => {
+        console.log(`Agent presets for ${value.root}`);
+        for (const preset of value.presets) console.log(`  ${preset.active ? "*" : " "} ${preset.id} [${preset.source}/${preset.stability}] — ${preset.description}`);
+      });
+    }
+    if (subcommand === "status") {
+      const report = await presetStatus(root);
+      await emit(report, options, (value) => {
+        console.log(`Agent preset ${value.activeId ?? "<none>"}: ${value.status.toUpperCase()}`);
+        for (const override of value.overrides ?? []) console.log(`  override ${override.path}${override.pointer}: ${override.reason}`);
+        for (const error of value.errors ?? []) console.log(`  error: ${error}`);
+      });
+      if (!["active", "partial"].includes(report.status)) process.exitCode = 1;
+      return;
+    }
+    if (subcommand === "plan") {
+      const plan = await maybePersist(await buildPresetPlan(root, options), options);
+      await emit(plan, options, printPlan);
+      if (!plan.canApply) process.exitCode = 1;
+      return;
+    }
+    const planPath = path.resolve(options.applyPlan ?? "");
+    const plan = await loadApplyPlan(options, { command: "preset", subcommand: "apply" });
+    const allowedDirtyPaths = planPath && path.dirname(planPath).startsWith(path.resolve(plan.root))
+      ? [path.relative(plan.root, planPath).replaceAll("\\", "/")]
+      : [];
+    const report = await applyPresetPlan(plan, { ...options, allowedDirtyPaths });
+    return emit(report, options, (value) => {
+      console.log(`Activated agent preset ${value.preset.id}${value.preset.status === "partial" ? " (partial)" : ""}.`);
+      console.log("Start a new Codex/OpenCode session so it loads the new project configuration.");
+    });
   }
 
   if (command === "tooling") {

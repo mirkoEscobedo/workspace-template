@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:workspace-template:agent-preset:1",
+  "title": "workspace-template agent routing preset",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "id", "description", "stability", "models", "roles"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "const": 1 },
+    "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "description": { "type": "string", "minLength": 1 },
+    "stability": { "enum": ["stable", "experimental"] },
+    "models": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["reasoningEffort", "targets"],
+        "properties": {
+          "reasoningEffort": { "enum": ["low", "medium", "high", "xhigh", "max", "ultra"] },
+          "targets": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "codex": { "type": "string", "minLength": 1 },
+              "opencode": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
+    "roles": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "coordinator",
+        "planner",
+        "scout",
+        "implementer",
+        "reviewer-spec",
+        "reviewer-code",
+        "reviewer-ops",
+        "repairer",
+        "integrator"
+      ],
+      "properties": {
+        "coordinator": { "type": "string" },
+        "planner": { "type": "string" },
+        "scout": { "type": "string" },
+        "implementer": { "type": "string" },
+        "reviewer-spec": { "type": "string" },
+        "reviewer-code": { "type": "string" },
+        "reviewer-ops": { "type": "string" },
+        "repairer": { "type": "string" },
+        "integrator": { "type": "string" }
+      }
+    }
+  }
+}
