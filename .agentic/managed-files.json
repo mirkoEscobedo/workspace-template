@@ -1,0 +1,1627 @@
+{
+  "version": 2,
+  "generator": "workspace-template",
+  "generatorVersion": "0.6.0",
+  "files": {
+    "AGENTS.md": {
+      "mode": "managed",
+      "hash": "1dec7ff5d8f4443b39e93fbb90e59cc170ab2c3034442cf2bb45af6ed7b31780"
+    },
+    ".agent/.gitignore": {
+      "mode": "managed",
+      "hash": "e7bdc776f42e239ac71d5b12eeb745055a556613e60ab565406b522889eec120"
+    },
+    ".agent/leases/.gitkeep": {
+      "mode": "managed",
+      "hash": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    ".agentic/config.json": {
+      "mode": "managed",
+      "hash": "23dc6401fb4cdfddfe353a92332e3aa2853f0960a0b2ec3623a675247c8204b4"
+    },
+    ".agentic/dependency-snapshot.md": {
+      "mode": "managed",
+      "hash": "3d26edd2fba737db3b2f53f827feaa5713a7d9dc03709f43791309edea991cce"
+    },
+    ".agentic/implementation-profile.md": {
+      "mode": "managed",
+      "hash": "23368c460772eab6939c00c9063c11801a34fa1d3cfbead95eec67c5c27c72c4"
+    },
+    ".agentic/managed-projections.json": {
+      "mode": "managed",
+      "hash": "6ab660c33ece50f4ccdc26824a914eee34517a390d1030d651c7995d52403da7"
+    },
+    ".agentic/modules/workspace-template/commands.json": {
+      "mode": "managed",
+      "hash": "16cfcb92558a15ef92056f2ddae8bab0de88d287bdc34eeaf881707c4283c85d"
+    },
+    ".agentic/modules/workspace-template/profile.json": {
+      "mode": "managed",
+      "hash": "adc2ca12d77de58b244b624b4f53c4c6c0a3291dc520dff46debc8b5c70951df"
+    },
+    ".agentic/policies/architecture-budgets.yaml": {
+      "mode": "managed",
+      "hash": "4be7f878454001986e4be26a0a918867cd9b1addb7d18d139138d5aeb6033085"
+    },
+    ".agentic/policies/model-routing.yaml": {
+      "mode": "managed",
+      "hash": "abfb19fab0acd0288fa3f3c74aa02f8343acd6e88ea66cc49659c3e7d927b99f"
+    },
+    ".agentic/policies/process.yaml": {
+      "mode": "managed",
+      "hash": "37c5de57923eaf2a6fe8d91eaf19d43c50d0a8a4760d842187a0c8c7f54d771c"
+    },
+    ".agentic/policies/verification.yaml": {
+      "mode": "managed",
+      "hash": "e57ce0cadccbb50fda009930a15ae4f32cf16db9ee2444117ed7c4c3a1f9e12f"
+    },
+    ".agentic/profile.json": {
+      "mode": "managed",
+      "hash": "212f811b4929b2e7f8dd2dee328fd9b18179955b4d39833810458d9c3c0093f4"
+    },
+    ".agentic/profile.schema.json": {
+      "mode": "managed",
+      "hash": "6598c726b8c4ff36f5649da7515be4a74cf97066699032e6cbffac0e6f772371"
+    },
+    ".agentic/README.md": {
+      "mode": "managed",
+      "hash": "2881afe62c9bc3aad3eb2c061ed749a2ec254c6a1e6da54eee78a26fb286e6fa"
+    },
+    ".agentic/scripts/_mini_yaml.py": {
+      "mode": "managed",
+      "hash": "fb4d1e46eb996289243c420b73c442672ce911e01071d1cd235111c039448e37"
+    },
+    ".agentic/scripts/check_architecture_budgets.py": {
+      "mode": "managed",
+      "hash": "621f256346cda1a3b354417614cf90a84164a7541b21720f1771b60af68b68fe"
+    },
+    ".agentic/scripts/codex_stop_guard.py": {
+      "mode": "managed",
+      "hash": "e5cb0d94e38716be9eb7700debea1ab1aff1e07347bc68c2ae653b123b2d1416"
+    },
+    ".agentic/scripts/managed_command.py": {
+      "mode": "managed",
+      "hash": "aced4641b905fd4766b233e180dea0b5f9a9d1b663de309cba7bc32a87eab720"
+    },
+    ".agentic/scripts/retrofit_docs.py": {
+      "mode": "managed",
+      "hash": "a5a425b0604af85e13347b5a063ac8e303fefb3a41cdf2470d4ae24fbd066756"
+    },
+    ".agentic/scripts/retrofit_tickets.py": {
+      "mode": "managed",
+      "hash": "de03eecd5591ef5ea8d4532d996e4888886ae4e8fc269050c3426df04f6a42e7"
+    },
+    ".agentic/scripts/validate_ticket_pack.py": {
+      "mode": "managed",
+      "hash": "d87e6268ba95194b538636975460737464fb74382e26c4948765eb739f63b265"
+    },
+    ".agentic/skill-baselines/compile-master-plan/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "261e57044858a3a1b516064e418d974a033880dc99db2f96c078349b0f9a1ec6"
+    },
+    ".agentic/skill-baselines/compile-master-plan/assets/architecture-budgets.yaml": {
+      "mode": "managed",
+      "hash": "4be7f878454001986e4be26a0a918867cd9b1addb7d18d139138d5aeb6033085"
+    },
+    ".agentic/skill-baselines/compile-master-plan/assets/contract-template.yaml": {
+      "mode": "managed",
+      "hash": "1b5ec78a21412841eac785617b26ed2eea5911733d5015754b65ca5edbdaa1d4"
+    },
+    ".agentic/skill-baselines/compile-master-plan/assets/master-plan-template.md": {
+      "mode": "managed",
+      "hash": "467485fda383a41c29d23f5c6b733b69f3876411437cd72931fe9e93fa58bfa4"
+    },
+    ".agentic/skill-baselines/compile-master-plan/assets/model-routing.yaml": {
+      "mode": "managed",
+      "hash": "89f5de681b89ac465afb59f2fa5abde898e22d278736e5a3497c748e7f271651"
+    },
+    ".agentic/skill-baselines/compile-master-plan/assets/process-policy.yaml": {
+      "mode": "managed",
+      "hash": "37c5de57923eaf2a6fe8d91eaf19d43c50d0a8a4760d842187a0c8c7f54d771c"
+    },
+    ".agentic/skill-baselines/compile-master-plan/assets/ticket-template.md": {
+      "mode": "managed",
+      "hash": "c84b653d44b7493db8f4e4aacd4397d004277f5968e82dc2b4e2091d060669af"
+    },
+    ".agentic/skill-baselines/compile-master-plan/assets/track-template.yaml": {
+      "mode": "managed",
+      "hash": "55364220f629f79d975962787765b048e8d2abcda18d1903fa23d7ee2ff0860f"
+    },
+    ".agentic/skill-baselines/compile-master-plan/assets/validation-template.md": {
+      "mode": "managed",
+      "hash": "d415b9d84858f81606f3e48db357631ac5b90cd88800db57f9cf5fc8eb4d2732"
+    },
+    ".agentic/skill-baselines/compile-master-plan/assets/verification-policy.yaml": {
+      "mode": "managed",
+      "hash": "e57ce0cadccbb50fda009930a15ae4f32cf16db9ee2444117ed7c4c3a1f9e12f"
+    },
+    ".agentic/skill-baselines/compile-master-plan/references/ticket-contract.md": {
+      "mode": "managed",
+      "hash": "5d62422dbad13f8ad065d2588878d5a559220d12a81fd5a454edd0a858de0d1b"
+    },
+    ".agentic/skill-baselines/compile-master-plan/schemas/ticket-contract.schema.json": {
+      "mode": "managed",
+      "hash": "21be754d2420c9ecc6f6ac236a912ddd28900acf3bdbab5b7f7fcf297b46fe14"
+    },
+    ".agentic/skill-baselines/compile-master-plan/scripts/validate_ticket_pack.py": {
+      "mode": "managed",
+      "hash": "2091390077ae1c209e4e0c9417b069be1194ec80311cd9672629f2cd05c26e9a"
+    },
+    ".agentic/skill-baselines/compile-master-plan/SKILL.md": {
+      "mode": "managed",
+      "hash": "7fd4e835b0900b88aace2735b2e43c6a5bf880587ffe4e7217fa2b4e53c9bc98"
+    },
+    ".agentic/skill-baselines/diagnose/SKILL.md": {
+      "mode": "managed",
+      "hash": "097171e2f1051f555945bb937d5409c3fcb8206af14b7f8cea323c892eb256d6"
+    },
+    ".agentic/skill-baselines/execute-frontier/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "23b494095c7fe3f25f7151b841bda63acc328658f30f96e4e6acc3aa2bcef88c"
+    },
+    ".agentic/skill-baselines/execute-frontier/references/scheduling.md": {
+      "mode": "managed",
+      "hash": "025e878e003083a0c91cae8e73bad7d65537a8e69fe19a42db00086994aa582d"
+    },
+    ".agentic/skill-baselines/execute-frontier/SKILL.md": {
+      "mode": "managed",
+      "hash": "3ae9b4962385ec57545f71e06ae98b74b9aa6c70a4629d7415242ea0080c7127"
+    },
+    ".agentic/skill-baselines/frontier-loop/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "2deb4ff0e59ed55af27d4864365e6e4784fdbcbeff4141460a5e9283cca8e9cb"
+    },
+    ".agentic/skill-baselines/frontier-loop/references/mode-selection.md": {
+      "mode": "managed",
+      "hash": "630e956929fecf3e9d17e7e2c0bb009165f355ecfebc7d7342222278344e56a0"
+    },
+    ".agentic/skill-baselines/frontier-loop/SKILL.md": {
+      "mode": "managed",
+      "hash": "d6f1f64741b2962be48513eb5fa5a133b38c4b7bab11d213bdb3b7f4d8d1676c"
+    },
+    ".agentic/skill-baselines/implementation-style/evals/evals.json": {
+      "mode": "managed",
+      "hash": "a47d1d626bd619dbcaab910c3e5a5131aeb79934858f5c83b837ffb76828cc16"
+    },
+    ".agentic/skill-baselines/implementation-style/evals/trigger-evals.json": {
+      "mode": "managed",
+      "hash": "99b345f39cbc5a22752c172e268b0ebb96f1f063b46bd2056816fd6f4e1ffdc9"
+    },
+    ".agentic/skill-baselines/implementation-style/references/stack-flutter.md": {
+      "mode": "managed",
+      "hash": "47f73e28459f2487c1ed9f734d0d7a644a3a6f02359768ff3cea086c7eb1c150"
+    },
+    ".agentic/skill-baselines/implementation-style/references/stack-javascript.md": {
+      "mode": "managed",
+      "hash": "747b0239dfe043bbfcd2a06cf9b69df458d7d0e554e27350cb14ce80cfde2e16"
+    },
+    ".agentic/skill-baselines/implementation-style/references/stack-react.md": {
+      "mode": "managed",
+      "hash": "321d7ae79881612c561e2c40a7659dd42c085af02905c43e376fbda9fce5d469"
+    },
+    ".agentic/skill-baselines/implementation-style/references/stack-rust.md": {
+      "mode": "managed",
+      "hash": "b703272d536aa5b187e25dbdc83937c43e21b7bf0b177c134aec4cd75f8adf5f"
+    },
+    ".agentic/skill-baselines/implementation-style/references/stack-typescript.md": {
+      "mode": "managed",
+      "hash": "2bafab3abf71dbf702a56f71c202e55a2729655b8b5874b65898e2776e95150b"
+    },
+    ".agentic/skill-baselines/implementation-style/references/style-clean.md": {
+      "mode": "managed",
+      "hash": "e809479317f5cba530d325dcae18dce89d10e5f75ffe00d08051167ede752909"
+    },
+    ".agentic/skill-baselines/implementation-style/references/style-functional-core.md": {
+      "mode": "managed",
+      "hash": "c672f7a34f5b2427a9bc674038460e8e3ec093cc3137b0e3acea508bf57a3c4c"
+    },
+    ".agentic/skill-baselines/implementation-style/references/style-preserve.md": {
+      "mode": "managed",
+      "hash": "8dbb0f1cb05ae508ae1f1de2af8d12d460a1458f03dcf0962320dc56d41edd20"
+    },
+    ".agentic/skill-baselines/implementation-style/references/style-simple.md": {
+      "mode": "managed",
+      "hash": "4993573b25a538c08b2cfb252eb57ef818ac8b44a459249ea13ff1529b7d8f9b"
+    },
+    ".agentic/skill-baselines/implementation-style/SKILL.md": {
+      "mode": "managed",
+      "hash": "d02c5633addcc8386685c6c937d72b6d4cf3b69a70ef21826a2dca32b31fc197"
+    },
+    ".agentic/skill-baselines/integrate-wave/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "765fcf5520d0e9a0fe289955afa84883acf29c5c2d972586e2d8dc793c45af3e"
+    },
+    ".agentic/skill-baselines/integrate-wave/SKILL.md": {
+      "mode": "managed",
+      "hash": "7ce64ec8ae686e639aef55df5864bf411dd3aaf47b86bff403052a34e2db725a"
+    },
+    ".agentic/skill-baselines/process-lifecycle/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "695b5320a763b2ac4ec3cb604e33581e08ff6b9e45c8cdfacca5d177b4cf55cb"
+    },
+    ".agentic/skill-baselines/process-lifecycle/references/windows-job-object.md": {
+      "mode": "managed",
+      "hash": "42df447f0cb093283664f5e69f78b21edfc39f441912a83e5cd32553eb7c9b7a"
+    },
+    ".agentic/skill-baselines/process-lifecycle/scripts/codex_stop_guard.py": {
+      "mode": "managed",
+      "hash": "e5cb0d94e38716be9eb7700debea1ab1aff1e07347bc68c2ae653b123b2d1416"
+    },
+    ".agentic/skill-baselines/process-lifecycle/scripts/managed_command.py": {
+      "mode": "managed",
+      "hash": "aced4641b905fd4766b233e180dea0b5f9a9d1b663de309cba7bc32a87eab720"
+    },
+    ".agentic/skill-baselines/process-lifecycle/SKILL.md": {
+      "mode": "managed",
+      "hash": "86d61fdb960327be40780cf2f86e4cd08010fed605afa6015b4d3f9a017515fc"
+    },
+    ".agentic/skill-baselines/repair-ticket/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "72d6313764f5d9ff03c25a4f3d79765d6d91100733f748164992ec15446b25b3"
+    },
+    ".agentic/skill-baselines/repair-ticket/SKILL.md": {
+      "mode": "managed",
+      "hash": "06d437b46d442ded31f89ea1e51636dcfbaefa561550fc19534b8ecf01f9a387"
+    },
+    ".agentic/skill-baselines/retrofit-agent-docs/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "da9211daa58ba08d256c5f1e3490ec9c3101964cab60705497209228c7e08248"
+    },
+    ".agentic/skill-baselines/retrofit-agent-docs/assets/architecture-baseline.json": {
+      "mode": "managed",
+      "hash": "7d189eefc77127d88c2c938f07443ae6161de1829a2e3eab1bffd588ff9fe53e"
+    },
+    ".agentic/skill-baselines/retrofit-agent-docs/assets/AUTHORITY_MAP.md": {
+      "mode": "managed",
+      "hash": "cdd4e8053943d20dbd4330cbb58044f35c32ab541c9b9ea9008691975683b15d"
+    },
+    ".agentic/skill-baselines/retrofit-agent-docs/assets/CURRENT_FRONTIER.json": {
+      "mode": "managed",
+      "hash": "5701434e032bc68aefd2408df4d3a427e64a313f8f8b3afb3c1171a01284dfcc"
+    },
+    ".agentic/skill-baselines/retrofit-agent-docs/assets/DOMAIN_GLOSSARY.md": {
+      "mode": "managed",
+      "hash": "04fa69bb103f921ad91386b69f243ad7997b9540de4d6e4eca01e1a045f0e533"
+    },
+    ".agentic/skill-baselines/retrofit-agent-docs/assets/FAILURE_CATALOG.md": {
+      "mode": "managed",
+      "hash": "a0e40f9351778fda3dedfc6d58617b521357f1b70bc829c98989e8bf889c3d86"
+    },
+    ".agentic/skill-baselines/retrofit-agent-docs/assets/PROCESS_POLICY.md": {
+      "mode": "managed",
+      "hash": "9c13816f3466cd1d4f9f7ac5ff49ce164086faa1d0483e025e9281a463b25d26"
+    },
+    ".agentic/skill-baselines/retrofit-agent-docs/assets/PROJECT_MAP.md": {
+      "mode": "managed",
+      "hash": "0f3320a36f35aac9e882dba06948d35febce4da05166802e0ae9698702fb4b2a"
+    },
+    ".agentic/skill-baselines/retrofit-agent-docs/assets/README.md": {
+      "mode": "managed",
+      "hash": "6766f8b8edf239088aedcba669dfe11671dbfc86c2a2e3e51de9b12b44393699"
+    },
+    ".agentic/skill-baselines/retrofit-agent-docs/assets/TEST_TOPOLOGY.md": {
+      "mode": "managed",
+      "hash": "ae6c3e52a18ffca6f334e1ab0846010a6b47c729293b592cf6434370b1d2a072"
+    },
+    ".agentic/skill-baselines/retrofit-agent-docs/assets/tickets-README.md": {
+      "mode": "managed",
+      "hash": "4e445a7c54522ba75c35e761ec03bf51256b92003938e205b1f15d6cfb14ae7a"
+    },
+    ".agentic/skill-baselines/retrofit-agent-docs/scripts/retrofit_docs.py": {
+      "mode": "managed",
+      "hash": "a5a425b0604af85e13347b5a063ac8e303fefb3a41cdf2470d4ae24fbd066756"
+    },
+    ".agentic/skill-baselines/retrofit-agent-docs/SKILL.md": {
+      "mode": "managed",
+      "hash": "34537051008e1009e72878d80143db59cbce53fdac82bbd9a82a0ace89524989"
+    },
+    ".agentic/skill-baselines/retrofit-ticket-pack/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "d7e7cde2ce69347e07a1a37538ebc0d55ed9c4b65b2de709a3be6617dd778576"
+    },
+    ".agentic/skill-baselines/retrofit-ticket-pack/references/migration-rules.md": {
+      "mode": "managed",
+      "hash": "83cdad726860969826ec16fbfb0f3f40783d4fad5e1d12c7d55873700e8da648"
+    },
+    ".agentic/skill-baselines/retrofit-ticket-pack/scripts/retrofit_tickets.py": {
+      "mode": "managed",
+      "hash": "d0e8ec700a428db0d1541f47f2d7fa0f9b61bc0a969856f1f2b5c5c367236143"
+    },
+    ".agentic/skill-baselines/retrofit-ticket-pack/SKILL.md": {
+      "mode": "managed",
+      "hash": "fae986b28b16bfd1ce58ab5bbb8ba4377496d30b9c3e95024ac58ecd93b904bd"
+    },
+    ".agentic/skill-baselines/tdd/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "c79be13156c201f01ada215bbea24b14c62ffa11b390f104aa3ac7d43662d2d3"
+    },
+    ".agentic/skill-baselines/tdd/references/deep-modules.md": {
+      "mode": "managed",
+      "hash": "ee03883448a0affbebb64b56f5beb2522ad88ee9fed70b8be30395e673f603ea"
+    },
+    ".agentic/skill-baselines/tdd/references/independent-oracles.md": {
+      "mode": "managed",
+      "hash": "dc1a842ecd75af8ff9250b7575e31391d78c363853a44e439e52f9a25fee79c7"
+    },
+    ".agentic/skill-baselines/tdd/references/mocking.md": {
+      "mode": "managed",
+      "hash": "75948847ef203787e5082e72d4ebf74dfe36122161a13c3568dd28f200b5f710"
+    },
+    ".agentic/skill-baselines/tdd/references/test-placement.md": {
+      "mode": "managed",
+      "hash": "e77c42ba1505b54a554823eb501ce28ea73c9b7d716dfd8d66232b60a95450ae"
+    },
+    ".agentic/skill-baselines/tdd/references/tests.md": {
+      "mode": "managed",
+      "hash": "6259293e0ec3de48928ced28ae5d5bfb6f751ec8c0e6f44b9660952e5311c2cd"
+    },
+    ".agentic/skill-baselines/tdd/SKILL.md": {
+      "mode": "managed",
+      "hash": "dcce1e1955f7276e5c55067eaa54faf3f63538962ff900e5aeaaf2a817ea4246"
+    },
+    ".agentic/skill-baselines/test-topology/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "ba8831b369c60f6f07836b7b85c384bd6d827451c5767f2b2dd110c6f5b526c7"
+    },
+    ".agentic/skill-baselines/test-topology/assets/architecture-budgets.yaml": {
+      "mode": "managed",
+      "hash": "4be7f878454001986e4be26a0a918867cd9b1addb7d18d139138d5aeb6033085"
+    },
+    ".agentic/skill-baselines/test-topology/scripts/check_architecture_budgets.py": {
+      "mode": "managed",
+      "hash": "b5c03ff04b41b49c499167eee205e358524d2f04dbbfaf6393fa8101846ff4a0"
+    },
+    ".agentic/skill-baselines/test-topology/SKILL.md": {
+      "mode": "managed",
+      "hash": "cee1e09f2b09be94569546776521307d79eff7fbff57fd1eb37cd5a780d4aeb7"
+    },
+    ".agentic/skill-baselines/ticket-implementer/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "1d472f134c64993e3f9a749f4ad01909f4fad4a1ecfd642188bdbe1a01762d72"
+    },
+    ".agentic/skill-baselines/ticket-implementer/assets/implementation-report.schema.json": {
+      "mode": "managed",
+      "hash": "5e892dccd8bda2581d731e8b4495c2b721e9e54f131662f371ac620c20e89dac"
+    },
+    ".agentic/skill-baselines/ticket-implementer/SKILL.md": {
+      "mode": "managed",
+      "hash": "b0a9b64e111ad19b04b78f35abf73d483b13897e9dccc77f5e28fd38eadf3e8c"
+    },
+    ".agentic/skill-baselines/ticket-review/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "efb2305d7fb847f6dac07d78c9d6763ba307a86b36f005898e5b7af9b585a0dc"
+    },
+    ".agentic/skill-baselines/ticket-review/assets/review-report.schema.json": {
+      "mode": "managed",
+      "hash": "fc05ae0bf13b94dc1b877cc511e3d288a534e2008b4d07ada39f07674be13d0d"
+    },
+    ".agentic/skill-baselines/ticket-review/SKILL.md": {
+      "mode": "managed",
+      "hash": "d1ab1f98431231e689d9b6bd6ff3fe20e1c2fe97ce187a0ef729cf72af32c96c"
+    },
+    ".agentic/skill-baselines/verify/SKILL.md": {
+      "mode": "managed",
+      "hash": "921797aa4fbff42777fc14500d45b43cf80f98dc11dbce3ced337fc7aacb955c"
+    },
+    ".agentic/skill-baselines/wayfinder/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "9ec4eea487e26a4366b02ae3eb9fa5f8ae77351600af8238566fd67feb87e6af"
+    },
+    ".agentic/skill-baselines/wayfinder/assets/decision-template.md": {
+      "mode": "managed",
+      "hash": "60d07ff1682575d501f0a51c198bbffdbc85f677a186795a3497921d250aa986"
+    },
+    ".agentic/skill-baselines/wayfinder/assets/frontier-template.yaml": {
+      "mode": "managed",
+      "hash": "7972353a73283d5b11a5e6fe7ac68e475d56fe431fa9ed2f58875956b4ab572e"
+    },
+    ".agentic/skill-baselines/wayfinder/assets/map-template.md": {
+      "mode": "managed",
+      "hash": "588d16d4b82fbc03f7a582d42ec24cdff9efe78bc3ae3a0a5a0ee151af26ec1e"
+    },
+    ".agentic/skill-baselines/wayfinder/SKILL.md": {
+      "mode": "managed",
+      "hash": "377a854e60a12f78d2a33fe4e2de789165887e10932caa9b0c5e7b2674b3a141"
+    },
+    ".agentic/skill-baselines/write-skill/evals/evals.json": {
+      "mode": "managed",
+      "hash": "a2d6e50f013c882e6f0dee8bf7cd42187993e4845ad38a97ba9b8100aae9db4d"
+    },
+    ".agentic/skill-baselines/write-skill/evals/trigger-evals.json": {
+      "mode": "managed",
+      "hash": "4fbb4fe2ad4d8016ef16813c3fcfeac9da918a2eea1779357c138b297f5148dc"
+    },
+    ".agentic/skill-baselines/write-skill/references/evaluation.md": {
+      "mode": "managed",
+      "hash": "b600b6499583ab97841877d7125d01852e1f2429502b6713381be0f4249308c7"
+    },
+    ".agentic/skill-baselines/write-skill/SKILL.md": {
+      "mode": "managed",
+      "hash": "fc2dbb5387bf94deab8a9d8f730620dcca89e1155dc1f4f624d83f278ab0d02d"
+    },
+    ".agentic/skills.lock.json": {
+      "mode": "managed",
+      "hash": "d2b143002cb455d79143089c4e49da9e1c8717b188f9644529341e555f6416dc"
+    },
+    ".agentic/skills/compile-master-plan/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "261e57044858a3a1b516064e418d974a033880dc99db2f96c078349b0f9a1ec6"
+    },
+    ".agentic/skills/compile-master-plan/assets/architecture-budgets.yaml": {
+      "mode": "managed",
+      "hash": "4be7f878454001986e4be26a0a918867cd9b1addb7d18d139138d5aeb6033085"
+    },
+    ".agentic/skills/compile-master-plan/assets/contract-template.yaml": {
+      "mode": "managed",
+      "hash": "1b5ec78a21412841eac785617b26ed2eea5911733d5015754b65ca5edbdaa1d4"
+    },
+    ".agentic/skills/compile-master-plan/assets/master-plan-template.md": {
+      "mode": "managed",
+      "hash": "467485fda383a41c29d23f5c6b733b69f3876411437cd72931fe9e93fa58bfa4"
+    },
+    ".agentic/skills/compile-master-plan/assets/model-routing.yaml": {
+      "mode": "managed",
+      "hash": "89f5de681b89ac465afb59f2fa5abde898e22d278736e5a3497c748e7f271651"
+    },
+    ".agentic/skills/compile-master-plan/assets/process-policy.yaml": {
+      "mode": "managed",
+      "hash": "37c5de57923eaf2a6fe8d91eaf19d43c50d0a8a4760d842187a0c8c7f54d771c"
+    },
+    ".agentic/skills/compile-master-plan/assets/ticket-template.md": {
+      "mode": "managed",
+      "hash": "c84b653d44b7493db8f4e4aacd4397d004277f5968e82dc2b4e2091d060669af"
+    },
+    ".agentic/skills/compile-master-plan/assets/track-template.yaml": {
+      "mode": "managed",
+      "hash": "55364220f629f79d975962787765b048e8d2abcda18d1903fa23d7ee2ff0860f"
+    },
+    ".agentic/skills/compile-master-plan/assets/validation-template.md": {
+      "mode": "managed",
+      "hash": "d415b9d84858f81606f3e48db357631ac5b90cd88800db57f9cf5fc8eb4d2732"
+    },
+    ".agentic/skills/compile-master-plan/assets/verification-policy.yaml": {
+      "mode": "managed",
+      "hash": "e57ce0cadccbb50fda009930a15ae4f32cf16db9ee2444117ed7c4c3a1f9e12f"
+    },
+    ".agentic/skills/compile-master-plan/references/ticket-contract.md": {
+      "mode": "managed",
+      "hash": "5d62422dbad13f8ad065d2588878d5a559220d12a81fd5a454edd0a858de0d1b"
+    },
+    ".agentic/skills/compile-master-plan/schemas/ticket-contract.schema.json": {
+      "mode": "managed",
+      "hash": "21be754d2420c9ecc6f6ac236a912ddd28900acf3bdbab5b7f7fcf297b46fe14"
+    },
+    ".agentic/skills/compile-master-plan/scripts/validate_ticket_pack.py": {
+      "mode": "managed",
+      "hash": "2091390077ae1c209e4e0c9417b069be1194ec80311cd9672629f2cd05c26e9a"
+    },
+    ".agentic/skills/compile-master-plan/SKILL.md": {
+      "mode": "managed",
+      "hash": "7fd4e835b0900b88aace2735b2e43c6a5bf880587ffe4e7217fa2b4e53c9bc98"
+    },
+    ".agentic/skills/diagnose/SKILL.md": {
+      "mode": "managed",
+      "hash": "097171e2f1051f555945bb937d5409c3fcb8206af14b7f8cea323c892eb256d6"
+    },
+    ".agentic/skills/execute-frontier/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "23b494095c7fe3f25f7151b841bda63acc328658f30f96e4e6acc3aa2bcef88c"
+    },
+    ".agentic/skills/execute-frontier/references/scheduling.md": {
+      "mode": "managed",
+      "hash": "025e878e003083a0c91cae8e73bad7d65537a8e69fe19a42db00086994aa582d"
+    },
+    ".agentic/skills/execute-frontier/SKILL.md": {
+      "mode": "managed",
+      "hash": "3ae9b4962385ec57545f71e06ae98b74b9aa6c70a4629d7415242ea0080c7127"
+    },
+    ".agentic/skills/frontier-loop/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "2deb4ff0e59ed55af27d4864365e6e4784fdbcbeff4141460a5e9283cca8e9cb"
+    },
+    ".agentic/skills/frontier-loop/references/mode-selection.md": {
+      "mode": "managed",
+      "hash": "630e956929fecf3e9d17e7e2c0bb009165f355ecfebc7d7342222278344e56a0"
+    },
+    ".agentic/skills/frontier-loop/SKILL.md": {
+      "mode": "managed",
+      "hash": "d6f1f64741b2962be48513eb5fa5a133b38c4b7bab11d213bdb3b7f4d8d1676c"
+    },
+    ".agentic/skills/implementation-style/evals/evals.json": {
+      "mode": "managed",
+      "hash": "a47d1d626bd619dbcaab910c3e5a5131aeb79934858f5c83b837ffb76828cc16"
+    },
+    ".agentic/skills/implementation-style/evals/trigger-evals.json": {
+      "mode": "managed",
+      "hash": "99b345f39cbc5a22752c172e268b0ebb96f1f063b46bd2056816fd6f4e1ffdc9"
+    },
+    ".agentic/skills/implementation-style/references/stack-flutter.md": {
+      "mode": "managed",
+      "hash": "47f73e28459f2487c1ed9f734d0d7a644a3a6f02359768ff3cea086c7eb1c150"
+    },
+    ".agentic/skills/implementation-style/references/stack-javascript.md": {
+      "mode": "managed",
+      "hash": "747b0239dfe043bbfcd2a06cf9b69df458d7d0e554e27350cb14ce80cfde2e16"
+    },
+    ".agentic/skills/implementation-style/references/stack-react.md": {
+      "mode": "managed",
+      "hash": "321d7ae79881612c561e2c40a7659dd42c085af02905c43e376fbda9fce5d469"
+    },
+    ".agentic/skills/implementation-style/references/stack-rust.md": {
+      "mode": "managed",
+      "hash": "b703272d536aa5b187e25dbdc83937c43e21b7bf0b177c134aec4cd75f8adf5f"
+    },
+    ".agentic/skills/implementation-style/references/stack-typescript.md": {
+      "mode": "managed",
+      "hash": "2bafab3abf71dbf702a56f71c202e55a2729655b8b5874b65898e2776e95150b"
+    },
+    ".agentic/skills/implementation-style/references/style-clean.md": {
+      "mode": "managed",
+      "hash": "e809479317f5cba530d325dcae18dce89d10e5f75ffe00d08051167ede752909"
+    },
+    ".agentic/skills/implementation-style/references/style-functional-core.md": {
+      "mode": "managed",
+      "hash": "c672f7a34f5b2427a9bc674038460e8e3ec093cc3137b0e3acea508bf57a3c4c"
+    },
+    ".agentic/skills/implementation-style/references/style-preserve.md": {
+      "mode": "managed",
+      "hash": "8dbb0f1cb05ae508ae1f1de2af8d12d460a1458f03dcf0962320dc56d41edd20"
+    },
+    ".agentic/skills/implementation-style/references/style-simple.md": {
+      "mode": "managed",
+      "hash": "4993573b25a538c08b2cfb252eb57ef818ac8b44a459249ea13ff1529b7d8f9b"
+    },
+    ".agentic/skills/implementation-style/SKILL.md": {
+      "mode": "managed",
+      "hash": "d02c5633addcc8386685c6c937d72b6d4cf3b69a70ef21826a2dca32b31fc197"
+    },
+    ".agentic/skills/integrate-wave/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "765fcf5520d0e9a0fe289955afa84883acf29c5c2d972586e2d8dc793c45af3e"
+    },
+    ".agentic/skills/integrate-wave/SKILL.md": {
+      "mode": "managed",
+      "hash": "7ce64ec8ae686e639aef55df5864bf411dd3aaf47b86bff403052a34e2db725a"
+    },
+    ".agentic/skills/process-lifecycle/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "695b5320a763b2ac4ec3cb604e33581e08ff6b9e45c8cdfacca5d177b4cf55cb"
+    },
+    ".agentic/skills/process-lifecycle/references/windows-job-object.md": {
+      "mode": "managed",
+      "hash": "42df447f0cb093283664f5e69f78b21edfc39f441912a83e5cd32553eb7c9b7a"
+    },
+    ".agentic/skills/process-lifecycle/scripts/codex_stop_guard.py": {
+      "mode": "managed",
+      "hash": "e5cb0d94e38716be9eb7700debea1ab1aff1e07347bc68c2ae653b123b2d1416"
+    },
+    ".agentic/skills/process-lifecycle/scripts/managed_command.py": {
+      "mode": "managed",
+      "hash": "aced4641b905fd4766b233e180dea0b5f9a9d1b663de309cba7bc32a87eab720"
+    },
+    ".agentic/skills/process-lifecycle/SKILL.md": {
+      "mode": "managed",
+      "hash": "86d61fdb960327be40780cf2f86e4cd08010fed605afa6015b4d3f9a017515fc"
+    },
+    ".agentic/skills/repair-ticket/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "72d6313764f5d9ff03c25a4f3d79765d6d91100733f748164992ec15446b25b3"
+    },
+    ".agentic/skills/repair-ticket/SKILL.md": {
+      "mode": "managed",
+      "hash": "06d437b46d442ded31f89ea1e51636dcfbaefa561550fc19534b8ecf01f9a387"
+    },
+    ".agentic/skills/retrofit-agent-docs/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "da9211daa58ba08d256c5f1e3490ec9c3101964cab60705497209228c7e08248"
+    },
+    ".agentic/skills/retrofit-agent-docs/assets/architecture-baseline.json": {
+      "mode": "managed",
+      "hash": "7d189eefc77127d88c2c938f07443ae6161de1829a2e3eab1bffd588ff9fe53e"
+    },
+    ".agentic/skills/retrofit-agent-docs/assets/AUTHORITY_MAP.md": {
+      "mode": "managed",
+      "hash": "cdd4e8053943d20dbd4330cbb58044f35c32ab541c9b9ea9008691975683b15d"
+    },
+    ".agentic/skills/retrofit-agent-docs/assets/CURRENT_FRONTIER.json": {
+      "mode": "managed",
+      "hash": "5701434e032bc68aefd2408df4d3a427e64a313f8f8b3afb3c1171a01284dfcc"
+    },
+    ".agentic/skills/retrofit-agent-docs/assets/DOMAIN_GLOSSARY.md": {
+      "mode": "managed",
+      "hash": "04fa69bb103f921ad91386b69f243ad7997b9540de4d6e4eca01e1a045f0e533"
+    },
+    ".agentic/skills/retrofit-agent-docs/assets/FAILURE_CATALOG.md": {
+      "mode": "managed",
+      "hash": "a0e40f9351778fda3dedfc6d58617b521357f1b70bc829c98989e8bf889c3d86"
+    },
+    ".agentic/skills/retrofit-agent-docs/assets/PROCESS_POLICY.md": {
+      "mode": "managed",
+      "hash": "9c13816f3466cd1d4f9f7ac5ff49ce164086faa1d0483e025e9281a463b25d26"
+    },
+    ".agentic/skills/retrofit-agent-docs/assets/PROJECT_MAP.md": {
+      "mode": "managed",
+      "hash": "0f3320a36f35aac9e882dba06948d35febce4da05166802e0ae9698702fb4b2a"
+    },
+    ".agentic/skills/retrofit-agent-docs/assets/README.md": {
+      "mode": "managed",
+      "hash": "6766f8b8edf239088aedcba669dfe11671dbfc86c2a2e3e51de9b12b44393699"
+    },
+    ".agentic/skills/retrofit-agent-docs/assets/TEST_TOPOLOGY.md": {
+      "mode": "managed",
+      "hash": "ae6c3e52a18ffca6f334e1ab0846010a6b47c729293b592cf6434370b1d2a072"
+    },
+    ".agentic/skills/retrofit-agent-docs/assets/tickets-README.md": {
+      "mode": "managed",
+      "hash": "4e445a7c54522ba75c35e761ec03bf51256b92003938e205b1f15d6cfb14ae7a"
+    },
+    ".agentic/skills/retrofit-agent-docs/scripts/retrofit_docs.py": {
+      "mode": "managed",
+      "hash": "a5a425b0604af85e13347b5a063ac8e303fefb3a41cdf2470d4ae24fbd066756"
+    },
+    ".agentic/skills/retrofit-agent-docs/SKILL.md": {
+      "mode": "managed",
+      "hash": "34537051008e1009e72878d80143db59cbce53fdac82bbd9a82a0ace89524989"
+    },
+    ".agentic/skills/retrofit-ticket-pack/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "d7e7cde2ce69347e07a1a37538ebc0d55ed9c4b65b2de709a3be6617dd778576"
+    },
+    ".agentic/skills/retrofit-ticket-pack/references/migration-rules.md": {
+      "mode": "managed",
+      "hash": "83cdad726860969826ec16fbfb0f3f40783d4fad5e1d12c7d55873700e8da648"
+    },
+    ".agentic/skills/retrofit-ticket-pack/scripts/retrofit_tickets.py": {
+      "mode": "managed",
+      "hash": "d0e8ec700a428db0d1541f47f2d7fa0f9b61bc0a969856f1f2b5c5c367236143"
+    },
+    ".agentic/skills/retrofit-ticket-pack/SKILL.md": {
+      "mode": "managed",
+      "hash": "fae986b28b16bfd1ce58ab5bbb8ba4377496d30b9c3e95024ac58ecd93b904bd"
+    },
+    ".agentic/skills/tdd/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "c79be13156c201f01ada215bbea24b14c62ffa11b390f104aa3ac7d43662d2d3"
+    },
+    ".agentic/skills/tdd/references/deep-modules.md": {
+      "mode": "managed",
+      "hash": "ee03883448a0affbebb64b56f5beb2522ad88ee9fed70b8be30395e673f603ea"
+    },
+    ".agentic/skills/tdd/references/independent-oracles.md": {
+      "mode": "managed",
+      "hash": "dc1a842ecd75af8ff9250b7575e31391d78c363853a44e439e52f9a25fee79c7"
+    },
+    ".agentic/skills/tdd/references/mocking.md": {
+      "mode": "managed",
+      "hash": "75948847ef203787e5082e72d4ebf74dfe36122161a13c3568dd28f200b5f710"
+    },
+    ".agentic/skills/tdd/references/test-placement.md": {
+      "mode": "managed",
+      "hash": "e77c42ba1505b54a554823eb501ce28ea73c9b7d716dfd8d66232b60a95450ae"
+    },
+    ".agentic/skills/tdd/references/tests.md": {
+      "mode": "managed",
+      "hash": "6259293e0ec3de48928ced28ae5d5bfb6f751ec8c0e6f44b9660952e5311c2cd"
+    },
+    ".agentic/skills/tdd/SKILL.md": {
+      "mode": "managed",
+      "hash": "dcce1e1955f7276e5c55067eaa54faf3f63538962ff900e5aeaaf2a817ea4246"
+    },
+    ".agentic/skills/test-topology/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "ba8831b369c60f6f07836b7b85c384bd6d827451c5767f2b2dd110c6f5b526c7"
+    },
+    ".agentic/skills/test-topology/assets/architecture-budgets.yaml": {
+      "mode": "managed",
+      "hash": "4be7f878454001986e4be26a0a918867cd9b1addb7d18d139138d5aeb6033085"
+    },
+    ".agentic/skills/test-topology/scripts/check_architecture_budgets.py": {
+      "mode": "managed",
+      "hash": "b5c03ff04b41b49c499167eee205e358524d2f04dbbfaf6393fa8101846ff4a0"
+    },
+    ".agentic/skills/test-topology/SKILL.md": {
+      "mode": "managed",
+      "hash": "cee1e09f2b09be94569546776521307d79eff7fbff57fd1eb37cd5a780d4aeb7"
+    },
+    ".agentic/skills/ticket-implementer/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "1d472f134c64993e3f9a749f4ad01909f4fad4a1ecfd642188bdbe1a01762d72"
+    },
+    ".agentic/skills/ticket-implementer/assets/implementation-report.schema.json": {
+      "mode": "managed",
+      "hash": "5e892dccd8bda2581d731e8b4495c2b721e9e54f131662f371ac620c20e89dac"
+    },
+    ".agentic/skills/ticket-implementer/SKILL.md": {
+      "mode": "managed",
+      "hash": "b0a9b64e111ad19b04b78f35abf73d483b13897e9dccc77f5e28fd38eadf3e8c"
+    },
+    ".agentic/skills/ticket-review/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "efb2305d7fb847f6dac07d78c9d6763ba307a86b36f005898e5b7af9b585a0dc"
+    },
+    ".agentic/skills/ticket-review/assets/review-report.schema.json": {
+      "mode": "managed",
+      "hash": "fc05ae0bf13b94dc1b877cc511e3d288a534e2008b4d07ada39f07674be13d0d"
+    },
+    ".agentic/skills/ticket-review/SKILL.md": {
+      "mode": "managed",
+      "hash": "d1ab1f98431231e689d9b6bd6ff3fe20e1c2fe97ce187a0ef729cf72af32c96c"
+    },
+    ".agentic/skills/verify/SKILL.md": {
+      "mode": "managed",
+      "hash": "921797aa4fbff42777fc14500d45b43cf80f98dc11dbce3ced337fc7aacb955c"
+    },
+    ".agentic/skills/wayfinder/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "9ec4eea487e26a4366b02ae3eb9fa5f8ae77351600af8238566fd67feb87e6af"
+    },
+    ".agentic/skills/wayfinder/assets/decision-template.md": {
+      "mode": "managed",
+      "hash": "60d07ff1682575d501f0a51c198bbffdbc85f677a186795a3497921d250aa986"
+    },
+    ".agentic/skills/wayfinder/assets/frontier-template.yaml": {
+      "mode": "managed",
+      "hash": "7972353a73283d5b11a5e6fe7ac68e475d56fe431fa9ed2f58875956b4ab572e"
+    },
+    ".agentic/skills/wayfinder/assets/map-template.md": {
+      "mode": "managed",
+      "hash": "588d16d4b82fbc03f7a582d42ec24cdff9efe78bc3ae3a0a5a0ee151af26ec1e"
+    },
+    ".agentic/skills/wayfinder/SKILL.md": {
+      "mode": "managed",
+      "hash": "377a854e60a12f78d2a33fe4e2de789165887e10932caa9b0c5e7b2674b3a141"
+    },
+    ".agentic/skills/write-skill/evals/evals.json": {
+      "mode": "managed",
+      "hash": "a2d6e50f013c882e6f0dee8bf7cd42187993e4845ad38a97ba9b8100aae9db4d"
+    },
+    ".agentic/skills/write-skill/evals/trigger-evals.json": {
+      "mode": "managed",
+      "hash": "4fbb4fe2ad4d8016ef16813c3fcfeac9da918a2eea1779357c138b297f5148dc"
+    },
+    ".agentic/skills/write-skill/references/evaluation.md": {
+      "mode": "managed",
+      "hash": "b600b6499583ab97841877d7125d01852e1f2429502b6713381be0f4249308c7"
+    },
+    ".agentic/skills/write-skill/SKILL.md": {
+      "mode": "managed",
+      "hash": "fc2dbb5387bf94deab8a9d8f730620dcca89e1155dc1f4f624d83f278ab0d02d"
+    },
+    ".agentic/workspace.json": {
+      "mode": "managed",
+      "hash": "4d26da697be873af17a2ba61e004f46eea3dad8059a90f83034cd2f7c0554f46"
+    },
+    ".agents/skills/.managed-by-workspace-template.json": {
+      "mode": "managed",
+      "hash": "4fa17926773faafd9d9f3deda57621e04d934d3ee872389186fe51230f4fe8a1"
+    },
+    ".agents/skills/compile-master-plan/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "261e57044858a3a1b516064e418d974a033880dc99db2f96c078349b0f9a1ec6"
+    },
+    ".agents/skills/compile-master-plan/assets/architecture-budgets.yaml": {
+      "mode": "managed",
+      "hash": "4be7f878454001986e4be26a0a918867cd9b1addb7d18d139138d5aeb6033085"
+    },
+    ".agents/skills/compile-master-plan/assets/contract-template.yaml": {
+      "mode": "managed",
+      "hash": "1b5ec78a21412841eac785617b26ed2eea5911733d5015754b65ca5edbdaa1d4"
+    },
+    ".agents/skills/compile-master-plan/assets/master-plan-template.md": {
+      "mode": "managed",
+      "hash": "467485fda383a41c29d23f5c6b733b69f3876411437cd72931fe9e93fa58bfa4"
+    },
+    ".agents/skills/compile-master-plan/assets/model-routing.yaml": {
+      "mode": "managed",
+      "hash": "89f5de681b89ac465afb59f2fa5abde898e22d278736e5a3497c748e7f271651"
+    },
+    ".agents/skills/compile-master-plan/assets/process-policy.yaml": {
+      "mode": "managed",
+      "hash": "37c5de57923eaf2a6fe8d91eaf19d43c50d0a8a4760d842187a0c8c7f54d771c"
+    },
+    ".agents/skills/compile-master-plan/assets/ticket-template.md": {
+      "mode": "managed",
+      "hash": "c84b653d44b7493db8f4e4aacd4397d004277f5968e82dc2b4e2091d060669af"
+    },
+    ".agents/skills/compile-master-plan/assets/track-template.yaml": {
+      "mode": "managed",
+      "hash": "55364220f629f79d975962787765b048e8d2abcda18d1903fa23d7ee2ff0860f"
+    },
+    ".agents/skills/compile-master-plan/assets/validation-template.md": {
+      "mode": "managed",
+      "hash": "d415b9d84858f81606f3e48db357631ac5b90cd88800db57f9cf5fc8eb4d2732"
+    },
+    ".agents/skills/compile-master-plan/assets/verification-policy.yaml": {
+      "mode": "managed",
+      "hash": "e57ce0cadccbb50fda009930a15ae4f32cf16db9ee2444117ed7c4c3a1f9e12f"
+    },
+    ".agents/skills/compile-master-plan/references/ticket-contract.md": {
+      "mode": "managed",
+      "hash": "5d62422dbad13f8ad065d2588878d5a559220d12a81fd5a454edd0a858de0d1b"
+    },
+    ".agents/skills/compile-master-plan/schemas/ticket-contract.schema.json": {
+      "mode": "managed",
+      "hash": "21be754d2420c9ecc6f6ac236a912ddd28900acf3bdbab5b7f7fcf297b46fe14"
+    },
+    ".agents/skills/compile-master-plan/scripts/validate_ticket_pack.py": {
+      "mode": "managed",
+      "hash": "2091390077ae1c209e4e0c9417b069be1194ec80311cd9672629f2cd05c26e9a"
+    },
+    ".agents/skills/compile-master-plan/SKILL.md": {
+      "mode": "managed",
+      "hash": "7fd4e835b0900b88aace2735b2e43c6a5bf880587ffe4e7217fa2b4e53c9bc98"
+    },
+    ".agents/skills/diagnose/SKILL.md": {
+      "mode": "managed",
+      "hash": "097171e2f1051f555945bb937d5409c3fcb8206af14b7f8cea323c892eb256d6"
+    },
+    ".agents/skills/execute-frontier/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "23b494095c7fe3f25f7151b841bda63acc328658f30f96e4e6acc3aa2bcef88c"
+    },
+    ".agents/skills/execute-frontier/references/scheduling.md": {
+      "mode": "managed",
+      "hash": "025e878e003083a0c91cae8e73bad7d65537a8e69fe19a42db00086994aa582d"
+    },
+    ".agents/skills/execute-frontier/SKILL.md": {
+      "mode": "managed",
+      "hash": "3ae9b4962385ec57545f71e06ae98b74b9aa6c70a4629d7415242ea0080c7127"
+    },
+    ".agents/skills/frontier-loop/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "2deb4ff0e59ed55af27d4864365e6e4784fdbcbeff4141460a5e9283cca8e9cb"
+    },
+    ".agents/skills/frontier-loop/references/mode-selection.md": {
+      "mode": "managed",
+      "hash": "630e956929fecf3e9d17e7e2c0bb009165f355ecfebc7d7342222278344e56a0"
+    },
+    ".agents/skills/frontier-loop/SKILL.md": {
+      "mode": "managed",
+      "hash": "d6f1f64741b2962be48513eb5fa5a133b38c4b7bab11d213bdb3b7f4d8d1676c"
+    },
+    ".agents/skills/implementation-style/evals/evals.json": {
+      "mode": "managed",
+      "hash": "a47d1d626bd619dbcaab910c3e5a5131aeb79934858f5c83b837ffb76828cc16"
+    },
+    ".agents/skills/implementation-style/evals/trigger-evals.json": {
+      "mode": "managed",
+      "hash": "99b345f39cbc5a22752c172e268b0ebb96f1f063b46bd2056816fd6f4e1ffdc9"
+    },
+    ".agents/skills/implementation-style/references/stack-flutter.md": {
+      "mode": "managed",
+      "hash": "47f73e28459f2487c1ed9f734d0d7a644a3a6f02359768ff3cea086c7eb1c150"
+    },
+    ".agents/skills/implementation-style/references/stack-javascript.md": {
+      "mode": "managed",
+      "hash": "747b0239dfe043bbfcd2a06cf9b69df458d7d0e554e27350cb14ce80cfde2e16"
+    },
+    ".agents/skills/implementation-style/references/stack-react.md": {
+      "mode": "managed",
+      "hash": "321d7ae79881612c561e2c40a7659dd42c085af02905c43e376fbda9fce5d469"
+    },
+    ".agents/skills/implementation-style/references/stack-rust.md": {
+      "mode": "managed",
+      "hash": "b703272d536aa5b187e25dbdc83937c43e21b7bf0b177c134aec4cd75f8adf5f"
+    },
+    ".agents/skills/implementation-style/references/stack-typescript.md": {
+      "mode": "managed",
+      "hash": "2bafab3abf71dbf702a56f71c202e55a2729655b8b5874b65898e2776e95150b"
+    },
+    ".agents/skills/implementation-style/references/style-clean.md": {
+      "mode": "managed",
+      "hash": "e809479317f5cba530d325dcae18dce89d10e5f75ffe00d08051167ede752909"
+    },
+    ".agents/skills/implementation-style/references/style-functional-core.md": {
+      "mode": "managed",
+      "hash": "c672f7a34f5b2427a9bc674038460e8e3ec093cc3137b0e3acea508bf57a3c4c"
+    },
+    ".agents/skills/implementation-style/references/style-preserve.md": {
+      "mode": "managed",
+      "hash": "8dbb0f1cb05ae508ae1f1de2af8d12d460a1458f03dcf0962320dc56d41edd20"
+    },
+    ".agents/skills/implementation-style/references/style-simple.md": {
+      "mode": "managed",
+      "hash": "4993573b25a538c08b2cfb252eb57ef818ac8b44a459249ea13ff1529b7d8f9b"
+    },
+    ".agents/skills/implementation-style/SKILL.md": {
+      "mode": "managed",
+      "hash": "d02c5633addcc8386685c6c937d72b6d4cf3b69a70ef21826a2dca32b31fc197"
+    },
+    ".agents/skills/integrate-wave/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "765fcf5520d0e9a0fe289955afa84883acf29c5c2d972586e2d8dc793c45af3e"
+    },
+    ".agents/skills/integrate-wave/SKILL.md": {
+      "mode": "managed",
+      "hash": "7ce64ec8ae686e639aef55df5864bf411dd3aaf47b86bff403052a34e2db725a"
+    },
+    ".agents/skills/process-lifecycle/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "695b5320a763b2ac4ec3cb604e33581e08ff6b9e45c8cdfacca5d177b4cf55cb"
+    },
+    ".agents/skills/process-lifecycle/references/windows-job-object.md": {
+      "mode": "managed",
+      "hash": "42df447f0cb093283664f5e69f78b21edfc39f441912a83e5cd32553eb7c9b7a"
+    },
+    ".agents/skills/process-lifecycle/scripts/codex_stop_guard.py": {
+      "mode": "managed",
+      "hash": "e5cb0d94e38716be9eb7700debea1ab1aff1e07347bc68c2ae653b123b2d1416"
+    },
+    ".agents/skills/process-lifecycle/scripts/managed_command.py": {
+      "mode": "managed",
+      "hash": "aced4641b905fd4766b233e180dea0b5f9a9d1b663de309cba7bc32a87eab720"
+    },
+    ".agents/skills/process-lifecycle/SKILL.md": {
+      "mode": "managed",
+      "hash": "86d61fdb960327be40780cf2f86e4cd08010fed605afa6015b4d3f9a017515fc"
+    },
+    ".agents/skills/repair-ticket/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "72d6313764f5d9ff03c25a4f3d79765d6d91100733f748164992ec15446b25b3"
+    },
+    ".agents/skills/repair-ticket/SKILL.md": {
+      "mode": "managed",
+      "hash": "06d437b46d442ded31f89ea1e51636dcfbaefa561550fc19534b8ecf01f9a387"
+    },
+    ".agents/skills/retrofit-agent-docs/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "da9211daa58ba08d256c5f1e3490ec9c3101964cab60705497209228c7e08248"
+    },
+    ".agents/skills/retrofit-agent-docs/assets/architecture-baseline.json": {
+      "mode": "managed",
+      "hash": "7d189eefc77127d88c2c938f07443ae6161de1829a2e3eab1bffd588ff9fe53e"
+    },
+    ".agents/skills/retrofit-agent-docs/assets/AUTHORITY_MAP.md": {
+      "mode": "managed",
+      "hash": "cdd4e8053943d20dbd4330cbb58044f35c32ab541c9b9ea9008691975683b15d"
+    },
+    ".agents/skills/retrofit-agent-docs/assets/CURRENT_FRONTIER.json": {
+      "mode": "managed",
+      "hash": "5701434e032bc68aefd2408df4d3a427e64a313f8f8b3afb3c1171a01284dfcc"
+    },
+    ".agents/skills/retrofit-agent-docs/assets/DOMAIN_GLOSSARY.md": {
+      "mode": "managed",
+      "hash": "04fa69bb103f921ad91386b69f243ad7997b9540de4d6e4eca01e1a045f0e533"
+    },
+    ".agents/skills/retrofit-agent-docs/assets/FAILURE_CATALOG.md": {
+      "mode": "managed",
+      "hash": "a0e40f9351778fda3dedfc6d58617b521357f1b70bc829c98989e8bf889c3d86"
+    },
+    ".agents/skills/retrofit-agent-docs/assets/PROCESS_POLICY.md": {
+      "mode": "managed",
+      "hash": "9c13816f3466cd1d4f9f7ac5ff49ce164086faa1d0483e025e9281a463b25d26"
+    },
+    ".agents/skills/retrofit-agent-docs/assets/PROJECT_MAP.md": {
+      "mode": "managed",
+      "hash": "0f3320a36f35aac9e882dba06948d35febce4da05166802e0ae9698702fb4b2a"
+    },
+    ".agents/skills/retrofit-agent-docs/assets/README.md": {
+      "mode": "managed",
+      "hash": "6766f8b8edf239088aedcba669dfe11671dbfc86c2a2e3e51de9b12b44393699"
+    },
+    ".agents/skills/retrofit-agent-docs/assets/TEST_TOPOLOGY.md": {
+      "mode": "managed",
+      "hash": "ae6c3e52a18ffca6f334e1ab0846010a6b47c729293b592cf6434370b1d2a072"
+    },
+    ".agents/skills/retrofit-agent-docs/assets/tickets-README.md": {
+      "mode": "managed",
+      "hash": "4e445a7c54522ba75c35e761ec03bf51256b92003938e205b1f15d6cfb14ae7a"
+    },
+    ".agents/skills/retrofit-agent-docs/scripts/retrofit_docs.py": {
+      "mode": "managed",
+      "hash": "a5a425b0604af85e13347b5a063ac8e303fefb3a41cdf2470d4ae24fbd066756"
+    },
+    ".agents/skills/retrofit-agent-docs/SKILL.md": {
+      "mode": "managed",
+      "hash": "34537051008e1009e72878d80143db59cbce53fdac82bbd9a82a0ace89524989"
+    },
+    ".agents/skills/retrofit-ticket-pack/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "d7e7cde2ce69347e07a1a37538ebc0d55ed9c4b65b2de709a3be6617dd778576"
+    },
+    ".agents/skills/retrofit-ticket-pack/references/migration-rules.md": {
+      "mode": "managed",
+      "hash": "83cdad726860969826ec16fbfb0f3f40783d4fad5e1d12c7d55873700e8da648"
+    },
+    ".agents/skills/retrofit-ticket-pack/scripts/retrofit_tickets.py": {
+      "mode": "managed",
+      "hash": "d0e8ec700a428db0d1541f47f2d7fa0f9b61bc0a969856f1f2b5c5c367236143"
+    },
+    ".agents/skills/retrofit-ticket-pack/SKILL.md": {
+      "mode": "managed",
+      "hash": "fae986b28b16bfd1ce58ab5bbb8ba4377496d30b9c3e95024ac58ecd93b904bd"
+    },
+    ".agents/skills/tdd/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "c79be13156c201f01ada215bbea24b14c62ffa11b390f104aa3ac7d43662d2d3"
+    },
+    ".agents/skills/tdd/references/deep-modules.md": {
+      "mode": "managed",
+      "hash": "ee03883448a0affbebb64b56f5beb2522ad88ee9fed70b8be30395e673f603ea"
+    },
+    ".agents/skills/tdd/references/independent-oracles.md": {
+      "mode": "managed",
+      "hash": "dc1a842ecd75af8ff9250b7575e31391d78c363853a44e439e52f9a25fee79c7"
+    },
+    ".agents/skills/tdd/references/mocking.md": {
+      "mode": "managed",
+      "hash": "75948847ef203787e5082e72d4ebf74dfe36122161a13c3568dd28f200b5f710"
+    },
+    ".agents/skills/tdd/references/test-placement.md": {
+      "mode": "managed",
+      "hash": "e77c42ba1505b54a554823eb501ce28ea73c9b7d716dfd8d66232b60a95450ae"
+    },
+    ".agents/skills/tdd/references/tests.md": {
+      "mode": "managed",
+      "hash": "6259293e0ec3de48928ced28ae5d5bfb6f751ec8c0e6f44b9660952e5311c2cd"
+    },
+    ".agents/skills/tdd/SKILL.md": {
+      "mode": "managed",
+      "hash": "dcce1e1955f7276e5c55067eaa54faf3f63538962ff900e5aeaaf2a817ea4246"
+    },
+    ".agents/skills/test-topology/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "ba8831b369c60f6f07836b7b85c384bd6d827451c5767f2b2dd110c6f5b526c7"
+    },
+    ".agents/skills/test-topology/assets/architecture-budgets.yaml": {
+      "mode": "managed",
+      "hash": "4be7f878454001986e4be26a0a918867cd9b1addb7d18d139138d5aeb6033085"
+    },
+    ".agents/skills/test-topology/scripts/check_architecture_budgets.py": {
+      "mode": "managed",
+      "hash": "b5c03ff04b41b49c499167eee205e358524d2f04dbbfaf6393fa8101846ff4a0"
+    },
+    ".agents/skills/test-topology/SKILL.md": {
+      "mode": "managed",
+      "hash": "cee1e09f2b09be94569546776521307d79eff7fbff57fd1eb37cd5a780d4aeb7"
+    },
+    ".agents/skills/ticket-implementer/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "1d472f134c64993e3f9a749f4ad01909f4fad4a1ecfd642188bdbe1a01762d72"
+    },
+    ".agents/skills/ticket-implementer/assets/implementation-report.schema.json": {
+      "mode": "managed",
+      "hash": "5e892dccd8bda2581d731e8b4495c2b721e9e54f131662f371ac620c20e89dac"
+    },
+    ".agents/skills/ticket-implementer/SKILL.md": {
+      "mode": "managed",
+      "hash": "b0a9b64e111ad19b04b78f35abf73d483b13897e9dccc77f5e28fd38eadf3e8c"
+    },
+    ".agents/skills/ticket-review/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "efb2305d7fb847f6dac07d78c9d6763ba307a86b36f005898e5b7af9b585a0dc"
+    },
+    ".agents/skills/ticket-review/assets/review-report.schema.json": {
+      "mode": "managed",
+      "hash": "fc05ae0bf13b94dc1b877cc511e3d288a534e2008b4d07ada39f07674be13d0d"
+    },
+    ".agents/skills/ticket-review/SKILL.md": {
+      "mode": "managed",
+      "hash": "d1ab1f98431231e689d9b6bd6ff3fe20e1c2fe97ce187a0ef729cf72af32c96c"
+    },
+    ".agents/skills/verify/SKILL.md": {
+      "mode": "managed",
+      "hash": "921797aa4fbff42777fc14500d45b43cf80f98dc11dbce3ced337fc7aacb955c"
+    },
+    ".agents/skills/wayfinder/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "9ec4eea487e26a4366b02ae3eb9fa5f8ae77351600af8238566fd67feb87e6af"
+    },
+    ".agents/skills/wayfinder/assets/decision-template.md": {
+      "mode": "managed",
+      "hash": "60d07ff1682575d501f0a51c198bbffdbc85f677a186795a3497921d250aa986"
+    },
+    ".agents/skills/wayfinder/assets/frontier-template.yaml": {
+      "mode": "managed",
+      "hash": "7972353a73283d5b11a5e6fe7ac68e475d56fe431fa9ed2f58875956b4ab572e"
+    },
+    ".agents/skills/wayfinder/assets/map-template.md": {
+      "mode": "managed",
+      "hash": "588d16d4b82fbc03f7a582d42ec24cdff9efe78bc3ae3a0a5a0ee151af26ec1e"
+    },
+    ".agents/skills/wayfinder/SKILL.md": {
+      "mode": "managed",
+      "hash": "377a854e60a12f78d2a33fe4e2de789165887e10932caa9b0c5e7b2674b3a141"
+    },
+    ".agents/skills/write-skill/evals/evals.json": {
+      "mode": "managed",
+      "hash": "a2d6e50f013c882e6f0dee8bf7cd42187993e4845ad38a97ba9b8100aae9db4d"
+    },
+    ".agents/skills/write-skill/evals/trigger-evals.json": {
+      "mode": "managed",
+      "hash": "4fbb4fe2ad4d8016ef16813c3fcfeac9da918a2eea1779357c138b297f5148dc"
+    },
+    ".agents/skills/write-skill/references/evaluation.md": {
+      "mode": "managed",
+      "hash": "b600b6499583ab97841877d7125d01852e1f2429502b6713381be0f4249308c7"
+    },
+    ".agents/skills/write-skill/SKILL.md": {
+      "mode": "managed",
+      "hash": "fc2dbb5387bf94deab8a9d8f730620dcca89e1155dc1f4f624d83f278ab0d02d"
+    },
+    ".codex/agents/implementer.toml": {
+      "mode": "managed",
+      "hash": "9d90447843f8f2f1d9ce7b17e18f967d365fb58b585dc43486aa533e9afefdff"
+    },
+    ".codex/agents/integrator.toml": {
+      "mode": "managed",
+      "hash": "9ba46edc052fe51804bc4f03dcddadebd74bc08287dbcdef0a3fccc338ab665d"
+    },
+    ".codex/agents/planner.toml": {
+      "mode": "managed",
+      "hash": "63e836ee0dce0f9acbc7ba625944703e832536374497f45654e94f11d137db97"
+    },
+    ".codex/agents/repairer.toml": {
+      "mode": "managed",
+      "hash": "74dc05bac764c41ef9ae5114958289ae1b90000b6a05d1f99730b55a6d32d499"
+    },
+    ".codex/agents/reviewer-code.toml": {
+      "mode": "managed",
+      "hash": "3299bed0407436164534401f97e8053057777ec3089214efd455ca2c545a5abb"
+    },
+    ".codex/agents/reviewer-ops.toml": {
+      "mode": "managed",
+      "hash": "52923e2c881fb2b8bb629c14ab4d2245ab15cd311ae9da77bdf133b2cdede3c9"
+    },
+    ".codex/agents/reviewer-spec.toml": {
+      "mode": "managed",
+      "hash": "60997e7dfbdd86e16bf3fc4a5e17023262f10d83109f2371d8bb5fbd2c478000"
+    },
+    ".codex/agents/scout.toml": {
+      "mode": "managed",
+      "hash": "5dfe82addc17b66a1c0bfb47d858eaa3f33f8f7050ca224d502d31afc2b74cff"
+    },
+    ".codex/config.toml": {
+      "mode": "managed",
+      "hash": "1ee51ce811e97168d37687dd4dcfc32fd29f2c9ee59e7921b38c8ac3a9b73646"
+    },
+    ".codex/hooks.json": {
+      "mode": "managed",
+      "hash": "8e6f1dca5d02853bc46d71f83daaa2519e392d064918da9d37428cc58d10c0b6"
+    },
+    ".opencode/prompts/frontier-loop/implementer.txt": {
+      "mode": "managed",
+      "hash": "5ab319408ad43fb21b727a34d70b7c4c7c557af96afbad6efd9bf98af8e55e62"
+    },
+    ".opencode/prompts/frontier-loop/integrator.txt": {
+      "mode": "managed",
+      "hash": "e6c7ebbb6692d2c108216d6102d712c502ee126317a4e70d48de6ba60bd2356f"
+    },
+    ".opencode/prompts/frontier-loop/orchestrator.txt": {
+      "mode": "managed",
+      "hash": "02b3add9a0885e9267db70a920733d64a4d9e9189257f7030df41190b8a10921"
+    },
+    ".opencode/prompts/frontier-loop/planner.txt": {
+      "mode": "managed",
+      "hash": "ae57b2c595f2f0b8af098aaa20b57c34574aabfcaa886fa7aa329a335a070db8"
+    },
+    ".opencode/prompts/frontier-loop/repairer.txt": {
+      "mode": "managed",
+      "hash": "a4ec17f547c893c02423f9b12f867c59038851a8eaec1637e2ee0f77fa167c0e"
+    },
+    ".opencode/prompts/frontier-loop/reviewer-code.txt": {
+      "mode": "managed",
+      "hash": "2c2df908e7aa66beb2766c0ef088364056887979e0c5e0c40374e902725e1231"
+    },
+    ".opencode/prompts/frontier-loop/reviewer-ops.txt": {
+      "mode": "managed",
+      "hash": "6c4d8a2199ab05544cdd4be0d24552b9571019d9c6caceb58d15eb8fe8142620"
+    },
+    ".opencode/prompts/frontier-loop/reviewer-spec.txt": {
+      "mode": "managed",
+      "hash": "7f620952f38fae850cd13b6c95b2bc3dbb643953419b9bd59537e03629f34834"
+    },
+    ".opencode/prompts/frontier-loop/scout.txt": {
+      "mode": "managed",
+      "hash": "d91f0893a84d576cdf47ebd7d03f4bb47852b76ce8062654aef5a77c970bf969"
+    },
+    ".opencode/skills/.managed-by-workspace-template.json": {
+      "mode": "managed",
+      "hash": "4fa17926773faafd9d9f3deda57621e04d934d3ee872389186fe51230f4fe8a1"
+    },
+    ".opencode/skills/compile-master-plan/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "261e57044858a3a1b516064e418d974a033880dc99db2f96c078349b0f9a1ec6"
+    },
+    ".opencode/skills/compile-master-plan/assets/architecture-budgets.yaml": {
+      "mode": "managed",
+      "hash": "4be7f878454001986e4be26a0a918867cd9b1addb7d18d139138d5aeb6033085"
+    },
+    ".opencode/skills/compile-master-plan/assets/contract-template.yaml": {
+      "mode": "managed",
+      "hash": "1b5ec78a21412841eac785617b26ed2eea5911733d5015754b65ca5edbdaa1d4"
+    },
+    ".opencode/skills/compile-master-plan/assets/master-plan-template.md": {
+      "mode": "managed",
+      "hash": "467485fda383a41c29d23f5c6b733b69f3876411437cd72931fe9e93fa58bfa4"
+    },
+    ".opencode/skills/compile-master-plan/assets/model-routing.yaml": {
+      "mode": "managed",
+      "hash": "89f5de681b89ac465afb59f2fa5abde898e22d278736e5a3497c748e7f271651"
+    },
+    ".opencode/skills/compile-master-plan/assets/process-policy.yaml": {
+      "mode": "managed",
+      "hash": "37c5de57923eaf2a6fe8d91eaf19d43c50d0a8a4760d842187a0c8c7f54d771c"
+    },
+    ".opencode/skills/compile-master-plan/assets/ticket-template.md": {
+      "mode": "managed",
+      "hash": "c84b653d44b7493db8f4e4aacd4397d004277f5968e82dc2b4e2091d060669af"
+    },
+    ".opencode/skills/compile-master-plan/assets/track-template.yaml": {
+      "mode": "managed",
+      "hash": "55364220f629f79d975962787765b048e8d2abcda18d1903fa23d7ee2ff0860f"
+    },
+    ".opencode/skills/compile-master-plan/assets/validation-template.md": {
+      "mode": "managed",
+      "hash": "d415b9d84858f81606f3e48db357631ac5b90cd88800db57f9cf5fc8eb4d2732"
+    },
+    ".opencode/skills/compile-master-plan/assets/verification-policy.yaml": {
+      "mode": "managed",
+      "hash": "e57ce0cadccbb50fda009930a15ae4f32cf16db9ee2444117ed7c4c3a1f9e12f"
+    },
+    ".opencode/skills/compile-master-plan/references/ticket-contract.md": {
+      "mode": "managed",
+      "hash": "5d62422dbad13f8ad065d2588878d5a559220d12a81fd5a454edd0a858de0d1b"
+    },
+    ".opencode/skills/compile-master-plan/schemas/ticket-contract.schema.json": {
+      "mode": "managed",
+      "hash": "21be754d2420c9ecc6f6ac236a912ddd28900acf3bdbab5b7f7fcf297b46fe14"
+    },
+    ".opencode/skills/compile-master-plan/scripts/validate_ticket_pack.py": {
+      "mode": "managed",
+      "hash": "2091390077ae1c209e4e0c9417b069be1194ec80311cd9672629f2cd05c26e9a"
+    },
+    ".opencode/skills/compile-master-plan/SKILL.md": {
+      "mode": "managed",
+      "hash": "7fd4e835b0900b88aace2735b2e43c6a5bf880587ffe4e7217fa2b4e53c9bc98"
+    },
+    ".opencode/skills/diagnose/SKILL.md": {
+      "mode": "managed",
+      "hash": "097171e2f1051f555945bb937d5409c3fcb8206af14b7f8cea323c892eb256d6"
+    },
+    ".opencode/skills/execute-frontier/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "23b494095c7fe3f25f7151b841bda63acc328658f30f96e4e6acc3aa2bcef88c"
+    },
+    ".opencode/skills/execute-frontier/references/scheduling.md": {
+      "mode": "managed",
+      "hash": "025e878e003083a0c91cae8e73bad7d65537a8e69fe19a42db00086994aa582d"
+    },
+    ".opencode/skills/execute-frontier/SKILL.md": {
+      "mode": "managed",
+      "hash": "3ae9b4962385ec57545f71e06ae98b74b9aa6c70a4629d7415242ea0080c7127"
+    },
+    ".opencode/skills/frontier-loop/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "2deb4ff0e59ed55af27d4864365e6e4784fdbcbeff4141460a5e9283cca8e9cb"
+    },
+    ".opencode/skills/frontier-loop/references/mode-selection.md": {
+      "mode": "managed",
+      "hash": "630e956929fecf3e9d17e7e2c0bb009165f355ecfebc7d7342222278344e56a0"
+    },
+    ".opencode/skills/frontier-loop/SKILL.md": {
+      "mode": "managed",
+      "hash": "d6f1f64741b2962be48513eb5fa5a133b38c4b7bab11d213bdb3b7f4d8d1676c"
+    },
+    ".opencode/skills/implementation-style/evals/evals.json": {
+      "mode": "managed",
+      "hash": "a47d1d626bd619dbcaab910c3e5a5131aeb79934858f5c83b837ffb76828cc16"
+    },
+    ".opencode/skills/implementation-style/evals/trigger-evals.json": {
+      "mode": "managed",
+      "hash": "99b345f39cbc5a22752c172e268b0ebb96f1f063b46bd2056816fd6f4e1ffdc9"
+    },
+    ".opencode/skills/implementation-style/references/stack-flutter.md": {
+      "mode": "managed",
+      "hash": "47f73e28459f2487c1ed9f734d0d7a644a3a6f02359768ff3cea086c7eb1c150"
+    },
+    ".opencode/skills/implementation-style/references/stack-javascript.md": {
+      "mode": "managed",
+      "hash": "747b0239dfe043bbfcd2a06cf9b69df458d7d0e554e27350cb14ce80cfde2e16"
+    },
+    ".opencode/skills/implementation-style/references/stack-react.md": {
+      "mode": "managed",
+      "hash": "321d7ae79881612c561e2c40a7659dd42c085af02905c43e376fbda9fce5d469"
+    },
+    ".opencode/skills/implementation-style/references/stack-rust.md": {
+      "mode": "managed",
+      "hash": "b703272d536aa5b187e25dbdc83937c43e21b7bf0b177c134aec4cd75f8adf5f"
+    },
+    ".opencode/skills/implementation-style/references/stack-typescript.md": {
+      "mode": "managed",
+      "hash": "2bafab3abf71dbf702a56f71c202e55a2729655b8b5874b65898e2776e95150b"
+    },
+    ".opencode/skills/implementation-style/references/style-clean.md": {
+      "mode": "managed",
+      "hash": "e809479317f5cba530d325dcae18dce89d10e5f75ffe00d08051167ede752909"
+    },
+    ".opencode/skills/implementation-style/references/style-functional-core.md": {
+      "mode": "managed",
+      "hash": "c672f7a34f5b2427a9bc674038460e8e3ec093cc3137b0e3acea508bf57a3c4c"
+    },
+    ".opencode/skills/implementation-style/references/style-preserve.md": {
+      "mode": "managed",
+      "hash": "8dbb0f1cb05ae508ae1f1de2af8d12d460a1458f03dcf0962320dc56d41edd20"
+    },
+    ".opencode/skills/implementation-style/references/style-simple.md": {
+      "mode": "managed",
+      "hash": "4993573b25a538c08b2cfb252eb57ef818ac8b44a459249ea13ff1529b7d8f9b"
+    },
+    ".opencode/skills/implementation-style/SKILL.md": {
+      "mode": "managed",
+      "hash": "d02c5633addcc8386685c6c937d72b6d4cf3b69a70ef21826a2dca32b31fc197"
+    },
+    ".opencode/skills/integrate-wave/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "765fcf5520d0e9a0fe289955afa84883acf29c5c2d972586e2d8dc793c45af3e"
+    },
+    ".opencode/skills/integrate-wave/SKILL.md": {
+      "mode": "managed",
+      "hash": "7ce64ec8ae686e639aef55df5864bf411dd3aaf47b86bff403052a34e2db725a"
+    },
+    ".opencode/skills/process-lifecycle/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "695b5320a763b2ac4ec3cb604e33581e08ff6b9e45c8cdfacca5d177b4cf55cb"
+    },
+    ".opencode/skills/process-lifecycle/references/windows-job-object.md": {
+      "mode": "managed",
+      "hash": "42df447f0cb093283664f5e69f78b21edfc39f441912a83e5cd32553eb7c9b7a"
+    },
+    ".opencode/skills/process-lifecycle/scripts/codex_stop_guard.py": {
+      "mode": "managed",
+      "hash": "e5cb0d94e38716be9eb7700debea1ab1aff1e07347bc68c2ae653b123b2d1416"
+    },
+    ".opencode/skills/process-lifecycle/scripts/managed_command.py": {
+      "mode": "managed",
+      "hash": "aced4641b905fd4766b233e180dea0b5f9a9d1b663de309cba7bc32a87eab720"
+    },
+    ".opencode/skills/process-lifecycle/SKILL.md": {
+      "mode": "managed",
+      "hash": "86d61fdb960327be40780cf2f86e4cd08010fed605afa6015b4d3f9a017515fc"
+    },
+    ".opencode/skills/repair-ticket/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "72d6313764f5d9ff03c25a4f3d79765d6d91100733f748164992ec15446b25b3"
+    },
+    ".opencode/skills/repair-ticket/SKILL.md": {
+      "mode": "managed",
+      "hash": "06d437b46d442ded31f89ea1e51636dcfbaefa561550fc19534b8ecf01f9a387"
+    },
+    ".opencode/skills/retrofit-agent-docs/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "da9211daa58ba08d256c5f1e3490ec9c3101964cab60705497209228c7e08248"
+    },
+    ".opencode/skills/retrofit-agent-docs/assets/architecture-baseline.json": {
+      "mode": "managed",
+      "hash": "7d189eefc77127d88c2c938f07443ae6161de1829a2e3eab1bffd588ff9fe53e"
+    },
+    ".opencode/skills/retrofit-agent-docs/assets/AUTHORITY_MAP.md": {
+      "mode": "managed",
+      "hash": "cdd4e8053943d20dbd4330cbb58044f35c32ab541c9b9ea9008691975683b15d"
+    },
+    ".opencode/skills/retrofit-agent-docs/assets/CURRENT_FRONTIER.json": {
+      "mode": "managed",
+      "hash": "5701434e032bc68aefd2408df4d3a427e64a313f8f8b3afb3c1171a01284dfcc"
+    },
+    ".opencode/skills/retrofit-agent-docs/assets/DOMAIN_GLOSSARY.md": {
+      "mode": "managed",
+      "hash": "04fa69bb103f921ad91386b69f243ad7997b9540de4d6e4eca01e1a045f0e533"
+    },
+    ".opencode/skills/retrofit-agent-docs/assets/FAILURE_CATALOG.md": {
+      "mode": "managed",
+      "hash": "a0e40f9351778fda3dedfc6d58617b521357f1b70bc829c98989e8bf889c3d86"
+    },
+    ".opencode/skills/retrofit-agent-docs/assets/PROCESS_POLICY.md": {
+      "mode": "managed",
+      "hash": "9c13816f3466cd1d4f9f7ac5ff49ce164086faa1d0483e025e9281a463b25d26"
+    },
+    ".opencode/skills/retrofit-agent-docs/assets/PROJECT_MAP.md": {
+      "mode": "managed",
+      "hash": "0f3320a36f35aac9e882dba06948d35febce4da05166802e0ae9698702fb4b2a"
+    },
+    ".opencode/skills/retrofit-agent-docs/assets/README.md": {
+      "mode": "managed",
+      "hash": "6766f8b8edf239088aedcba669dfe11671dbfc86c2a2e3e51de9b12b44393699"
+    },
+    ".opencode/skills/retrofit-agent-docs/assets/TEST_TOPOLOGY.md": {
+      "mode": "managed",
+      "hash": "ae6c3e52a18ffca6f334e1ab0846010a6b47c729293b592cf6434370b1d2a072"
+    },
+    ".opencode/skills/retrofit-agent-docs/assets/tickets-README.md": {
+      "mode": "managed",
+      "hash": "4e445a7c54522ba75c35e761ec03bf51256b92003938e205b1f15d6cfb14ae7a"
+    },
+    ".opencode/skills/retrofit-agent-docs/scripts/retrofit_docs.py": {
+      "mode": "managed",
+      "hash": "a5a425b0604af85e13347b5a063ac8e303fefb3a41cdf2470d4ae24fbd066756"
+    },
+    ".opencode/skills/retrofit-agent-docs/SKILL.md": {
+      "mode": "managed",
+      "hash": "34537051008e1009e72878d80143db59cbce53fdac82bbd9a82a0ace89524989"
+    },
+    ".opencode/skills/retrofit-ticket-pack/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "d7e7cde2ce69347e07a1a37538ebc0d55ed9c4b65b2de709a3be6617dd778576"
+    },
+    ".opencode/skills/retrofit-ticket-pack/references/migration-rules.md": {
+      "mode": "managed",
+      "hash": "83cdad726860969826ec16fbfb0f3f40783d4fad5e1d12c7d55873700e8da648"
+    },
+    ".opencode/skills/retrofit-ticket-pack/scripts/retrofit_tickets.py": {
+      "mode": "managed",
+      "hash": "d0e8ec700a428db0d1541f47f2d7fa0f9b61bc0a969856f1f2b5c5c367236143"
+    },
+    ".opencode/skills/retrofit-ticket-pack/SKILL.md": {
+      "mode": "managed",
+      "hash": "fae986b28b16bfd1ce58ab5bbb8ba4377496d30b9c3e95024ac58ecd93b904bd"
+    },
+    ".opencode/skills/tdd/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "c79be13156c201f01ada215bbea24b14c62ffa11b390f104aa3ac7d43662d2d3"
+    },
+    ".opencode/skills/tdd/references/deep-modules.md": {
+      "mode": "managed",
+      "hash": "ee03883448a0affbebb64b56f5beb2522ad88ee9fed70b8be30395e673f603ea"
+    },
+    ".opencode/skills/tdd/references/independent-oracles.md": {
+      "mode": "managed",
+      "hash": "dc1a842ecd75af8ff9250b7575e31391d78c363853a44e439e52f9a25fee79c7"
+    },
+    ".opencode/skills/tdd/references/mocking.md": {
+      "mode": "managed",
+      "hash": "75948847ef203787e5082e72d4ebf74dfe36122161a13c3568dd28f200b5f710"
+    },
+    ".opencode/skills/tdd/references/test-placement.md": {
+      "mode": "managed",
+      "hash": "e77c42ba1505b54a554823eb501ce28ea73c9b7d716dfd8d66232b60a95450ae"
+    },
+    ".opencode/skills/tdd/references/tests.md": {
+      "mode": "managed",
+      "hash": "6259293e0ec3de48928ced28ae5d5bfb6f751ec8c0e6f44b9660952e5311c2cd"
+    },
+    ".opencode/skills/tdd/SKILL.md": {
+      "mode": "managed",
+      "hash": "dcce1e1955f7276e5c55067eaa54faf3f63538962ff900e5aeaaf2a817ea4246"
+    },
+    ".opencode/skills/test-topology/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "ba8831b369c60f6f07836b7b85c384bd6d827451c5767f2b2dd110c6f5b526c7"
+    },
+    ".opencode/skills/test-topology/assets/architecture-budgets.yaml": {
+      "mode": "managed",
+      "hash": "4be7f878454001986e4be26a0a918867cd9b1addb7d18d139138d5aeb6033085"
+    },
+    ".opencode/skills/test-topology/scripts/check_architecture_budgets.py": {
+      "mode": "managed",
+      "hash": "b5c03ff04b41b49c499167eee205e358524d2f04dbbfaf6393fa8101846ff4a0"
+    },
+    ".opencode/skills/test-topology/SKILL.md": {
+      "mode": "managed",
+      "hash": "cee1e09f2b09be94569546776521307d79eff7fbff57fd1eb37cd5a780d4aeb7"
+    },
+    ".opencode/skills/ticket-implementer/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "1d472f134c64993e3f9a749f4ad01909f4fad4a1ecfd642188bdbe1a01762d72"
+    },
+    ".opencode/skills/ticket-implementer/assets/implementation-report.schema.json": {
+      "mode": "managed",
+      "hash": "5e892dccd8bda2581d731e8b4495c2b721e9e54f131662f371ac620c20e89dac"
+    },
+    ".opencode/skills/ticket-implementer/SKILL.md": {
+      "mode": "managed",
+      "hash": "b0a9b64e111ad19b04b78f35abf73d483b13897e9dccc77f5e28fd38eadf3e8c"
+    },
+    ".opencode/skills/ticket-review/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "efb2305d7fb847f6dac07d78c9d6763ba307a86b36f005898e5b7af9b585a0dc"
+    },
+    ".opencode/skills/ticket-review/assets/review-report.schema.json": {
+      "mode": "managed",
+      "hash": "fc05ae0bf13b94dc1b877cc511e3d288a534e2008b4d07ada39f07674be13d0d"
+    },
+    ".opencode/skills/ticket-review/SKILL.md": {
+      "mode": "managed",
+      "hash": "d1ab1f98431231e689d9b6bd6ff3fe20e1c2fe97ce187a0ef729cf72af32c96c"
+    },
+    ".opencode/skills/verify/SKILL.md": {
+      "mode": "managed",
+      "hash": "921797aa4fbff42777fc14500d45b43cf80f98dc11dbce3ced337fc7aacb955c"
+    },
+    ".opencode/skills/wayfinder/agents/openai.yaml": {
+      "mode": "managed",
+      "hash": "9ec4eea487e26a4366b02ae3eb9fa5f8ae77351600af8238566fd67feb87e6af"
+    },
+    ".opencode/skills/wayfinder/assets/decision-template.md": {
+      "mode": "managed",
+      "hash": "60d07ff1682575d501f0a51c198bbffdbc85f677a186795a3497921d250aa986"
+    },
+    ".opencode/skills/wayfinder/assets/frontier-template.yaml": {
+      "mode": "managed",
+      "hash": "7972353a73283d5b11a5e6fe7ac68e475d56fe431fa9ed2f58875956b4ab572e"
+    },
+    ".opencode/skills/wayfinder/assets/map-template.md": {
+      "mode": "managed",
+      "hash": "588d16d4b82fbc03f7a582d42ec24cdff9efe78bc3ae3a0a5a0ee151af26ec1e"
+    },
+    ".opencode/skills/wayfinder/SKILL.md": {
+      "mode": "managed",
+      "hash": "377a854e60a12f78d2a33fe4e2de789165887e10932caa9b0c5e7b2674b3a141"
+    },
+    ".opencode/skills/write-skill/evals/evals.json": {
+      "mode": "managed",
+      "hash": "a2d6e50f013c882e6f0dee8bf7cd42187993e4845ad38a97ba9b8100aae9db4d"
+    },
+    ".opencode/skills/write-skill/evals/trigger-evals.json": {
+      "mode": "managed",
+      "hash": "4fbb4fe2ad4d8016ef16813c3fcfeac9da918a2eea1779357c138b297f5148dc"
+    },
+    ".opencode/skills/write-skill/references/evaluation.md": {
+      "mode": "managed",
+      "hash": "b600b6499583ab97841877d7125d01852e1f2429502b6713381be0f4249308c7"
+    },
+    ".opencode/skills/write-skill/SKILL.md": {
+      "mode": "managed",
+      "hash": "fc2dbb5387bf94deab8a9d8f730620dcca89e1155dc1f4f624d83f278ab0d02d"
+    },
+    "docs/agent/architecture-baseline.json": {
+      "mode": "managed",
+      "hash": "5613617c96586ecfbc2b8e6d9e6f0b92bbfae70e9d93649b912ebea867c27c3e"
+    },
+    "docs/agent/AUTHORITY_MAP.md": {
+      "mode": "managed",
+      "hash": "cdd4e8053943d20dbd4330cbb58044f35c32ab541c9b9ea9008691975683b15d"
+    },
+    "docs/agent/CURRENT_FRONTIER.json": {
+      "mode": "managed",
+      "hash": "5701434e032bc68aefd2408df4d3a427e64a313f8f8b3afb3c1171a01284dfcc"
+    },
+    "docs/agent/decisions/README.md": {
+      "mode": "managed",
+      "hash": "2cce984feac8953790a34cb9a7176e7bb9b7dc08d81140ee7a42766571afb28d"
+    },
+    "docs/agent/DOMAIN_GLOSSARY.md": {
+      "mode": "managed",
+      "hash": "04fa69bb103f921ad91386b69f243ad7997b9540de4d6e4eca01e1a045f0e533"
+    },
+    "docs/agent/evidence/README.md": {
+      "mode": "managed",
+      "hash": "72a3a70e6c44c3c4e7ec4c207b3e2597c0af2062cb256da4686671f663ac260f"
+    },
+    "docs/agent/FAILURE_CATALOG.md": {
+      "mode": "managed",
+      "hash": "a0e40f9351778fda3dedfc6d58617b521357f1b70bc829c98989e8bf889c3d86"
+    },
+    "docs/agent/migrations/README.md": {
+      "mode": "managed",
+      "hash": "aa691cbd189b52d6e222e05a7d1a4324abda69c3079a9cfe90b3a482e00be4ed"
+    },
+    "docs/agent/PROCESS_POLICY.md": {
+      "mode": "managed",
+      "hash": "9c13816f3466cd1d4f9f7ac5ff49ce164086faa1d0483e025e9281a463b25d26"
+    },
+    "docs/agent/PROJECT_MAP.md": {
+      "mode": "managed",
+      "hash": "0f3320a36f35aac9e882dba06948d35febce4da05166802e0ae9698702fb4b2a"
+    },
+    "docs/agent/README.md": {
+      "mode": "managed",
+      "hash": "6766f8b8edf239088aedcba669dfe11671dbfc86c2a2e3e51de9b12b44393699"
+    },
+    "docs/agent/TEST_TOPOLOGY.md": {
+      "mode": "managed",
+      "hash": "ae6c3e52a18ffca6f334e1ab0846010a6b47c729293b592cf6434370b1d2a072"
+    },
+    "docs/agent/wayfinding/README.md": {
+      "mode": "managed",
+      "hash": "612de3c0da2fd721686eee1ea1c846a63c97182625ccef75b5bdc147e34f64e5"
+    },
+    "docs/tickets/README.md": {
+      "mode": "managed",
+      "hash": "0e863063fb993316319e05c32f5e18b85b06489a0a6922f17da82c4019724636"
+    },
+    "opencode.json": {
+      "mode": "managed",
+      "hash": "0d82d9d1ebac5d5c48e2ea921d19a405ee4b14500df2c3a691608d8fd5b54df4"
+    }
+  }
+}

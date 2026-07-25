@@ -1,0 +1,59 @@
+{
+  "$schema": "./profile.schema.json",
+  "version": 2,
+  "mode": "adopted",
+  "project": "javascript",
+  "style": "preserve",
+  "architecture": {
+    "current": "existing-or-mixed",
+    "preferredForNewCode": null,
+    "migrationPolicy": "incremental-protected-vertical-slices",
+    "organization": "preserve-coherent-existing-structure",
+    "effects": "make-new-or-touched-effects-explicit",
+    "dependencyDirection": "preserve-unless-an-approved-slice-changes-it",
+    "ports": "only-for-real-volatile-boundaries-or-useful-seams"
+  },
+  "architectureName": "existing-or-mixed",
+  "organization": "preserve-coherent-existing-structure",
+  "effects": "make-new-or-touched-effects-explicit",
+  "dependencyDirection": "preserve-unless-an-approved-slice-changes-it",
+  "ports": "only-for-real-volatile-boundaries-or-useful-seams",
+  "tdd": "preserve",
+  "testing": {
+    "current": "detected-or-undetermined",
+    "policyForChangedBehavior": "follow-explicit-repository-policy-otherwise-pragmatic-regression-protection",
+    "strategy": {
+      "domain": "fast-behavior-tests-through-public-functions",
+      "application": "use-case-tests-with-owned-fakes",
+      "adapters": "contract-or-integration-tests",
+      "ui": "not-applicable",
+      "endToEnd": "few-critical-path-tests"
+    }
+  },
+  "immutability": "prefer",
+  "errorModel": "explicit-errors-and-result-objects",
+  "refactoring": "micro-refactor-after-green-structural-refactor-as-separate-change",
+  "complexityBudget": "minimum-architecture-that-protects-the-current-change",
+  "execution": {
+    "method": "frontier-loop",
+    "coordinator": {
+      "model": "gpt-5.6-sol",
+      "reasoningEffort": "high"
+    },
+    "planner": {
+      "model": "gpt-5.6-sol",
+      "reasoningEffort": "high"
+    },
+    "workers": {
+      "model": "gpt-5.3-codex",
+      "reasoningEffort": "high"
+    },
+    "defaultWriters": 1,
+    "maxConcurrentSubagents": 3,
+    "landing": "serial"
+  },
+  "agentTargets": [
+    "codex",
+    "opencode"
+  ]
+}

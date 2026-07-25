@@ -1,0 +1,6 @@
+interface:
+  display_name: "Execute Frontier"
+  short_description: "Continuously runs the local ticket frontier."
+  default_prompt: "Execute this local ticket pack continuously with one writer by default, parallel read-only evidence, independent review, targeted repair, and serial integration."
+policy:
+  allow_implicit_invocation: false

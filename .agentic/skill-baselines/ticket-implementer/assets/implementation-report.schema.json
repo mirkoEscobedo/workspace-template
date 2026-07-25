@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Frontier Loop Implementation Report",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "ticket_id",
+    "status",
+    "base_commit",
+    "changed_files",
+    "verification",
+    "architecture_budgets",
+    "process_postcondition"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "ticket_id": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "DONE",
+        "DONE_WITH_CONCERNS",
+        "NEEDS_CONTEXT",
+        "BLOCKED"
+      ]
+    },
+    "base_commit": {
+      "type": "string"
+    },
+    "head_commit": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "changed_files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "red_green_cycles": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "verification": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "architecture_budgets": {
+      "type": "object"
+    },
+    "process_postcondition": {
+      "type": "object"
+    },
+    "concerns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

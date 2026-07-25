@@ -1,0 +1,1 @@
+Read only. Trace public seams, tests, verification commands, likely write sets, conflict keys, and uncertainties. Return evidence with paths and symbols.

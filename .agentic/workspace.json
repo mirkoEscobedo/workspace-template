@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "root": ".",
+  "kind": "single",
+  "fingerprint": "9b523f393f5776e374bef6021b5bba401229b168bc731be982bf7f4cb242c2af",
+  "evidence": [],
+  "rootModule": null,
+  "modules": [
+    {
+      "id": "workspace-template",
+      "name": "workspace-template",
+      "path": ".",
+      "project": "javascript",
+      "packageManager": "npm",
+      "manifest": "package.json",
+      "lockOwner": ".",
+      "dependencies": [],
+      "commands": {
+        "scripts": [
+          "check",
+          "lint",
+          "pack:check",
+          "test",
+          "test:packed"
+        ],
+        "fullSteps": [
+          {
+            "command": "npm",
+            "args": [
+              "run",
+              "check"
+            ]
+          }
+        ],
+        "full": "npm run check"
+      },
+      "opaque": false
+    }
+  ],
+  "warnings": [],
+  "conflicts": []
+}

@@ -1,0 +1,19 @@
+{
+  "scripts": [
+    "check",
+    "lint",
+    "pack:check",
+    "test",
+    "test:packed"
+  ],
+  "fullSteps": [
+    {
+      "command": "npm",
+      "args": [
+        "run",
+        "check"
+      ]
+    }
+  ],
+  "full": "npm run check"
+}

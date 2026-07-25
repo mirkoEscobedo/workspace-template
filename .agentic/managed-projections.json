@@ -1,0 +1,94 @@
+{
+  "version": 2,
+  "generator": "workspace-template",
+  "generatedAt": null,
+  "canonical": ".agentic/skills",
+  "skillNames": [
+    "compile-master-plan",
+    "diagnose",
+    "execute-frontier",
+    "frontier-loop",
+    "implementation-style",
+    "integrate-wave",
+    "process-lifecycle",
+    "repair-ticket",
+    "retrofit-agent-docs",
+    "retrofit-ticket-pack",
+    "tdd",
+    "test-topology",
+    "ticket-implementer",
+    "ticket-review",
+    "verify",
+    "wayfinder",
+    "write-skill"
+  ],
+  "skillHashes": {
+    "compile-master-plan": "461db9af3a4e3152f4fa3a0d68b8f3bdc33eed8bd2039fc4eef8b3647917205f",
+    "diagnose": "f24a4794fe69aa73438b37fdc2e09a67673f0a85f9dd34bc86c442d93ada2379",
+    "execute-frontier": "751b914804b4815da5c6d7458d864999cdcc38f248c7febdcef794e63f0a9d0f",
+    "frontier-loop": "361e5808ffb84b65aa1a363403fe387a3b302e366879d6de99dc9b18b271646f",
+    "implementation-style": "4bc5a8c42f132980d4a34a798b2bc0c73110385b0fede941743b05aa59251777",
+    "integrate-wave": "3fa87e74b7c097afab6dfde9e45d0ab60e9617a85dd6c8f0229e7b5681738303",
+    "process-lifecycle": "e4eacd7cd7b0bfd0ba0ca4467c972e721d3f144014769eb1897f292d9fd9d532",
+    "repair-ticket": "76f3342c876dfe8681c369018793a85f7e0efeeef8795f7c70de65b536d8faa6",
+    "retrofit-agent-docs": "233f62a34e1304297c171b49e09c5effd9e13be2dfda12645a55ef9ae4858c89",
+    "retrofit-ticket-pack": "226e06920bcd177978b2e1b1391f5d47af20fa44f584a7e63138fb3508bc27e1",
+    "tdd": "4d68a0837ce6ca0097d78b74088853b88a1d8ee250eac8d88378a2faa3729530",
+    "test-topology": "2330b0b1fd2ae31b250e686243c4a848d2dac313cc33b14f8792806b670783b2",
+    "ticket-implementer": "90aa55fff38f09d8738ae182a8a1cb144dcfc9e08d830c81536b1b65d4fe8dad",
+    "ticket-review": "2dc1b3ebe1597a31ad17d4112a025189b647702d69152aab4a9be295535324b7",
+    "verify": "0c2d1d13c1e2ca87079c83f6f28ff328b721c7caf27b7c957a7c04cf4f54fcc2",
+    "wayfinder": "a5962cf39034dd64b15887a2ed8478d71eee65eb4d1d38a14b1dabdd8f0e9872",
+    "write-skill": "0dc9c864602e422ec07bc06bc3daab1edc02c543ea11e759cfc7a4c5fa8e08b1"
+  },
+  "agentTargets": [
+    "codex",
+    "opencode"
+  ],
+  "projections": {
+    "codex": {
+      "path": ".agents/skills",
+      "skills": [
+        "compile-master-plan",
+        "diagnose",
+        "execute-frontier",
+        "frontier-loop",
+        "implementation-style",
+        "integrate-wave",
+        "process-lifecycle",
+        "repair-ticket",
+        "retrofit-agent-docs",
+        "retrofit-ticket-pack",
+        "tdd",
+        "test-topology",
+        "ticket-implementer",
+        "ticket-review",
+        "verify",
+        "wayfinder",
+        "write-skill"
+      ]
+    },
+    "opencode": {
+      "path": ".opencode/skills",
+      "skills": [
+        "compile-master-plan",
+        "diagnose",
+        "execute-frontier",
+        "frontier-loop",
+        "implementation-style",
+        "integrate-wave",
+        "process-lifecycle",
+        "repair-ticket",
+        "retrofit-agent-docs",
+        "retrofit-ticket-pack",
+        "tdd",
+        "test-topology",
+        "ticket-implementer",
+        "ticket-review",
+        "verify",
+        "wayfinder",
+        "write-skill"
+      ]
+    }
+  }
+}

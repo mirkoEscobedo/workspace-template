@@ -1,0 +1,42 @@
+{
+  "version": 2,
+  "generator": "workspace-template",
+  "generatorVersion": "0.6.0",
+  "mode": "adopted",
+  "adoptedAt": null,
+  "project": "javascript",
+  "style": "preserve",
+  "tdd": "preserve",
+  "packageManager": "npm",
+  "canonicalSkills": ".agentic/skills",
+  "skillLock": ".agentic/skills.lock.json",
+  "managedFiles": ".agentic/managed-files.json",
+  "execution": {
+    "method": "frontier",
+    "coordinator": {
+      "model": "gpt-5.6-sol",
+      "reasoningEffort": "high"
+    },
+    "planner": {
+      "model": "gpt-5.6-sol",
+      "reasoningEffort": "high"
+    },
+    "workers": {
+      "model": "gpt-5.3-codex",
+      "reasoningEffort": "high"
+    },
+    "maxConcurrentSubagents": 3,
+    "defaultWriters": 1,
+    "landing": "serial"
+  },
+  "features": {
+    "durableAgentDocs": true,
+    "ticketContracts": true,
+    "processLeases": true,
+    "architectureBudgets": true
+  },
+  "agentTargets": [
+    "codex",
+    "opencode"
+  ]
+}

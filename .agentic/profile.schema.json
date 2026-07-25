@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:workspace-template:profile:2",
+  "title": "Agentic implementation profile",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "version",
+    "mode",
+    "project",
+    "style",
+    "architecture",
+    "tdd",
+    "execution"
+  ],
+  "properties": {
+    "version": {
+      "enum": [
+        1,
+        2
+      ]
+    },
+    "mode": {
+      "enum": [
+        "generated",
+        "adopted"
+      ]
+    },
+    "project": {
+      "enum": [
+        "typescript",
+        "javascript",
+        "react",
+        "rust",
+        "flutter",
+        "dart",
+        "workspace"
+      ]
+    },
+    "style": {
+      "enum": [
+        "preserve",
+        "simple",
+        "functional-core",
+        "clean"
+      ]
+    },
+    "architecture": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "object",
+          "required": [
+            "current",
+            "migrationPolicy"
+          ],
+          "additionalProperties": true,
+          "properties": {
+            "current": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "preferredForNewCode": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "migrationPolicy": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      ]
+    },
+    "tdd": {
+      "enum": [
+        "preserve",
+        "strict",
+        "pragmatic",
+        "off"
+      ]
+    },
+    "agentTargets": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "claude",
+          "codex",
+          "copilot",
+          "cursor",
+          "opencode",
+          "gemini"
+        ]
+      }
+    },
+    "execution": {
+      "type": "object",
+      "required": [
+        "method",
+        "coordinator",
+        "workers",
+        "landing"
+      ],
+      "additionalProperties": true
+    }
+  }
+}

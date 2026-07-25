@@ -1,0 +1,6 @@
+interface:
+  display_name: "Wayfinder"
+  short_description: "Captures planning as a decision frontier."
+  default_prompt: "Use Wayfinder to capture this conversation as a durable destination, decisions, fog, authority gates, and next planning frontier."
+policy:
+  allow_implicit_invocation: true
