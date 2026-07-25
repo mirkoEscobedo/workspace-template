@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "generator": "workspace-template",
   "generatorVersion": "0.6.0",
   "files": {
@@ -17,7 +17,7 @@
     },
     ".agentic/config.json": {
       "mode": "managed",
-      "hash": "23dc6401fb4cdfddfe353a92332e3aa2853f0960a0b2ec3623a675247c8204b4"
+      "hash": "d1b978394691170a3d0486b8018ba7d835d1b4c8e2e2145a14e8d4b07577beb0"
     },
     ".agentic/dependency-snapshot.md": {
       "mode": "managed",
@@ -25,11 +25,11 @@
     },
     ".agentic/implementation-profile.md": {
       "mode": "managed",
-      "hash": "23368c460772eab6939c00c9063c11801a34fa1d3cfbead95eec67c5c27c72c4"
+      "hash": "1f6c0f9d2708a1de1c003b93ed19982cd4d3c6a531ac07606bf3d51ef3a521df"
     },
     ".agentic/managed-projections.json": {
       "mode": "managed",
-      "hash": "6ab660c33ece50f4ccdc26824a914eee34517a390d1030d651c7995d52403da7"
+      "hash": "544b1701292f2c1c9e9c4c842a43ecdfe49983c3f30caaecd06fb6d99715758b"
     },
     ".agentic/modules/workspace-template/commands.json": {
       "mode": "managed",
@@ -45,7 +45,7 @@
     },
     ".agentic/policies/model-routing.yaml": {
       "mode": "managed",
-      "hash": "abfb19fab0acd0288fa3f3c74aa02f8343acd6e88ea66cc49659c3e7d927b99f"
+      "hash": "eac3b41d94ed9c972346faad7b5053755457f665c6fd4251c0b72c16ed3e6e25"
     },
     ".agentic/policies/process.yaml": {
       "mode": "managed",
@@ -55,9 +55,25 @@
       "mode": "managed",
       "hash": "e57ce0cadccbb50fda009930a15ae4f32cf16db9ee2444117ed7c4c3a1f9e12f"
     },
+    ".agentic/presets/builtin/sol-codex.json": {
+      "mode": "managed",
+      "hash": "12268246319bf086622ce3d92fb220b9b305b928c54d1d4fc2fcf79abd64967c"
+    },
+    ".agentic/presets/builtin/sol-only.json": {
+      "mode": "managed",
+      "hash": "a1c6befd8171754ec88fd965da2be47d2679f4178c1a13e315305e5f6e8f620a"
+    },
+    ".agentic/presets/local/README.md": {
+      "mode": "managed",
+      "hash": "e93fc29133750576af5eda504ee40d510dc98594ee5acdac264a65d6d31b1b45"
+    },
+    ".agentic/presets/preset.schema.json": {
+      "mode": "managed",
+      "hash": "141034886a63dba2f94b4deef85bb733d39a066db5bd8dcc553705d81a94d299"
+    },
     ".agentic/profile.json": {
       "mode": "managed",
-      "hash": "212f811b4929b2e7f8dd2dee328fd9b18179955b4d39833810458d9c3c0093f4"
+      "hash": "eee807227a5a613f0623d1423e2fa0f5653e024d1190aae294377e2fe9a84493"
     },
     ".agentic/profile.schema.json": {
       "mode": "managed",
@@ -89,7 +105,7 @@
     },
     ".agentic/scripts/retrofit_tickets.py": {
       "mode": "managed",
-      "hash": "de03eecd5591ef5ea8d4532d996e4888886ae4e8fc269050c3426df04f6a42e7"
+      "hash": "a619298fcc18811edde1fdda188110d50914b4659e5cbdb45214e3f8c7607a1f"
     },
     ".agentic/scripts/validate_ticket_pack.py": {
       "mode": "managed",
@@ -113,7 +129,7 @@
     },
     ".agentic/skill-baselines/compile-master-plan/assets/model-routing.yaml": {
       "mode": "managed",
-      "hash": "89f5de681b89ac465afb59f2fa5abde898e22d278736e5a3497c748e7f271651"
+      "hash": "808abd1bbbc5cf45fe40811e425fe87b7a575368c4a81ff55c5efa6db41f0b12"
     },
     ".agentic/skill-baselines/compile-master-plan/assets/process-policy.yaml": {
       "mode": "managed",
@@ -149,7 +165,7 @@
     },
     ".agentic/skill-baselines/compile-master-plan/SKILL.md": {
       "mode": "managed",
-      "hash": "7fd4e835b0900b88aace2735b2e43c6a5bf880587ffe4e7217fa2b4e53c9bc98"
+      "hash": "e2535a32ec224e67fe209b7ef3f041e2a8b27f5b79ee1d2646fb4be609ec1cd5"
     },
     ".agentic/skill-baselines/diagnose/SKILL.md": {
       "mode": "managed",
@@ -165,7 +181,7 @@
     },
     ".agentic/skill-baselines/execute-frontier/SKILL.md": {
       "mode": "managed",
-      "hash": "3ae9b4962385ec57545f71e06ae98b74b9aa6c70a4629d7415242ea0080c7127"
+      "hash": "42a428e51e7db231051ee1de61c909db538f9349db4171c00bea004ce3e5ed49"
     },
     ".agentic/skill-baselines/frontier-loop/agents/openai.yaml": {
       "mode": "managed",
@@ -325,7 +341,7 @@
     },
     ".agentic/skill-baselines/retrofit-ticket-pack/scripts/retrofit_tickets.py": {
       "mode": "managed",
-      "hash": "d0e8ec700a428db0d1541f47f2d7fa0f9b61bc0a969856f1f2b5c5c367236143"
+      "hash": "8812af0c293d43f2ab53428c965a2e3600651969e1388ac965bc4de1266a0984"
     },
     ".agentic/skill-baselines/retrofit-ticket-pack/SKILL.md": {
       "mode": "managed",
@@ -441,7 +457,7 @@
     },
     ".agentic/skills.lock.json": {
       "mode": "managed",
-      "hash": "d2b143002cb455d79143089c4e49da9e1c8717b188f9644529341e555f6416dc"
+      "hash": "1dcdd7394905dacdb907723d544d72a2b27b7f572221d1913e43c30193baf7c5"
     },
     ".agentic/skills/compile-master-plan/agents/openai.yaml": {
       "mode": "managed",
@@ -461,7 +477,7 @@
     },
     ".agentic/skills/compile-master-plan/assets/model-routing.yaml": {
       "mode": "managed",
-      "hash": "89f5de681b89ac465afb59f2fa5abde898e22d278736e5a3497c748e7f271651"
+      "hash": "808abd1bbbc5cf45fe40811e425fe87b7a575368c4a81ff55c5efa6db41f0b12"
     },
     ".agentic/skills/compile-master-plan/assets/process-policy.yaml": {
       "mode": "managed",
@@ -497,7 +513,7 @@
     },
     ".agentic/skills/compile-master-plan/SKILL.md": {
       "mode": "managed",
-      "hash": "7fd4e835b0900b88aace2735b2e43c6a5bf880587ffe4e7217fa2b4e53c9bc98"
+      "hash": "e2535a32ec224e67fe209b7ef3f041e2a8b27f5b79ee1d2646fb4be609ec1cd5"
     },
     ".agentic/skills/diagnose/SKILL.md": {
       "mode": "managed",
@@ -513,7 +529,7 @@
     },
     ".agentic/skills/execute-frontier/SKILL.md": {
       "mode": "managed",
-      "hash": "3ae9b4962385ec57545f71e06ae98b74b9aa6c70a4629d7415242ea0080c7127"
+      "hash": "42a428e51e7db231051ee1de61c909db538f9349db4171c00bea004ce3e5ed49"
     },
     ".agentic/skills/frontier-loop/agents/openai.yaml": {
       "mode": "managed",
@@ -673,7 +689,7 @@
     },
     ".agentic/skills/retrofit-ticket-pack/scripts/retrofit_tickets.py": {
       "mode": "managed",
-      "hash": "d0e8ec700a428db0d1541f47f2d7fa0f9b61bc0a969856f1f2b5c5c367236143"
+      "hash": "8812af0c293d43f2ab53428c965a2e3600651969e1388ac965bc4de1266a0984"
     },
     ".agentic/skills/retrofit-ticket-pack/SKILL.md": {
       "mode": "managed",
@@ -793,7 +809,7 @@
     },
     ".agents/skills/.managed-by-workspace-template.json": {
       "mode": "managed",
-      "hash": "4fa17926773faafd9d9f3deda57621e04d934d3ee872389186fe51230f4fe8a1"
+      "hash": "de92d38e2144a3087db245a1fec99619c506e9638eb73f45a68711b15bca0eed"
     },
     ".agents/skills/compile-master-plan/agents/openai.yaml": {
       "mode": "managed",
@@ -813,7 +829,7 @@
     },
     ".agents/skills/compile-master-plan/assets/model-routing.yaml": {
       "mode": "managed",
-      "hash": "89f5de681b89ac465afb59f2fa5abde898e22d278736e5a3497c748e7f271651"
+      "hash": "808abd1bbbc5cf45fe40811e425fe87b7a575368c4a81ff55c5efa6db41f0b12"
     },
     ".agents/skills/compile-master-plan/assets/process-policy.yaml": {
       "mode": "managed",
@@ -849,7 +865,7 @@
     },
     ".agents/skills/compile-master-plan/SKILL.md": {
       "mode": "managed",
-      "hash": "7fd4e835b0900b88aace2735b2e43c6a5bf880587ffe4e7217fa2b4e53c9bc98"
+      "hash": "e2535a32ec224e67fe209b7ef3f041e2a8b27f5b79ee1d2646fb4be609ec1cd5"
     },
     ".agents/skills/diagnose/SKILL.md": {
       "mode": "managed",
@@ -865,7 +881,7 @@
     },
     ".agents/skills/execute-frontier/SKILL.md": {
       "mode": "managed",
-      "hash": "3ae9b4962385ec57545f71e06ae98b74b9aa6c70a4629d7415242ea0080c7127"
+      "hash": "42a428e51e7db231051ee1de61c909db538f9349db4171c00bea004ce3e5ed49"
     },
     ".agents/skills/frontier-loop/agents/openai.yaml": {
       "mode": "managed",
@@ -1025,7 +1041,7 @@
     },
     ".agents/skills/retrofit-ticket-pack/scripts/retrofit_tickets.py": {
       "mode": "managed",
-      "hash": "d0e8ec700a428db0d1541f47f2d7fa0f9b61bc0a969856f1f2b5c5c367236143"
+      "hash": "8812af0c293d43f2ab53428c965a2e3600651969e1388ac965bc4de1266a0984"
     },
     ".agents/skills/retrofit-ticket-pack/SKILL.md": {
       "mode": "managed",
@@ -1189,7 +1205,7 @@
     },
     ".opencode/prompts/frontier-loop/orchestrator.txt": {
       "mode": "managed",
-      "hash": "02b3add9a0885e9267db70a920733d64a4d9e9189257f7030df41190b8a10921"
+      "hash": "059331844e5f89c4463430052c9fa54baa87f5c0de62e2de90764964a3a271ad"
     },
     ".opencode/prompts/frontier-loop/planner.txt": {
       "mode": "managed",
@@ -1217,7 +1233,7 @@
     },
     ".opencode/skills/.managed-by-workspace-template.json": {
       "mode": "managed",
-      "hash": "4fa17926773faafd9d9f3deda57621e04d934d3ee872389186fe51230f4fe8a1"
+      "hash": "de92d38e2144a3087db245a1fec99619c506e9638eb73f45a68711b15bca0eed"
     },
     ".opencode/skills/compile-master-plan/agents/openai.yaml": {
       "mode": "managed",
@@ -1237,7 +1253,7 @@
     },
     ".opencode/skills/compile-master-plan/assets/model-routing.yaml": {
       "mode": "managed",
-      "hash": "89f5de681b89ac465afb59f2fa5abde898e22d278736e5a3497c748e7f271651"
+      "hash": "808abd1bbbc5cf45fe40811e425fe87b7a575368c4a81ff55c5efa6db41f0b12"
     },
     ".opencode/skills/compile-master-plan/assets/process-policy.yaml": {
       "mode": "managed",
@@ -1273,7 +1289,7 @@
     },
     ".opencode/skills/compile-master-plan/SKILL.md": {
       "mode": "managed",
-      "hash": "7fd4e835b0900b88aace2735b2e43c6a5bf880587ffe4e7217fa2b4e53c9bc98"
+      "hash": "e2535a32ec224e67fe209b7ef3f041e2a8b27f5b79ee1d2646fb4be609ec1cd5"
     },
     ".opencode/skills/diagnose/SKILL.md": {
       "mode": "managed",
@@ -1289,7 +1305,7 @@
     },
     ".opencode/skills/execute-frontier/SKILL.md": {
       "mode": "managed",
-      "hash": "3ae9b4962385ec57545f71e06ae98b74b9aa6c70a4629d7415242ea0080c7127"
+      "hash": "42a428e51e7db231051ee1de61c909db538f9349db4171c00bea004ce3e5ed49"
     },
     ".opencode/skills/frontier-loop/agents/openai.yaml": {
       "mode": "managed",
@@ -1449,7 +1465,7 @@
     },
     ".opencode/skills/retrofit-ticket-pack/scripts/retrofit_tickets.py": {
       "mode": "managed",
-      "hash": "d0e8ec700a428db0d1541f47f2d7fa0f9b61bc0a969856f1f2b5c5c367236143"
+      "hash": "8812af0c293d43f2ab53428c965a2e3600651969e1388ac965bc4de1266a0984"
     },
     ".opencode/skills/retrofit-ticket-pack/SKILL.md": {
       "mode": "managed",
@@ -1621,7 +1637,8 @@
     },
     "opencode.json": {
       "mode": "managed",
-      "hash": "0d82d9d1ebac5d5c48e2ea921d19a405ee4b14500df2c3a691608d8fd5b54df4"
+      "hash": "aaee6b379c4484db681821a25163aba7c4d81e0518cb39932e7f92cc9084f25a"
     }
-  }
+  },
+  "settings": {}
 }

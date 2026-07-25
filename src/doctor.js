@@ -231,7 +231,7 @@ async function validateManagedFiles(root, report) {
     report.errors.push("managed-files.json is not owned by workspace-template");
     return manifest;
   }
-  if (![1, 2].includes(manifest.version)) report.errors.push(`unsupported managed-files version ${manifest.version}`);
+  if (![1, 2, 3].includes(manifest.version)) report.errors.push(`unsupported managed-files version ${manifest.version}`);
   for (const [relative, record] of Object.entries(manifest.files ?? {})) {
     const target = path.join(root, relative);
     if (!isPathInside(root, target)) {

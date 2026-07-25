@@ -994,6 +994,38 @@ This is a source-grounded migration map. It recovers the current route from pres
     }
     return map_text, frontier_yaml
 
+def active_model_policy(track: Path) -> dict[str, Any]:
+    for candidate in [track, *track.parents]:
+        config_path = candidate / ".agentic" / "config.json"
+        if not config_path.exists():
+            continue
+        try:
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            preset = config.get("execution", {}).get("preset", {})
+            roles = preset.get("roles", {})
+            expanded = {}
+            for role, route in roles.items():
+                targets = route.get("targets", {})
+                expanded[role] = {
+                    "preferred": targets.get("codex") or targets.get("opencode") or "UNRESOLVED",
+                    "effort": route.get("reasoningEffort", "UNRESOLVED"),
+                }
+            return {
+                "schema_version": 2,
+                "preset": preset.get("id", "UNRESOLVED"),
+                "source": ".agentic/policies/model-routing.yaml",
+                "roles": expanded,
+            }
+        except (OSError, ValueError, TypeError):
+            break
+    return {
+        "schema_version": 2,
+        "preset": "UNRESOLVED",
+        "source": ".agentic/policies/model-routing.yaml",
+        "roles": {},
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("track", type=Path, help="Existing ticket-track directory")
@@ -1213,16 +1245,7 @@ Every required implementation ticket is passed and serially landed; tracker tick
             "max_subagents": 3,
             "max_write_agents": 1,
         },
-        "model-routing.yaml": {
-            "schema_version": 1,
-            "orchestrator": {"preferred": "gpt-5.6-sol", "effort": "high"},
-            "planner": {"preferred": "gpt-5.6-sol", "effort": "high"},
-            "scout": {"preferred": "gpt-5.3-codex", "effort": "high"},
-            "implementer": {"preferred": "gpt-5.3-codex", "effort": "high"},
-            "reviewer": {"preferred": "gpt-5.3-codex", "effort": "high"},
-            "repairer": {"preferred": "gpt-5.3-codex", "effort": "high"},
-            "integrator": {"preferred": "gpt-5.3-codex", "effort": "high"},
-        },
+        "model-routing.yaml": active_model_policy(track),
     }
     for name, data in policies.items():
         write_generated(

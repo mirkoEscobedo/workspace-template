@@ -67,13 +67,11 @@ Use the templates and schema in `assets/` and `schemas/`.
 9. Generate the initial `frontier.json` from true dependencies and status.
 10. Validate schema, missing blockers, cycles, duplicate IDs, and executable tracker parents.
 
-## Default model routing
+## Active model routing
 
-Generate policy with:
-
-- coordinator/orchestrator: `gpt-5.6-sol`, high;
-- planner: `gpt-5.6-sol`, high;
-- every scout, implementer, reviewer, repairer, and integrator: `gpt-5.3-codex`, high.
+Read `.agentic/policies/model-routing.yaml` and copy its active preset and
+expanded role routing into the track policy. Never substitute model names from
+memory or from this skill.
 
 ## Master-plan requirements
 

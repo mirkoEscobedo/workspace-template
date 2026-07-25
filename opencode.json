@@ -9,7 +9,7 @@
   },
   "agent": {
     "frontier-orchestrator": {
-      "description": "Primary Sol-high coordinator for continuous local Frontier execution.",
+      "description": "Primary coordinator for continuous local Frontier execution.",
       "mode": "primary",
       "model": "openai/gpt-5.6-sol",
       "reasoningEffort": "high",
@@ -19,9 +19,14 @@
         "bash": "allow",
         "task": {
           "*": "deny",
-          "frontier-*": "allow",
-          "ticket-*": "allow",
-          "reviewer-*": "allow"
+          "frontier-planner": "allow",
+          "frontier-scout": "allow",
+          "ticket-implementer": "allow",
+          "reviewer-spec-authority": "allow",
+          "reviewer-code-test": "allow",
+          "reviewer-operations-security": "allow",
+          "ticket-repairer": "allow",
+          "frontier-integrator": "allow"
         },
         "skill": "allow",
         "external_directory": "deny"

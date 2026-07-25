@@ -8,8 +8,8 @@
     "compile-master-plan": {
       "path": ".agentic/skills/compile-master-plan",
       "baselinePath": ".agentic/skill-baselines/compile-master-plan",
-      "baselineHash": "461db9af3a4e3152f4fa3a0d68b8f3bdc33eed8bd2039fc4eef8b3647917205f",
-      "installedHash": "461db9af3a4e3152f4fa3a0d68b8f3bdc33eed8bd2039fc4eef8b3647917205f",
+      "baselineHash": "d57756c3abe095e16344d18f88045344190590e587de258f79d610278cc07ef6",
+      "installedHash": "d57756c3abe095e16344d18f88045344190590e587de258f79d610278cc07ef6",
       "localEditsAllowed": true,
       "files": {
         "agents/openai.yaml": {
@@ -29,8 +29,8 @@
           "installedHash": "467485fda383a41c29d23f5c6b733b69f3876411437cd72931fe9e93fa58bfa4"
         },
         "assets/model-routing.yaml": {
-          "baselineHash": "89f5de681b89ac465afb59f2fa5abde898e22d278736e5a3497c748e7f271651",
-          "installedHash": "89f5de681b89ac465afb59f2fa5abde898e22d278736e5a3497c748e7f271651"
+          "baselineHash": "808abd1bbbc5cf45fe40811e425fe87b7a575368c4a81ff55c5efa6db41f0b12",
+          "installedHash": "808abd1bbbc5cf45fe40811e425fe87b7a575368c4a81ff55c5efa6db41f0b12"
         },
         "assets/process-policy.yaml": {
           "baselineHash": "37c5de57923eaf2a6fe8d91eaf19d43c50d0a8a4760d842187a0c8c7f54d771c",
@@ -65,8 +65,8 @@
           "installedHash": "2091390077ae1c209e4e0c9417b069be1194ec80311cd9672629f2cd05c26e9a"
         },
         "SKILL.md": {
-          "baselineHash": "7fd4e835b0900b88aace2735b2e43c6a5bf880587ffe4e7217fa2b4e53c9bc98",
-          "installedHash": "7fd4e835b0900b88aace2735b2e43c6a5bf880587ffe4e7217fa2b4e53c9bc98"
+          "baselineHash": "e2535a32ec224e67fe209b7ef3f041e2a8b27f5b79ee1d2646fb4be609ec1cd5",
+          "installedHash": "e2535a32ec224e67fe209b7ef3f041e2a8b27f5b79ee1d2646fb4be609ec1cd5"
         }
       }
     },
@@ -86,8 +86,8 @@
     "execute-frontier": {
       "path": ".agentic/skills/execute-frontier",
       "baselinePath": ".agentic/skill-baselines/execute-frontier",
-      "baselineHash": "751b914804b4815da5c6d7458d864999cdcc38f248c7febdcef794e63f0a9d0f",
-      "installedHash": "751b914804b4815da5c6d7458d864999cdcc38f248c7febdcef794e63f0a9d0f",
+      "baselineHash": "abdf06c3d2606cdc32c0717830d71a3cabe2ba7ceb63ffdf9edc9189c65787e8",
+      "installedHash": "abdf06c3d2606cdc32c0717830d71a3cabe2ba7ceb63ffdf9edc9189c65787e8",
       "localEditsAllowed": true,
       "files": {
         "agents/openai.yaml": {
@@ -99,8 +99,8 @@
           "installedHash": "025e878e003083a0c91cae8e73bad7d65537a8e69fe19a42db00086994aa582d"
         },
         "SKILL.md": {
-          "baselineHash": "3ae9b4962385ec57545f71e06ae98b74b9aa6c70a4629d7415242ea0080c7127",
-          "installedHash": "3ae9b4962385ec57545f71e06ae98b74b9aa6c70a4629d7415242ea0080c7127"
+          "baselineHash": "42a428e51e7db231051ee1de61c909db538f9349db4171c00bea004ce3e5ed49",
+          "installedHash": "42a428e51e7db231051ee1de61c909db538f9349db4171c00bea004ce3e5ed49"
         }
       }
     },
@@ -309,8 +309,8 @@
     "retrofit-ticket-pack": {
       "path": ".agentic/skills/retrofit-ticket-pack",
       "baselinePath": ".agentic/skill-baselines/retrofit-ticket-pack",
-      "baselineHash": "226e06920bcd177978b2e1b1391f5d47af20fa44f584a7e63138fb3508bc27e1",
-      "installedHash": "226e06920bcd177978b2e1b1391f5d47af20fa44f584a7e63138fb3508bc27e1",
+      "baselineHash": "8579ef24c6a499f6917001a274854adc87827087435dcbdb26f70e83419e925a",
+      "installedHash": "8579ef24c6a499f6917001a274854adc87827087435dcbdb26f70e83419e925a",
       "localEditsAllowed": true,
       "files": {
         "agents/openai.yaml": {
@@ -322,8 +322,8 @@
           "installedHash": "83cdad726860969826ec16fbfb0f3f40783d4fad5e1d12c7d55873700e8da648"
         },
         "scripts/retrofit_tickets.py": {
-          "baselineHash": "d0e8ec700a428db0d1541f47f2d7fa0f9b61bc0a969856f1f2b5c5c367236143",
-          "installedHash": "d0e8ec700a428db0d1541f47f2d7fa0f9b61bc0a969856f1f2b5c5c367236143"
+          "baselineHash": "8812af0c293d43f2ab53428c965a2e3600651969e1388ac965bc4de1266a0984",
+          "installedHash": "8812af0c293d43f2ab53428c965a2e3600651969e1388ac965bc4de1266a0984"
         },
         "SKILL.md": {
           "baselineHash": "fae986b28b16bfd1ce58ab5bbb8ba4377496d30b9c3e95024ac58ecd93b904bd",

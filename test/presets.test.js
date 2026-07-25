@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { describe, it } from "node:test";
 import { createProject } from "../src/create.js";
+import { doctorProject } from "../src/doctor.js";
 import { exists, readJson, writeJson } from "../src/fs-utils.js";
 import {
   applyPresetPlan,
@@ -80,6 +81,7 @@ describe("agent preset catalog and switching", () => {
     assert.equal(toSplit.canApply, true);
     assert.equal(toSplit.metadata.previousPreset, "sol-only");
     await applyPresetPlan(toSplit);
+    assert.equal((await doctorProject(root)).ok, true);
     assert.deepEqual(await presetStatus(root), {
       root,
       activeId: "sol-codex",

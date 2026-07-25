@@ -1,32 +1,6 @@
-schema_version: 1
-roles:
-  orchestrator:
-    preferred: gpt-5.6-sol
-    reasoning: high
-  planner:
-    preferred: gpt-5.6-sol
-    reasoning: high
-  scout:
-    preferred: gpt-5.3-codex
-    reasoning: high
-  implementer:
-    preferred: gpt-5.3-codex
-    reasoning: high
-  reviewer_spec_authority:
-    preferred: gpt-5.3-codex
-    reasoning: high
-  reviewer_code_test:
-    preferred: gpt-5.3-codex
-    reasoning: high
-  reviewer_operations_security:
-    preferred: gpt-5.3-codex
-    reasoning: high
-  repairer:
-    preferred: gpt-5.3-codex
-    reasoning: high
-  integrator:
-    preferred: gpt-5.3-codex
-    reasoning: high
+schema_version: 2
+source: .agentic/policies/model-routing.yaml
+preset: UNRESOLVED
+roles: {}
 notes:
-  - Keep separate contexts and permissions even when multiple roles use the same model.
-  - Change defaults only after representative ticket evals and a reviewed policy update.
+  - Copy the reviewed active preset routing instead of inventing model assignments.

@@ -10,13 +10,12 @@ metadata:
 
 Frontier is the default and only execution workflow. The coordinator reads local files, selects the next safe work, dispatches bounded roles when available, serially lands passed work, recomputes the frontier, and continues until completion or a real stop condition.
 
-## Default role routing
+## Active role routing
 
-- coordinator/orchestrator: `gpt-5.6-sol`, high reasoning;
-- planner: `gpt-5.6-sol`, high reasoning;
-- scout, implementer, reviewers, repairer, and integrator: `gpt-5.3-codex`, high reasoning.
-
-Repository policy may override a role only through an explicit, reviewed configuration change.
+Read `.agentic/policies/model-routing.yaml` before dispatching work. It records
+the active versioned preset and the expanded model and reasoning assignment for
+each role. Repository policy may change routing only through a reviewed preset
+activation.
 
 ## Scheduler invariant
 
@@ -34,9 +33,9 @@ ready = status == ready
 
 Start with:
 
-- one Sol-high coordinator in the current conversation;
-- one write-capable Codex-high worker;
-- up to two read-only Codex-high scouts or reviewers;
+- one coordinator in the current conversation;
+- one write-capable implementation worker;
+- up to two read-only scouts or reviewers;
 - serial integration and commits.
 
 Enable a second writer only after measured clean operation and only for Lane 0–2 tickets with disjoint write sets, disjoint conflict keys, isolated worktrees, and no shared schema, root manifest, generated registry, migration order, central fixture, or authority state machine.
