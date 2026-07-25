@@ -26,11 +26,10 @@ The self-check validates:
 
 - package/internal version consistency;
 - published package file declarations;
-- 17 repository skills and the one self-contained ChatGPT skill;
+- 17 repository skills;
 - skill frontmatter, names, local links/resources, and eval JSON where present;
 - JavaScript syntax across source, binary, scripts, and tests;
 - non-scaffold internal JavaScript imports;
-- required ChatGPT Wayfinder sections;
 - no runtime PyYAML import in standalone Python tooling;
 - Python syntax when Python is present;
 - Sol-high/Codex-high Codex and OpenCode routing;
@@ -50,8 +49,7 @@ The Node suite covers:
 - worktree/copy checkpoints and file restoration;
 - conservative JavaScript/TypeScript, Rust, and Dart reference rewrite planning plus target restoration;
 - architecture assessment, bounded slice planning, manual/command executor behavior, actual-diff guards, task-by-task resume, final verification, and restoration;
-- dependency-free Python docs/ticket/budget scripts under `python -S`;
-- ChatGPT/repository Wayfinder separation and public module import integrity.
+- dependency-free Python docs/ticket/budget scripts under `python -S`.
 
 ## Python tooling
 
@@ -69,7 +67,7 @@ They used the bundled `_mini_yaml.py` fallback. PyYAML is not required. Release 
 npm pack --dry-run --json
 ```
 
-Result: **pass**. The dry run produced 230 publishable entries and included the executable, runtime modules, harness configurations, project templates, 17 repository skills, process/retrofit scripts, tooling-pack catalog, self-contained ChatGPT skill, Markdown/HTML documentation, and the versioned retrofit plan. Tests, GitHub workflow files, caches, bytecode, and local tarballs are excluded.
+Result: **pass**. The dry run produced 230 publishable entries and included the executable, runtime modules, harness configurations, project templates, 17 repository skills, process/retrofit scripts, tooling-pack catalog, Markdown/HTML documentation, and the versioned retrofit plan. Tests, GitHub workflow files, caches, bytecode, and local tarballs are excluded.
 
 ## Actual tarball smoke test
 

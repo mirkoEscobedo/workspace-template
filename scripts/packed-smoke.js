@@ -68,7 +68,7 @@ const invokeJson = (args, options = {}) => runJson(process.execPath, [cli, ...ar
 assert.equal(invoke(["--version"]).stdout.trim(), "0.6.0");
 
 // The actual packed payload must include the runtime, modular repository skills,
-// the self-contained ChatGPT skill, operational scripts, and release docs.
+// operational scripts, and release docs.
 for (const relative of [
   "src/index.js",
   "src/tooling/apply.js",
@@ -77,7 +77,6 @@ for (const relative of [
   "assets/skills/wayfinder/SKILL.md",
   "assets/skills/execute-frontier/SKILL.md",
   "assets/scripts/managed_command.py",
-  "chatgpt-skills/wayfinder-planner/SKILL.md",
   "docs/usage.md",
   "docs/guides/frontier-loop-user-guide.html",
 ]) {

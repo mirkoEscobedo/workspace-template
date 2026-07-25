@@ -135,7 +135,6 @@
       <li><a href="#models">Models and subagents</a></li>
       <li><a href="#codex">Codex configuration</a></li>
       <li><a href="#opencode">OpenCode configuration</a></li>
-      <li><a href="#chatgpt">ChatGPT Wayfinder</a></li>
       <li><a href="#workspace">Monorepos and verification</a></li>
       <li><a href="#tooling">Tooling transactions</a></li>
       <li><a href="#skills">Skill upgrades</a></li>
@@ -331,24 +330,6 @@ hooks = true</code></pre>
       <h2>9. OpenCode setup</h2>
       <p><code>opencode.json</code> and <code>.opencode/prompts/frontier-loop/</code> define the equivalent role split, models, prompts, step limits, and tool permissions. The orchestrator can call approved roles. Read-only roles cannot edit. Write workers cannot recursively create a new writer tree.</p>
       <p>OpenCode discovers projected Agent Skills under <code>.opencode/skills/</code> and the shared <code>.agents/skills/</code> path. Replace model IDs only when your configured provider exposes different identifiers.</p>
-    </section>
-
-    <section id="chatgpt">
-      <h2>10. Install the ChatGPT Wayfinder skill</h2>
-      <p>The ChatGPT edition is deliberately a single self-contained file:</p>
-      <pre><code>chatgpt-skills/wayfinder-planner/SKILL.md</code></pre>
-      <ol>
-        <li>Create or keep a folder named <code>wayfinder-planner</code>.</li>
-        <li>Place the supplied <code>SKILL.md</code> inside it.</li>
-        <li>In ChatGPT, open <strong>Skills</strong>, select <strong>+</strong>, then <strong>Upload from your computer</strong>.</li>
-        <li>Upload the folder/ZIP prepared by the release or the skill file in the structure accepted by the UI.</li>
-      </ol>
-      <p>Use it to capture planning in the conversation first:</p>
-      <pre><code>Use Wayfinder Planner for this effort. Maintain the visible planning ledger,
-distinguish source-backed facts, my decisions, and your inferences, and keep
-route-changing questions open as fog. When stable, compile the master plan and
-produce the local execution handoff.</code></pre>
-      <div class="callout"><strong>Do not install the repository edition in its place.</strong> The repository Wayfinder expects companion skills and durable local paths; the ChatGPT edition includes the compiler/templates inline.</div>
     </section>
 
     <section id="workspace">

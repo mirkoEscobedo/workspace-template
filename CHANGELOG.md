@@ -10,7 +10,6 @@ All notable changes to this package are documented here.
 - Added separate repository skills for Wayfinder planning, master-plan compilation, dependency-frontier execution, ticket implementation, independent review axes, targeted repair, neutral integration, test topology, process lifecycle, documentation retrofit, and ticket-pack retrofit.
 - Preserved the useful executor → reviewer → repair-until-pass discipline while allowing read-only planning and review work to run concurrently and keeping one writer by default.
 - Added risk lanes, conflict keys, expected write sets, verification levels, architecture budgets, authority gates, and stop/split conditions to ticket contracts.
-- Added a single-file `chatgpt-skills/wayfinder-planner/SKILL.md` for ChatGPT’s Skills interface. The repository Wayfinder remains modular and hands stable maps to `compile-master-plan`.
 
 ### Models and harnesses
 
@@ -39,13 +38,13 @@ All notable changes to this package are documented here.
 - Added managed command leases, process-group/Windows Job Object ownership, deadlines, bounded output, and zero-descendant completion checks.
 - Added architecture/test-file ratchets and megafile no-growth policies.
 - Added dependency-free Python fallback parsing for all installed retrofit/budget scripts; PyYAML is no longer required.
-- Expanded source tests to persisted-plan round trips, monorepo adoption, package-manager authority/rollback, skill-update merge/risk cases, checkpoint recovery, source restructuring, architecture alignment, Python fallback execution, and ChatGPT skill separation.
+- Expanded source tests to persisted-plan round trips, monorepo adoption, package-manager authority/rollback, skill-update merge/risk cases, checkpoint recovery, source restructuring, architecture alignment, Python fallback execution.
 - Added an actual packed-tarball smoke test covering creation, adoption, workspace verification, offline local-package installation, mechanical restructuring, skill update inspection, and the manual alignment stop gate.
 
 ### Documentation and release
 
 - Added a complete usage guide, Frontier/advanced-operation architecture guides, a self-contained HTML user guide, updated security and validation records, and the original retrofit program plan under `docs/plans/`.
-- Package contents now include the ChatGPT skill and release documentation.
+- Package contents now include the release documentation.
 
 ## 0.1.0 — 2026-07-11
 

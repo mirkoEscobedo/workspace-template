@@ -187,10 +187,6 @@ human/contradiction/safety gate.
 
 Frontier does not require an issue tracker. A repository may mirror contracts into issues later, but local files remain sufficient.
 
-### ChatGPT planning edition
-
-Upload `chatgpt-skills/wayfinder-planner/SKILL.md` through ChatGPT’s Skills interface. That single file contains the visible conversation ledger, planning procedure, master-plan compiler, ticket/validation templates, retrofit behavior, and execution handoff. It intentionally does not depend on repository companion files.
-
 ## 5. Configure Codex and OpenCode
 
 Generated defaults:

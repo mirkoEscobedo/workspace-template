@@ -111,14 +111,9 @@ The coordinator may continue through all ordinary local tickets in one conversat
 
 Generated Codex roles are under `.codex/agents/`; generated OpenCode role prompts are under `.opencode/prompts/frontier-loop/`. Planners and reviewers are read-only. Write access is limited to implementation, repair, and integration roles. The default child-agent cap is three.
 
-## ChatGPT Wayfinder
+## Wayfinder
 
-The repository contains two deliberately different Wayfinder editions:
-
-- `chatgpt-skills/wayfinder-planner/SKILL.md` is a single self-contained file for ChatGPT’s Skills interface. It includes conversational planning, the visible ledger, route stabilization, master-plan compilation, ticket templates, retrofit behavior, and the handoff to local execution.
 - `assets/skills/wayfinder/SKILL.md` is the modular repository edition. It writes durable planning artifacts and delegates ticket compilation to `compile-master-plan`.
-
-The ChatGPT file can be placed in a `wayfinder-planner/` folder and uploaded from **Skills → + → Upload from your computer**.
 
 ## Generated project shape
 

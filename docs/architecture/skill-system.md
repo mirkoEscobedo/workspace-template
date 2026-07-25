@@ -7,7 +7,6 @@
 - a clear separation between planning, execution, review, repair, integration, testing, process safety, and migration;
 - deterministic validation and project-owned upgrade baselines;
 - conflict-safe projections into several harnesses;
-- one self-contained ChatGPT planning skill where repository companion files are unavailable.
 
 ## Durable layers
 
@@ -90,23 +89,13 @@ A projection is writable only when absent, hash-identical and explicitly adopted
 
 The catalog contains 17 canonical skill directories in this release.
 
-## ChatGPT versus repository Wayfinder
-
-These are intentionally different products:
-
-```text
-chatgpt-skills/wayfinder-planner/SKILL.md
-```
-
-is one self-contained file for ChatGPT’s Skills UI. It includes the visible conversation ledger, planning questions, evidence/decision/fog handling, Wayfinder exit criteria, master-plan compilation, ticket/validation/contract templates, retrofit behavior, model routing, and local execution handoff. It cannot assume repository companion resources.
+## Wayfinder
 
 ```text
 assets/skills/wayfinder/SKILL.md
 ```
 
-is the modular repository edition. It writes `docs/agent/wayfinding/<effort>/map.md`, `frontier.yaml`, and supporting decision/research/prototype artifacts, then hands stable planning results to `compile-master-plan`.
-
-The single-file ChatGPT edition should not replace the modular repository catalog.
+ It writes `docs/agent/wayfinding/<effort>/map.md`, `frontier.yaml`, and supporting decision/research/prototype artifacts, then hands stable planning results to `compile-master-plan`.
 
 ## Frontier orchestration
 
