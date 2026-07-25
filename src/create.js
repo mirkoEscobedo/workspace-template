@@ -14,7 +14,7 @@ import {
 } from "./fs-utils.js";
 import { dartPackageName, displayNameFromTarget, npmName, rustCrateName } from "./names.js";
 import { createProfile, profileSchema } from "./profile.js";
-import { commandExists, runCommand } from "./process-utils.js";
+import { commandExists, runCommandAsync } from "./process-utils.js";
 import { createScaffold, scaffoldStructure } from "./scaffolds/index.js";
 import { generatedReadme } from "./scaffolds/shared.js";
 import { syncSkills } from "./sync.js";
@@ -36,6 +36,59 @@ import {
 
 function jsonBuffer(value) {
   return Buffer.from(`${JSON.stringify(value, null, 2)}\n`, "utf8");
+}
+
+const DEFAULT_COMMAND_TIMEOUT_MS = 15 * 60 * 1000;
+const DEFAULT_COMMAND_OUTPUT_BYTES = 100_000;
+
+function formatCommandFailure(command, args, result) {
+  const prefix = `${command} ${args.join(" ")}`;
+  if (result?.error) return `${prefix} failed to start: ${String(result.error.message ?? result.error)}`;
+  if (result?.timedOut) return `${prefix} timed out after ${result.durationMs ?? "unknown"}ms`;
+  if (result?.status !== 0) {
+    const detail = (result.stdout || result.stderr) ? `\n${result.stdout || ""}${result.stderr || ""}`.trim() : "";
+    return `${prefix} exited with code ${result.status}.${detail ? ` ${detail}` : ""}`;
+  }
+  return `${prefix} failed`;
+}
+
+async function runCreateCommand(command, args, options = {}) {
+  const result = await (options.runner ?? runCommandAsync)(command, args, {
+    cwd: options.cwd,
+    timeout: options.timeout ?? DEFAULT_COMMAND_TIMEOUT_MS,
+    maxOutputBytes: options.maxOutputBytes ?? DEFAULT_COMMAND_OUTPUT_BYTES,
+    env: options.env,
+  });
+
+  if (result.error || result.status !== 0 || result.timedOut) {
+    throw new Error(formatCommandFailure(command, args, result));
+  }
+
+  return result;
+}
+
+function resolveCreateActions(options, warnings = []) {
+  const resolved = { ...options };
+  const isFlutterProject = options.project === "flutter";
+  if (options.yes && options.allowNetwork !== true) {
+    if (options.install && options.installExplicit !== true) {
+      resolved.install = false;
+      warnings.push("Install was skipped because --yes was used without --allow-network. Use --install --allow-network to run dependency install.");
+    }
+    if (isFlutterProject && options.bootstrap && options.bootstrapExplicit !== true) {
+      resolved.bootstrap = false;
+      warnings.push("Flutter bootstrap was skipped because --yes was used without --allow-network. Use --bootstrap --allow-network to run Flutter bootstrap.");
+    }
+  }
+  if (options.yes && !options.allowNetwork) {
+    if (resolved.install && options.installExplicit === true) {
+      throw new Error("--yes requires --allow-network to run dependency install in create.");
+    }
+    if (isFlutterProject && resolved.bootstrap && options.bootstrapExplicit === true) {
+      throw new Error("--yes requires --allow-network to run Flutter bootstrap in create.");
+    }
+  }
+  return resolved;
 }
 
 function editorConfig() {
@@ -97,7 +150,11 @@ async function bootstrapFlutter(root, packageName, options, warnings) {
     return;
   }
   if (!(await isDirectoryEmpty(root))) return;
-  runCommand("flutter", ["create", "--project-name", packageName, "--org", "com.example", "--no-pub", "."], { cwd: root });
+  await runCreateCommand(
+    "flutter",
+    ["create", "--project-name", packageName, "--org", "com.example", "--no-pub", "."],
+    { cwd: root, timeout: options.timeout },
+  );
   await removePath(path.join(root, "test", "widget_test.dart"));
 }
 
@@ -199,6 +256,7 @@ export async function createProject(options) {
   };
   context.commands = commandsFor(context.project, context.packageManager);
   const warnings = [];
+  const effectiveOptions = resolveCreateActions(options, warnings);
 
   const files = createScaffold(context);
   const structure = scaffoldStructure(context.project, context.style);
@@ -233,11 +291,11 @@ export async function createProject(options) {
       dryRun: true,
       plannedFiles,
       plannedCommands: [
-        options.project === "flutter" && options.bootstrap
+        effectiveOptions.project === "flutter" && effectiveOptions.bootstrap
           ? `flutter create --project-name ${context.dartPackageName} --org com.example --no-pub .`
           : undefined,
-        options.install && install ? `${install.command} ${install.args.join(" ")}` : undefined,
-        options.git ? "git init" : undefined,
+        effectiveOptions.install && install ? `${install.command} ${install.args.join(" ")}` : undefined,
+        effectiveOptions.git ? "git init" : undefined,
       ].filter(Boolean),
     };
   }
@@ -246,21 +304,28 @@ export async function createProject(options) {
     throw new Error(`Target directory is not empty: ${root}. Use adopt/retrofit for an existing repository, or --force only for an intentional overlay.`);
   }
   await ensureDirectory(root);
-  await bootstrapFlutter(root, context.dartPackageName, options, warnings);
+  await bootstrapFlutter(root, context.dartPackageName, effectiveOptions, warnings);
   await writeScaffoldFiles(root, files);
   await writeScaffoldFiles(root, generatedCommon);
   await writeArtifacts(root, artifacts);
   await syncSkills(root, context.agents);
 
-  if (options.install) {
+  if (effectiveOptions.install) {
     const install = packageInstallCommand(context.project, context.packageManager);
-    if (install && commandExists(install.command)) runCommand(install.command, install.args, { cwd: root });
+    if (install && commandExists(install.command)) {
+      await runCreateCommand(install.command, install.args, {
+        cwd: root,
+        timeout: options.timeout,
+      });
+    }
     else if (install) warnings.push(`${install.command} was not found. Dependencies/checks were not installed or run; use ${context.commands.setup} later.`);
   }
 
-  if (options.git) {
+  if (effectiveOptions.git) {
     if (!commandExists("git")) warnings.push("git was not found; repository was not initialized.");
-    else if (!(await exists(path.join(root, ".git")))) runCommand("git", ["init"], { cwd: root });
+    else if (!(await exists(path.join(root, ".git")))) {
+      await runCreateCommand("git", ["init"], { cwd: root, timeout: options.timeout });
+    }
   }
 
   return { root, context, warnings, dryRun: false, plannedFiles };

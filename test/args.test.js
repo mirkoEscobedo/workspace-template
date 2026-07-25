@@ -24,6 +24,27 @@ describe("parseArgs", () => {
     assert.deepEqual(parsed.options.agents, ["claude", "codex"]);
     assert.equal(parsed.options.install, false);
     assert.equal(parsed.options.agentsExplicit, true);
+    assert.equal(parsed.options.installExplicit, true);
+    assert.equal(parsed.options.gitExplicit, false);
+    assert.equal(parsed.options.bootstrapExplicit, false);
+  });
+
+  it("tracks explicit create action flags", () => {
+    const parsed = parseArgs([
+      "demo",
+      "--project",
+      "typescript",
+      "--install",
+      "--bootstrap",
+      "--git",
+    ]);
+
+    assert.equal(parsed.options.install, true);
+    assert.equal(parsed.options.bootstrap, true);
+    assert.equal(parsed.options.git, true);
+    assert.equal(parsed.options.installExplicit, true);
+    assert.equal(parsed.options.bootstrapExplicit, true);
+    assert.equal(parsed.options.gitExplicit, true);
   });
 
   it("uses the project config agent targets for sync unless --agents is explicit", () => {

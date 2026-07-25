@@ -113,6 +113,92 @@ describe("createProject", () => {
     assert.ok(result.plannedFiles.includes("Cargo.toml"));
   });
 
+  it("uses effective --yes rules in dry-run commands", async () => {
+    const temp = await mkdtemp(path.join(os.tmpdir(), "workspace-template-drysafe-"));
+    const target = path.join(temp, "flutter-app");
+    const result = await createProject({
+      ...options(target, "flutter"),
+      dryRun: true,
+      yes: true,
+      install: true,
+      bootstrap: true,
+      git: true,
+    });
+
+    assert.equal(result.dryRun, true);
+    assert.equal(await exists(target), false);
+    assert.equal(result.plannedCommands.includes("git init"), true);
+    assert.equal(result.plannedCommands.some((command) => command.startsWith("flutter create")), false);
+    assert.equal(result.plannedCommands.some((command) => command.startsWith("flutter")), false);
+  });
+
+  it("includes networked create commands in dry-run when --allow-network is set", async () => {
+    const temp = await mkdtemp(path.join(os.tmpdir(), "workspace-template-drysafe-net-"));
+    const target = path.join(temp, "flutter-app");
+    const result = await createProject({
+      ...options(target, "flutter"),
+      dryRun: true,
+      yes: true,
+      allowNetwork: true,
+      install: true,
+      bootstrap: true,
+      git: false,
+    });
+
+    assert.equal(result.plannedCommands.some((command) => command.startsWith("flutter create --project-name")), true);
+    assert.equal(result.plannedCommands.some((command) => command.startsWith("flutter pub get")), true);
+  });
+
+  it("suppresses networked create actions in --yes by default", async () => {
+    const temp = await mkdtemp(path.join(os.tmpdir(), "workspace-template-safe-mode-"));
+    const target = path.join(temp, "flutter-app");
+    const result = await createProject({
+      ...options(target, "flutter"),
+      yes: true,
+      install: true,
+      bootstrap: true,
+      git: false,
+    });
+
+    assert.match(result.warnings.join("\n"), /Install was skipped because --yes was used without --allow-network/);
+    assert.match(result.warnings.join("\n"), /Flutter bootstrap was skipped because --yes was used without --allow-network/);
+    assert.equal(await exists(path.join(target, "pubspec.yaml")), true);
+  });
+
+  it("rejects explicit networked create actions without --allow-network", async () => {
+    const temp = await mkdtemp(path.join(os.tmpdir(), "workspace-template-safe-mode-blocked-"));
+    const target = path.join(temp, "typescript-app");
+
+    await assert.rejects(
+      createProject({
+        ...options(target, "typescript"),
+        yes: true,
+        install: true,
+        installExplicit: true,
+      }),
+      /--yes requires --allow-network to run dependency install in create/,
+    );
+    assert.equal(await exists(target), false);
+  });
+
+  it("does not treat --bootstrap as networked for non-Flutter projects", async () => {
+    const temp = await mkdtemp(path.join(os.tmpdir(), "workspace-template-safe-mode-noflutter-bootstrap-"));
+    const target = path.join(temp, "typescript-app");
+
+    const result = await createProject({
+      ...options(target, "typescript"),
+      yes: true,
+      bootstrap: true,
+      bootstrapExplicit: true,
+      install: false,
+      dryRun: true,
+    });
+
+    assert.equal(result.dryRun, true);
+    assert.equal(result.warnings.some((warning) => warning.includes("Flutter bootstrap")), false);
+    assert.equal(result.plannedCommands.some((command) => command.startsWith("flutter create")), false);
+  });
+
   it("refuses a non-empty target without --force", async () => {
     const temp = await mkdtemp(path.join(os.tmpdir(), "workspace-template-existing-"));
     await writeFile(path.join(temp, "keep.txt"), "keep\n");

@@ -109,8 +109,11 @@ function defaultsFor(command, subcommand) {
       tdd: "pragmatic",
       packageManager: "npm",
       install: true,
+      installExplicit: false,
       git: true,
+      gitExplicit: false,
       bootstrap: true,
+      bootstrapExplicit: false,
       force: false,
       docs: true,
       tickets: true,
@@ -246,12 +249,12 @@ export function parseArgs(argv) {
       case "--tdd": options.tdd = valueFor().toLowerCase(); break;
       case "--package-manager": case "--pm": options.packageManager = valueFor().toLowerCase(); break;
       case "--agents": options.agents = parseAgents(valueFor()); options.agentsExplicit = true; break;
-      case "--install": options.install = true; break;
-      case "--no-install": options.install = false; break;
-      case "--git": options.git = true; break;
-      case "--no-git": options.git = false; break;
-      case "--bootstrap": options.bootstrap = true; break;
-      case "--no-bootstrap": options.bootstrap = false; break;
+      case "--install": options.install = true; options.installExplicit = true; break;
+      case "--no-install": options.install = false; options.installExplicit = true; break;
+      case "--git": options.git = true; options.gitExplicit = true; break;
+      case "--no-git": options.git = false; options.gitExplicit = true; break;
+      case "--bootstrap": options.bootstrap = true; options.bootstrapExplicit = true; break;
+      case "--no-bootstrap": options.bootstrap = false; options.bootstrapExplicit = true; break;
       case "--force": case "-f": options.force = true; break;
       case "--conflict": options.conflict = valueFor().toLowerCase(); break;
       case "--allow-dirty": options.allowDirty = true; break;

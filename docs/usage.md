@@ -42,6 +42,9 @@ npx workspace-template create inventory-api \
   --yes
 ```
 
+In `create`, `--yes` keeps scaffolding deterministic and defaults to suppressing networked actions (`install`, `flutter` bootstrap).
+Add `--allow-network` to run those steps in `--yes` mode.
+
 ### Project choices
 
 - `typescript`

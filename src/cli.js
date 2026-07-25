@@ -62,6 +62,10 @@ Projects:
 Create defaults:
   --style ${CREATE_STYLES.join("|")} (default functional-core)
   --tdd ${CREATE_TDD_MODES.join("|")} (default pragmatic)
+  --install | --no-install (default on)
+  --bootstrap | --no-bootstrap (default on)
+  --git | --no-git (default on)
+  --yes: suppresses default networked create actions unless --allow-network is also set
 
 Adopt defaults:
   --style ${ADOPT_STYLES.join("|")} (default preserve)
@@ -82,7 +86,9 @@ Shared advanced options:
 
 Tooling authority:
   --pack <name> --dependency <name[@version]> --kind development|runtime|build
-  --allow-network --allow-runtime --lifecycle-scripts deny|allow
+  --allow-network (for tooling install, and create when paired with --yes)
+  --allow-runtime
+  --lifecycle-scripts deny|allow
   --scripts propose|managed-block|fail|preserve
 
 Skill update authority:
