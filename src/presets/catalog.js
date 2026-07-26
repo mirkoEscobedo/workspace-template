@@ -106,7 +106,7 @@ export async function loadBuiltInPresets() {
 export async function loadPresetCatalog(rootDirectory, options = {}) {
   const root = path.resolve(rootDirectory);
   const installedBuiltIns = path.join(root, ".agentic", "presets", "builtin");
-  const builtIns = (await exists(installedBuiltIns))
+  const builtIns = (!options.preferPackageBuiltIns && await exists(installedBuiltIns))
     ? await loadPresetDirectory(installedBuiltIns, "builtin")
     : await loadBuiltInPresets();
   const local = await loadPresetDirectory(path.join(root, ".agentic", "presets", "local"), "local");

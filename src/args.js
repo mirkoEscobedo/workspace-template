@@ -27,6 +27,7 @@ const COMMANDS = new Set([
   "restructure",
   "align",
   "preset",
+  "upgrade",
 ]);
 
 const SUBCOMMANDS = Object.freeze({
@@ -193,6 +194,15 @@ function validateAdopt(options) {
 }
 
 function validateAdvanced(command, options) {
+  if (command === "upgrade") {
+    const selectedModes = [options.dryRun, options.planOut !== undefined, options.applyPlan !== undefined].filter(Boolean);
+    if (selectedModes.length > 1) throw new Error("upgrade accepts only one of --dry-run, --plan-out, or --apply-plan");
+    if (options.planOut === "") throw new Error("--plan-out path must not be empty");
+    if (options.partial) throw new Error("upgrade is atomic and does not support --partial");
+    if (options.applyPlan && (options.presetExplicit || options.allowDirty || options.allowRiskyToolChanges || options.allowSkillRemoval)) {
+      throw new Error("--apply-plan uses only authority sealed into the plan");
+    }
+  }
   if (command === "verify" && !["root", "module", "affected", "all"].includes(options.scope)) throw new Error("--scope must be root, module, affected, or all");
   if (command === "tooling") {
     if (!new Set(["plan", "install"]).has(options.subcommand)) throw new Error("tooling requires plan or install");
@@ -277,7 +287,14 @@ export function parseArgs(argv) {
       case "--current-ticket": options.currentTicket = valueFor(); break;
       case "--current-status": options.currentStatus = valueFor().toLowerCase(); break;
       case "--trust-current-dependencies": options.trustCurrentDependencies = true; break;
-      case "--plan-out": options.planOut = valueFor(); break;
+      case "--plan-out": {
+        if (command === "upgrade" && inlineValue === undefined && (tokens[index + 1] === undefined || tokens[index + 1].startsWith("-"))) {
+          options.planOut = true;
+        } else {
+          options.planOut = valueFor();
+        }
+        break;
+      }
       case "--apply-plan": options.applyPlan = valueFor(); break;
       case "--workspace": options.workspace = valueFor().toLowerCase(); break;
       case "--nested-instructions": options.nestedInstructions = valueFor().toLowerCase(); break;

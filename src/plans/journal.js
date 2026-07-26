@@ -39,10 +39,9 @@ export async function readJournal(root, planId) {
 }
 
 function completed(event) {
-  return event?.status === "completed"
-    || event?.state === "completed"
+  return event?.state === "completed"
     || event?.type === "completed"
-    || (event?.event === "finish" && event?.status !== "failed");
+    || (event?.event === "finish" && event?.status === "completed");
 }
 
 export async function assertNotApplied(root, planId) {

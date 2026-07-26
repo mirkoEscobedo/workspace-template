@@ -36,7 +36,7 @@ Use local repository files as execution authority. GitHub issues, webhooks, and 
 1. Use `wayfinder` while a route-changing decision remains unresolved.
 2. Use `compile-master-plan` to create vertical ticket contracts, dependencies, risk lanes, conflict keys, verification levels, and stop conditions.
 3. Use `execute-frontier` from one continuous coordinator conversation. Start with one writer, parallelize read-only evidence, review in independent lenses, and land serially.
-4. The coordinator/planner model profile is GPT-5.6 Sol with high reasoning. Worker, scout, reviewer, repairer, and integrator profiles use GPT-5.3-Codex with high reasoning.
+4. The active `sol-only` profile uses GPT-5.6 Sol with high reasoning for the coordinator, planner, worker, scout, reviewer, repairer, and integrator roles.
 5. Do not continue through human authority gates, unsafe scope expansion, unresolved semantic conflicts, or unrecoverable verification.
 
 ### Working agreement

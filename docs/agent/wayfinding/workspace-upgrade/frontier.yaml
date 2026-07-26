@@ -1,0 +1,46 @@
+schema_version: 1
+effort: workspace-upgrade
+items:
+  - id: D001
+    title: Command lifecycle
+    type: human-decision
+    status: closed
+    blocked_by: []
+    claim: null
+    artifact: decisions/D001-command-lifecycle.md
+  - id: D002
+    title: Upgrade ownership boundary
+    type: human-decision
+    status: closed
+    blocked_by: []
+    claim: null
+    artifact: decisions/D002-upgrade-ownership-boundary.md
+  - id: D003
+    title: Mode and preset preservation
+    type: human-decision
+    status: closed
+    blocked_by: []
+    claim: null
+    artifact: decisions/D003-mode-and-preset-preservation.md
+  - id: D004
+    title: Atomicity and recovery
+    type: human-decision
+    status: closed
+    blocked_by: []
+    claim: null
+    artifact: decisions/D004-atomicity-and-recovery.md
+  - id: D005
+    title: Verification contract
+    type: human-decision
+    status: closed
+    blocked_by: []
+    claim: null
+    artifact: decisions/D005-verification-contract.md
+  - id: D006
+    title: Compatibility floor
+    type: repository-research
+    status: closed
+    blocked_by: []
+    claim: null
+    artifact: decisions/D006-compatibility-floor.md
+fog: []

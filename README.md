@@ -7,7 +7,7 @@ Version 0.6.0 combines:
 - Wayfinder planning and dependency-frontier ticket compilation;
 - one continuous, local-file-based coordinator workflow;
 - project-owned Agent Skills and conflict-safe harness projections;
-- GPT-5.6 Sol high for orchestration/planning and GPT-5.3-Codex high for all delegated engineering roles;
+- a default `sol-only` route using GPT-5.6 Sol high for every role, plus the historical `sol-codex` split using GPT-5.3 Codex high for delegated engineering roles;
 - immutable inspect → plan → approve → apply → verify transactions;
 - workspace/monorepo discovery and dependency-aware verification;
 - explicit dependency/tooling installation;
@@ -114,6 +114,44 @@ Repository-owned experimental definitions live in
 the expanded active policy lives in `.agentic/policies/model-routing.yaml`.
 Start a new agent session after switching because an existing session retains
 the configuration it loaded at startup.
+
+### Seamless workspace upgrades
+
+Created and adopted repositories now share one atomic upgrade path:
+
+```bash
+workspace-template upgrade . --allow-network
+workspace-template upgrade . --dry-run
+workspace-template upgrade . --dry-run --json
+workspace-template upgrade . --plan-out --allow-network
+workspace-template upgrade . --apply-plan ".agentic/plans/upgrades/upgrade-0.6.0-to-0.7.0-<id>.json"
+```
+
+Bare `upgrade` seals the exact plan, runs doctor plus every sealed module/root
+verification command, stages and validates the proposed tree, backs up its
+write set, applies, then repeats doctor and verification. Any write or
+verification failure restores the exact pre-upgrade state of the reviewed
+repository-local write set. Verification runs only in disposable repository
+copies, so `.git`, dependency trees, reports, transaction outputs, and deletion
+of the copy cannot mutate the source repository. Because portable confinement
+cannot prevent a command from reaching other filesystem paths or the network,
+verification requires explicit `--allow-network`; external effects are not
+claimed reversible. The sealed plan,
+journal, backup metadata, and report remain under
+`.agentic/transactions/<plan-id>/` for recovery and audit. `--dry-run` prints
+that same plan without writing. Bare `--plan-out` creates a deterministic reviewed-plan name
+under `.agentic/plans/upgrades/`, prints its path and exact apply command, and
+does not apply. The active preset, generated/adopted identity, original
+timestamp, product files, durable planning memory, and repository-local preset
+definitions are preserved.
+
+The isolated upgrade checkpoint deliberately excludes source `node_modules`.
+For this baseline, a verified JavaScript/TypeScript manifest with any declared
+dependency section, or a selected verification script that names
+`node_modules/.bin`, blocks planning with FBK-002 instead of running an
+incomplete check. Native whole-tree upgrade verification is currently supported
+only by the Windows Job Object owner; POSIX upgrade verification fails before
+payload or lease creation until FBK-002 supplies detached-session containment.
 
 For fair A/B experiments, create sibling branches or worktrees from the same
 feature baseline, activate a different preset on each, and run equivalent

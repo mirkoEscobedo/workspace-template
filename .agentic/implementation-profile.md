@@ -7,9 +7,9 @@ Machine-readable policy: `.agentic/profile.json`.
 - Style: `preserve`
 - TDD mode: `preserve`
 - Execution: Frontier Loop
-- Active agent preset: `sol-codex` (active)
+- Active agent preset: `sol-only` (active)
 - Coordinator: `gpt-5.6-sol`, high
-- Implementer: `gpt-5.3-codex`, high
+- Implementer: `gpt-5.6-sol`, high
 
 ## Decision rule
 

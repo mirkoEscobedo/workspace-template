@@ -5,7 +5,7 @@
   "files": {
     "AGENTS.md": {
       "mode": "managed",
-      "hash": "1dec7ff5d8f4443b39e93fbb90e59cc170ab2c3034442cf2bb45af6ed7b31780"
+      "hash": "c00ea0fd11794b14ba6cd54cc276866bbdb34ec32a3ed826de605fb1fdc7e04c"
     },
     ".agent/.gitignore": {
       "mode": "managed",
@@ -17,7 +17,7 @@
     },
     ".agentic/config.json": {
       "mode": "managed",
-      "hash": "d1b978394691170a3d0486b8018ba7d835d1b4c8e2e2145a14e8d4b07577beb0"
+      "hash": "da2d896c3a26767ab63790dbbaabed9c11e7cd73aee6368e5d13077a24cc97f0"
     },
     ".agentic/dependency-snapshot.md": {
       "mode": "managed",
@@ -25,7 +25,7 @@
     },
     ".agentic/implementation-profile.md": {
       "mode": "managed",
-      "hash": "1f6c0f9d2708a1de1c003b93ed19982cd4d3c6a531ac07606bf3d51ef3a521df"
+      "hash": "389e4bf9ddfb1be2e02ba7f9aabd1f9450d2bcc48ba73da6934dcb1bc2abb6c8"
     },
     ".agentic/managed-projections.json": {
       "mode": "managed",
@@ -45,7 +45,7 @@
     },
     ".agentic/policies/model-routing.yaml": {
       "mode": "managed",
-      "hash": "eac3b41d94ed9c972346faad7b5053755457f665c6fd4251c0b72c16ed3e6e25"
+      "hash": "7b289617b40816b1e2928f1b69e023c983e52393acb0deeeae9b743966079163"
     },
     ".agentic/policies/process.yaml": {
       "mode": "managed",
@@ -73,7 +73,7 @@
     },
     ".agentic/profile.json": {
       "mode": "managed",
-      "hash": "eee807227a5a613f0623d1423e2fa0f5653e024d1190aae294377e2fe9a84493"
+      "hash": "edce549388eb0a1cb7429b65439932947f1706a2e66e90567ce41c20c610e4ac"
     },
     ".agentic/profile.schema.json": {
       "mode": "managed",
@@ -1157,11 +1157,11 @@
     },
     ".codex/agents/implementer.toml": {
       "mode": "managed",
-      "hash": "9d90447843f8f2f1d9ce7b17e18f967d365fb58b585dc43486aa533e9afefdff"
+      "hash": "3c4ff08fb8f58a7305ce08cb2091f0bc2488a000013f36be9e8ecb74cb25e9c3"
     },
     ".codex/agents/integrator.toml": {
       "mode": "managed",
-      "hash": "9ba46edc052fe51804bc4f03dcddadebd74bc08287dbcdef0a3fccc338ab665d"
+      "hash": "cdc6fc0691bbe6fbfc43daa7443b69c9509899f6d4975cc1a4737202e524c7e1"
     },
     ".codex/agents/planner.toml": {
       "mode": "managed",
@@ -1169,27 +1169,27 @@
     },
     ".codex/agents/repairer.toml": {
       "mode": "managed",
-      "hash": "74dc05bac764c41ef9ae5114958289ae1b90000b6a05d1f99730b55a6d32d499"
+      "hash": "2fdedf3c43b8697a68d55b125aaa6906bdd514e5897c19ad847646e20a0f8879"
     },
     ".codex/agents/reviewer-code.toml": {
       "mode": "managed",
-      "hash": "3299bed0407436164534401f97e8053057777ec3089214efd455ca2c545a5abb"
+      "hash": "cf176aaf29fb73ba5335cf41dccc1519bd16a8dcea0ba2e3008ecb31df2a9e94"
     },
     ".codex/agents/reviewer-ops.toml": {
       "mode": "managed",
-      "hash": "52923e2c881fb2b8bb629c14ab4d2245ab15cd311ae9da77bdf133b2cdede3c9"
+      "hash": "064a7b68227edc164d2597fdb79d86f2957ac289eb5fa643ac072d2b96543911"
     },
     ".codex/agents/reviewer-spec.toml": {
       "mode": "managed",
-      "hash": "60997e7dfbdd86e16bf3fc4a5e17023262f10d83109f2371d8bb5fbd2c478000"
+      "hash": "4ad1094db2eed4322fcdb9b5a858acab5f8dfa8471bf4f5b0d42b8d485466169"
     },
     ".codex/agents/scout.toml": {
       "mode": "managed",
-      "hash": "5dfe82addc17b66a1c0bfb47d858eaa3f33f8f7050ca224d502d31afc2b74cff"
+      "hash": "03b53bbfee0fa9454b99cb7dd0f43c5c0d15f14a25119ad56653a8fded157b9c"
     },
     ".codex/config.toml": {
       "mode": "managed",
-      "hash": "1ee51ce811e97168d37687dd4dcfc32fd29f2c9ee59e7921b38c8ac3a9b73646"
+      "hash": "0fc10d5ba2c5b3ae0e3838f9242fa73704eb6213edcc0827105bd15e8e8fb4c9"
     },
     ".codex/hooks.json": {
       "mode": "managed",
@@ -1589,7 +1589,7 @@
     },
     "docs/agent/CURRENT_FRONTIER.json": {
       "mode": "managed",
-      "hash": "5701434e032bc68aefd2408df4d3a427e64a313f8f8b3afb3c1171a01284dfcc"
+      "hash": "2bf24bf3bb64d1409434a4314333710adb3c2ce5d96d285cdf97e69ec565c796"
     },
     "docs/agent/decisions/README.md": {
       "mode": "managed",
@@ -1637,7 +1637,7 @@
     },
     "opencode.json": {
       "mode": "managed",
-      "hash": "aaee6b379c4484db681821a25163aba7c4d81e0518cb39932e7f92cc9084f25a"
+      "hash": "2f3bb1e88690eb2a6e916a145462514563932469f4a3104a2a4ffcbd6d7f7138"
     }
   },
   "settings": {}

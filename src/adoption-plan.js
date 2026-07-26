@@ -369,10 +369,16 @@ function buildManagedManifest(operations) {
   for (const operation of operations) {
     if (!["create", "update-managed", "merge-managed-block", "propose", "noop"].includes(operation.action)) continue;
     if (!operation.proposedHash) continue;
-    files[operation.path] = {
+    const record = {
       mode: operation.action === "merge-managed-block" ? "managed-section" : operation.action === "propose" ? "proposal" : "managed",
       hash: operation.proposedHash,
     };
+    if (record.mode === "managed-section" && operation.content) {
+      const content = Buffer.from(operation.content, operation.contentEncoding ?? "base64").toString("utf8");
+      const block = inspectManagedBlock(content);
+      if (block.state === "valid") record.managedBlockHash = hashBuffer(Buffer.from(block.body));
+    }
+    files[operation.path] = record;
   }
   return {
     version: 2,

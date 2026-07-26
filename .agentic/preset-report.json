@@ -1,12 +1,12 @@
 {
   "version": 1,
   "generator": "workspace-template",
-  "planId": "d0bb174ff36f55e2a2d7e9957d10aa7e",
-  "appliedAt": "2026-07-25T21:13:17.954Z",
+  "planId": "ec636865745ae73c617fce2bdaa325a9",
+  "appliedAt": "2026-07-26T09:50:58.393Z",
   "preset": {
-    "id": "sol-codex",
+    "id": "sol-only",
     "source": "builtin",
-    "fingerprint": "e6e2339a437f1ac47bea7802d3f53fa5c17d8beb2f9c3d4b77a84961fb648e00",
+    "fingerprint": "793606dafbcd5571feb039beaad992c501952fe7a8d33a913a035653a10420b6",
     "stability": "stable",
     "status": "active",
     "roleIds": {
@@ -52,64 +52,64 @@
         }
       },
       "scout": {
-        "alias": "codex-high",
+        "alias": "sol-high",
         "reasoningEffort": "high",
         "targets": {
-          "codex": "gpt-5.3-codex",
-          "opencode": "openai/gpt-5.3-codex"
+          "codex": "gpt-5.6-sol",
+          "opencode": "openai/gpt-5.6-sol"
         }
       },
       "implementer": {
-        "alias": "codex-high",
+        "alias": "sol-high",
         "reasoningEffort": "high",
         "targets": {
-          "codex": "gpt-5.3-codex",
-          "opencode": "openai/gpt-5.3-codex"
+          "codex": "gpt-5.6-sol",
+          "opencode": "openai/gpt-5.6-sol"
         }
       },
       "reviewer-spec": {
-        "alias": "codex-high",
+        "alias": "sol-high",
         "reasoningEffort": "high",
         "targets": {
-          "codex": "gpt-5.3-codex",
-          "opencode": "openai/gpt-5.3-codex"
+          "codex": "gpt-5.6-sol",
+          "opencode": "openai/gpt-5.6-sol"
         }
       },
       "reviewer-code": {
-        "alias": "codex-high",
+        "alias": "sol-high",
         "reasoningEffort": "high",
         "targets": {
-          "codex": "gpt-5.3-codex",
-          "opencode": "openai/gpt-5.3-codex"
+          "codex": "gpt-5.6-sol",
+          "opencode": "openai/gpt-5.6-sol"
         }
       },
       "reviewer-ops": {
-        "alias": "codex-high",
+        "alias": "sol-high",
         "reasoningEffort": "high",
         "targets": {
-          "codex": "gpt-5.3-codex",
-          "opencode": "openai/gpt-5.3-codex"
+          "codex": "gpt-5.6-sol",
+          "opencode": "openai/gpt-5.6-sol"
         }
       },
       "repairer": {
-        "alias": "codex-high",
+        "alias": "sol-high",
         "reasoningEffort": "high",
         "targets": {
-          "codex": "gpt-5.3-codex",
-          "opencode": "openai/gpt-5.3-codex"
+          "codex": "gpt-5.6-sol",
+          "opencode": "openai/gpt-5.6-sol"
         }
       },
       "integrator": {
-        "alias": "codex-high",
+        "alias": "sol-high",
         "reasoningEffort": "high",
         "targets": {
-          "codex": "gpt-5.3-codex",
-          "opencode": "openai/gpt-5.3-codex"
+          "codex": "gpt-5.6-sol",
+          "opencode": "openai/gpt-5.6-sol"
         }
       }
     }
   },
-  "previousPreset": "sol-only",
+  "previousPreset": "sol-codex",
   "applied": [
     ".agentic/config.json",
     ".agentic/implementation-profile.md",
@@ -127,7 +127,16 @@
     "opencode.json"
   ],
   "unchanged": [
-    ".codex/agents/planner.toml"
+    ".codex/agents/planner.toml",
+    ".opencode/prompts/frontier-loop/implementer.txt",
+    ".opencode/prompts/frontier-loop/integrator.txt",
+    ".opencode/prompts/frontier-loop/orchestrator.txt",
+    ".opencode/prompts/frontier-loop/planner.txt",
+    ".opencode/prompts/frontier-loop/repairer.txt",
+    ".opencode/prompts/frontier-loop/reviewer-code.txt",
+    ".opencode/prompts/frontier-loop/reviewer-ops.txt",
+    ".opencode/prompts/frontier-loop/reviewer-spec.txt",
+    ".opencode/prompts/frontier-loop/scout.txt"
   ],
   "sessionRestartRequired": true,
   "ok": true

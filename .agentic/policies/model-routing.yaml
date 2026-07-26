@@ -1,7 +1,7 @@
 schema_version: 2
-preset: sol-codex
+preset: sol-only
 preset_source: builtin
-preset_fingerprint: e6e2339a437f1ac47bea7802d3f53fa5c17d8beb2f9c3d4b77a84961fb648e00
+preset_fingerprint: 793606dafbcd5571feb039beaad992c501952fe7a8d33a913a035653a10420b6
 status: active
 roles:
   coordinator:
@@ -17,47 +17,47 @@ roles:
       codex: gpt-5.6-sol
       opencode: openai/gpt-5.6-sol
   scout:
-    alias: codex-high
+    alias: sol-high
     reasoning_effort: high
     targets:
-      codex: gpt-5.3-codex
-      opencode: openai/gpt-5.3-codex
+      codex: gpt-5.6-sol
+      opencode: openai/gpt-5.6-sol
   implementer:
-    alias: codex-high
+    alias: sol-high
     reasoning_effort: high
     targets:
-      codex: gpt-5.3-codex
-      opencode: openai/gpt-5.3-codex
+      codex: gpt-5.6-sol
+      opencode: openai/gpt-5.6-sol
   reviewer-spec:
-    alias: codex-high
+    alias: sol-high
     reasoning_effort: high
     targets:
-      codex: gpt-5.3-codex
-      opencode: openai/gpt-5.3-codex
+      codex: gpt-5.6-sol
+      opencode: openai/gpt-5.6-sol
   reviewer-code:
-    alias: codex-high
+    alias: sol-high
     reasoning_effort: high
     targets:
-      codex: gpt-5.3-codex
-      opencode: openai/gpt-5.3-codex
+      codex: gpt-5.6-sol
+      opencode: openai/gpt-5.6-sol
   reviewer-ops:
-    alias: codex-high
+    alias: sol-high
     reasoning_effort: high
     targets:
-      codex: gpt-5.3-codex
-      opencode: openai/gpt-5.3-codex
+      codex: gpt-5.6-sol
+      opencode: openai/gpt-5.6-sol
   repairer:
-    alias: codex-high
+    alias: sol-high
     reasoning_effort: high
     targets:
-      codex: gpt-5.3-codex
-      opencode: openai/gpt-5.3-codex
+      codex: gpt-5.6-sol
+      opencode: openai/gpt-5.6-sol
   integrator:
-    alias: codex-high
+    alias: sol-high
     reasoning_effort: high
     targets:
-      codex: gpt-5.3-codex
-      opencode: openai/gpt-5.3-codex
+      codex: gpt-5.6-sol
+      opencode: openai/gpt-5.6-sol
 concurrency:
   max_subagents: 3
   default_writers: 1

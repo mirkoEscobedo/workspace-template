@@ -1,0 +1,174 @@
+schema_version: 1
+id: UPG-004
+title: Atomic apply and recovery
+legacy_ids: []
+status: closed
+parent: null
+public_outcome: Direct and persisted-plan upgrades apply atomically with full verification, rollback, replay protection, and same-plan recovery.
+behaviors:
+  - verify baseline before mutation
+  - stage and validate the complete proposed substrate
+  - durably back up and apply the exact reviewed write set
+  - verify after apply and roll back failures
+  - recover an interrupted same-plan transaction
+invariants:
+  - manifests and locks write last
+  - apply never replans or broadens approvals
+  - completion leaves zero owned processes and leases
+  - atomic rollback covers the repository-local managed filesystem boundary; verification has no authority for external side effects
+out_of_scope:
+  - manual partial repair
+  - external process cleanup by executable name
+  - reversal of network, publish, deploy, remote Git, or other external side effects; those effects are forbidden instead
+blocked_by:
+  - UPG-003
+risk_lane: 3
+preflight_required: true
+read_set:
+  - src/plans/**
+  - src/checkpoints/**
+  - src/tooling/structured-edit.js
+  - src/workspace/verify.js
+  - src/doctor.js
+  - src/upgrade/**
+write_set:
+  - src/upgrade/**
+  - src/plans/journal.js
+  - src/checkpoints/backups.js
+  - src/cli.js
+  - test/upgrade-apply.test.js
+  - test/checkpoints.test.js
+conflict_keys:
+  - upgrade-transaction
+  - workspace-owned-artifact-set
+  - transaction-journal-schema
+  - process-lease-state
+skills:
+  - tdd
+  - test-topology
+  - implementation-style
+  - process-lifecycle
+  - verify
+human_gates: []
+stop_conditions:
+  - rollback cannot restore the exact reviewed paths
+  - full verification command is unavailable
+  - another transaction or process lease is active
+commit_policy: coordinator
+review_lenses:
+  - spec-authority
+  - code-test
+  - operations-security
+verification:
+  red:
+    - npm run test -- test/upgrade-apply.test.js
+  repair_levels:
+    - L0
+    - L1
+    - L2
+    - L3
+  landing_levels:
+    - L0
+    - L1
+    - L2
+    - L3
+    - L4
+  commands:
+    - npm run test -- test/upgrade-apply.test.js
+    - npm run check
+  native_checks:
+    - filesystem rollback restores exact bytes and absence
+    - process lease guard reports zero open leases
+budgets:
+  locked_files: []
+  max_new_test_file_loc: 700
+  max_new_production_file_loc: 600
+  zero_owned_processes_after_run: true
+repair_amendments:
+  - id: baseline-repair-e-2026-07-26
+    authority: current user authorization
+    status: passed
+    reason: Reconcile repair-D live ledgers and evidence, qualify handled versus abrupt parent termination, and remove impossible POSIX signal cases while POSIX upgrade verification is fail-closed.
+    write_set:
+      - test/upgrade-cli.test.js
+      - docs/agent/CURRENT_FRONTIER.json
+      - docs/tickets/workspace-upgrade/frontier.json
+      - docs/tickets/workspace-upgrade/current-sprint.md
+      - docs/tickets/workspace-upgrade/004-atomic-apply-and-recovery/evidence/result.md
+      - docs/tickets/workspace-upgrade/006-packed-distribution-contract/evidence/result.md
+      - .agentic/managed-files.json
+    authority_boundary:
+      - repair D remains the current implementation repair; repair E is evidence and test-topology reconciliation only
+      - repair C is historical evidence only
+      - synchronous descendant cleanup is claimed only for handled SIGINT or SIGTERM, AbortSignal, timeout, and ordinary failure
+      - abrupt SIGKILL, TerminateProcess, or crash relies on retained transaction and lease recovery rather than synchronous cleanup
+      - POSIX upgrade verification remains fail-closed and is covered by the no-payload/no-lease capability test
+    completion_gate: UPG-004 remains active and UPG-006 blocked pending coordinator-owned full, packed, and independent review gates.
+  - id: baseline-repair-d-2026-07-26
+    authority: current user authorization
+    status: passed
+    reason: Fail closed where isolated verification cannot truthfully provide dependencies or POSIX detached-session containment, repair streaming redaction, and align public help/evidence without weakening repair C.
+    write_set:
+      - src/upgrade/plan.js
+      - src/upgrade/apply.js
+      - src/process-utils.js
+      - src/process-spawn-wrapper.js
+      - src/workspace/verify.js
+      - src/cli.js
+      - src/adoption-plan.js
+      - src/create.js
+      - test/upgrade-plan.test.js
+      - test/upgrade-apply.test.js
+      - test/process-utils.test.js
+      - test/upgrade-cli.test.js
+      - test/args.test.js
+      - test/adopt.test.js
+      - test/create.test.js
+      - README.md
+      - docs/usage.md
+      - docs/guides/frontier-loop-user-guide.html
+      - docs/tickets/workspace-upgrade/**
+      - .agentic/managed-files.json
+    authority_boundary:
+      - dependency-backed isolated verification is blocked until FBK-002; source node_modules is never copied or exposed
+      - non-Windows upgrade verification is blocked before payload launch until FBK-002 provides a native owner for detached sessions
+      - Windows Job Object ownership behavior remains required
+      - signal evidence distinguishes actual POSIX delivery from Windows IPC signal-bridge simulation
+      - adoption/create writes are limited to atomic-upgrade manifest compatibility already present in the shared diff
+    completion_gate: UPG-004 remains active and UPG-006 blocked until fresh focused, affected, lint, doctor, diff, lease, mutex, and review evidence is appended.
+  - id: baseline-repair-c-2026-07-26
+    authority: current user authorization
+    status: passed
+    reason: Reopen operations/security findings before integration without rewriting prior evidence.
+    write_set:
+      - src/process-utils.js
+      - src/process-spawn-wrapper.js
+      - src/workspace/verify.js
+      - src/upgrade/apply.js
+      - src/upgrade/plan.js
+      - src/cli.js
+      - src/agents-md.js
+      - test/process-utils.test.js
+      - test/upgrade-apply.test.js
+      - test/upgrade-apply-rejection.test.js
+      - test/upgrade-artifacts.test.js
+      - test/upgrade-compatibility.test.js
+      - test/upgrade-lock.test.js
+      - test/upgrade-cli.test.js
+      - test/upgrade-plan.test.js
+      - test/upgrade-skills.test.js
+      - test/upgrade-internal-harness.js
+      - AGENTS.md
+      - README.md
+      - docs/usage.md
+      - docs/validation.md
+      - docs/architecture/skill-system.md
+      - docs/tickets/workspace-upgrade/**
+      - .agentic/managed-files.json
+    authority_boundary:
+      - verification payload waits for native ownership, resolved identity, and a durable lease
+      - default verification executes only in a disposable repository copy
+      - external or network reach requires sealed explicit unconfined-verification approval
+      - apply-time flags cannot broaden sealed authority
+      - SIGKILL and unhandleable parent death are not claimed cleanly recoverable
+    completion_gate: UPG-004 and UPG-006 remain open until fresh focused, lint, diff, lease, review, and coordinator landing evidence is appended.

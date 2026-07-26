@@ -131,6 +131,7 @@ async function renderedHarness(root, agentTargets, resolved, roleIds, managed) {
 
   if (agentTargets.includes("opencode")) {
     const rendered = await renderOpenCodeArtifacts(resolved, roleIds);
+    for (const artifact of rendered.filter((item) => item.path.startsWith(".opencode/prompts/"))) artifacts.push(artifact);
     const desiredConfig = rendered.find((item) => item.path === "opencode.json");
     const desiredDocument = JSON.parse(desiredConfig.content.toString("utf8"));
     const current = await currentBuffer(root, desiredConfig.path);
@@ -211,7 +212,7 @@ export async function buildPresetPlan(rootDirectory, options = {}) {
   const config = await readJson(configPath);
   if (config.generator !== "workspace-template") throw new Error(".agentic/config.json is not owned by workspace-template");
   const agentTargets = config.agentTargets ?? [];
-  const selection = await selectPreset(root, options.preset, agentTargets);
+  const selection = await selectPreset(root, options.preset, agentTargets, { catalog: options.catalog });
   const roleIds = await resolveRoleIds(root, agentTargets, config.execution?.preset);
   const managedPath = path.join(root, ".agentic", "managed-files.json");
   const managed = await readJsonIfExists(managedPath) ?? { version: 3, generator: "workspace-template", files: {}, settings: {} };
@@ -230,7 +231,7 @@ export async function buildPresetPlan(rootDirectory, options = {}) {
         project: config.project,
         style: config.style,
         tdd: config.tdd,
-        mode: config.mode,
+        mode: options.mode ?? config.mode,
         presetState,
       })),
     },

@@ -1,0 +1,74 @@
+schema_version: 1
+id: UPG-001
+title: Upgrade preview and immutable plan
+legacy_ids: []
+status: closed
+parent: null
+public_outcome: A managed workspace exposes a deterministic zero-write upgrade preview and immutable plan.
+behaviors:
+  - parse bare upgrade, dry-run, optional plan-out, and apply-plan forms
+  - generate a stable automatic plan path
+  - return a no-op current plan without workspace mutation
+invariants:
+  - running package is the incoming source
+  - dry-run performs no target writes
+  - plan integrity uses the common plan schema
+out_of_scope:
+  - applying non-noop operations
+  - merging skills
+blocked_by: []
+risk_lane: 2
+preflight_required: true
+read_set:
+  - src/args.js
+  - src/cli.js
+  - src/plans/**
+  - src/skills/baseline.js
+write_set:
+  - src/args.js
+  - src/cli.js
+  - src/index.js
+  - src/upgrade/**
+  - test/args.test.js
+  - test/upgrade-plan.test.js
+conflict_keys:
+  - public-cli-command-registry
+  - upgrade-plan-shape
+skills:
+  - tdd
+  - test-topology
+  - implementation-style
+  - process-lifecycle
+  - verify
+human_gates: []
+stop_conditions:
+  - preview requires a target-workspace mutation
+  - write set expands into product scaffolds
+commit_policy: coordinator
+review_lenses:
+  - spec-authority
+  - code-test
+  - operations-security
+verification:
+  red:
+    - npm run test -- test/args.test.js test/upgrade-plan.test.js
+  repair_levels:
+    - L0
+    - L1
+    - L2
+  landing_levels:
+    - L0
+    - L1
+    - L2
+  commands:
+    - npm run test -- test/args.test.js test/upgrade-plan.test.js
+    - npm run lint
+  native_checks: []
+budgets:
+  locked_files:
+    - test/adopt.test.js
+    - test/presets.test.js
+    - test/skills-update.test.js
+  max_new_test_file_loc: 700
+  max_new_production_file_loc: 600
+  zero_owned_processes_after_run: true
