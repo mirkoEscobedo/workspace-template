@@ -1,0 +1,164 @@
+schema_version: 1
+id: FBK-006
+title: Sol-only and fallback live dogfood
+legacy_ids: []
+status: blocked
+parent: null
+public_outcome: The completed fallback is proven from the sol-only implementation baseline, then sol-codex is atomically activated and, after a human App restart, a bounded native-refusal and brokered implementer/reviewer proof passes with sol-codex left active.
+behaviors:
+  - verify FBK-001 through FBK-005 were implemented and independently reviewed under the baseline sol-only fingerprint
+  - run the complete offline acceptance command set before activation
+  - build and review an immutable sol-codex preset plan whose preconditions cover broker files, expanded config/profile/policy state, report, and managed manifest
+  - atomically apply that exact plan with exact-byte rollback and preservation of user-owned or drifted artifacts
+  - persist the new active fingerprint and restart-required checkpoint, then stop before model discovery or live delegation
+  - after a human restarts the Codex App and explicitly resumes, confirm active fingerprint and collision-safe broker discovery
+  - run opencode models openai and confirm openai/gpt-5.3-codex-spark is exposed
+  - before the restart gate freeze and hash the sole live input packet at docs/tickets/conditional-spark-fallback/006-live-dogfood/evidence/live/packet.md
+  - capture a native Spark implementer refused before start with an approved normalized category and no child identity
+  - run one brokered evidence-only fixture implementer that may write only docs/tickets/conditional-spark-fallback/006-live-dogfood/evidence/live/implementer.marker and docs/tickets/conditional-spark-fallback/006-live-dogfood/evidence/live/implementer-report.json
+  - run one fresh brokered reviewer-code session that is itself read-only; only broker/coordinator capture may write docs/tickets/conditional-spark-fallback/006-live-dogfood/evidence/live/reviewer-report.json
+  - validate run-id with the safe-component rules and allow the controller to write exactly .agent/runs/<run-id>/routing-state.json, .agent/runs/<run-id>/attempts/implementer-1.json, and .agent/runs/<run-id>/attempts/reviewer-code-1.json
+  - use the exact safe-component agent IDs native-spark-implementer, opencode-spark-implementer, and opencode-spark-reviewer-code with transient leases .agent/leases/<run-id>--FBK-006--native-spark-implementer.json, .agent/leases/<run-id>--FBK-006--opencode-spark-implementer.json, and .agent/leases/<run-id>--FBK-006--opencode-spark-reviewer-code.json
+  - remove all three transient lease .json files at completion and retain only .agent/leases/<run-id>--FBK-006--native-spark-implementer.final.json, .agent/leases/<run-id>--FBK-006--opencode-spark-implementer.final.json, and .agent/leases/<run-id>--FBK-006--opencode-spark-reviewer-code.final.json with final outcome and remaining-descendant evidence
+  - leave sol-codex active and prove zero owned descendants and zero open leases
+invariants:
+  - no live proof runs on the activation side of the human restart gate
+  - the native refusal is persisted verbatim and normalized before broker spawn
+  - any native child identity forbids fallback and stops the proof
+  - packet.md is immutable after its pre-restart hash is recorded
+  - the implementer owns only implementer.marker and implementer-report.json
+  - the reviewer session is read-only and fresh; broker/coordinator capture alone owns reviewer-report.json
+  - the controller owns only the three exact run-scoped files for a safe-component run-id and no wildcard run directory
+  - the same safe-component run-id prefixes all six exact lease paths and the three agent IDs are fixed
+  - completion retains the three terminal .final.json lease evidence files, removes the three transient .json lease files, and permits no other FBK-006 lease path
+  - broker auth/refusal/timeout/nonzero/malformed output, unexpected writes, or a second routing failure stops
+  - a failed post-activation proof does not silently revert or reroute; sol-codex remains the explicit active state for diagnosis unless the human authorizes another change
+  - no release/version bump, push, publish, or deploy
+out_of_scope:
+  - production feature implementation during live proof
+  - unbounded model calls or retries
+  - release mutation or remote Git action
+  - using reviewer output as restart authority
+blocked_by:
+  - FBK-005
+risk_lane: 3
+preflight_required: true
+read_set:
+  - docs/agent/wayfinding/conditional-spark-fallback/**
+  - docs/tickets/conditional-spark-fallback/**
+  - .agentic/config.json
+  - .agentic/profile.json
+  - .agentic/policies/model-routing.yaml
+  - .agentic/presets/**
+  - .agentic/managed-files.json
+  - .codex/**
+  - opencode.json
+  - docs/tickets/conditional-spark-fallback/006-live-dogfood/evidence/live/packet.md
+write_set:
+  - .agentic/config.json
+  - .agentic/profile.json
+  - .agentic/policies/model-routing.yaml
+  - .agentic/implementation-profile.md
+  - .agentic/managed-files.json
+  - .agentic/preset-report.json
+  - .codex/config.toml
+  - .codex/agents/**
+  - opencode.json
+  - .opencode/prompts/frontier-loop/**
+  - .agent/runs/<run-id>/routing-state.json
+  - .agent/runs/<run-id>/attempts/implementer-1.json
+  - .agent/runs/<run-id>/attempts/reviewer-code-1.json
+  - .agent/leases/<run-id>--FBK-006--native-spark-implementer.json
+  - .agent/leases/<run-id>--FBK-006--opencode-spark-implementer.json
+  - .agent/leases/<run-id>--FBK-006--opencode-spark-reviewer-code.json
+  - .agent/leases/<run-id>--FBK-006--native-spark-implementer.final.json
+  - .agent/leases/<run-id>--FBK-006--opencode-spark-implementer.final.json
+  - .agent/leases/<run-id>--FBK-006--opencode-spark-reviewer-code.final.json
+  - docs/tickets/conditional-spark-fallback/006-live-dogfood/evidence/live/packet.md
+  - docs/tickets/conditional-spark-fallback/006-live-dogfood/evidence/live/implementer.marker
+  - docs/tickets/conditional-spark-fallback/006-live-dogfood/evidence/live/implementer-report.json
+  - docs/tickets/conditional-spark-fallback/006-live-dogfood/evidence/live/reviewer-report.json
+  - docs/tickets/conditional-spark-fallback/current-sprint.md
+  - docs/tickets/conditional-spark-fallback/frontier.json
+  - docs/agent/CURRENT_FRONTIER.json
+conflict_keys:
+  - active-preset
+  - active-preset-fingerprint
+  - codex-session-routing
+  - preset-apply-transaction
+  - managed-artifact-manifest
+  - live-routing-state
+  - live-proof-write-set
+  - process-lease-state
+  - dogfood-evidence
+skills:
+  - tdd
+  - test-topology
+  - implementation-style
+  - process-lifecycle
+  - verify
+human_gates:
+  - After atomic sol-codex activation, a human must restart the Codex App and explicitly resume the coordinator before model discovery or any live proof.
+  - Any release bump, push, publish, deploy, or remote mutation requires separate explicit human authorization and is outside this ticket.
+stop_conditions:
+  - FBK-001 through FBK-005 lack exact sol-only fingerprint or independent review evidence
+  - pre-activation offline verification fails
+  - activation preconditions drift or rollback cannot restore broker, expanded state, report, and managed manifest exactly
+  - any model discovery or live delegation is attempted before human restart confirmation
+  - the post-restart active fingerprint or broker discovery is not exact
+  - OpenCode does not expose openai/gpt-5.3-codex-spark
+  - the native attempt returns a child identity, starts, or has an unapproved refusal category
+  - broker authentication, refusal, timeout, nonzero exit, malformed output, unexpected write, or second routing failure occurs
+  - run-id fails safe-component validation or any controller path differs from the three frozen .agent/runs/<run-id> files
+  - docs/tickets/conditional-spark-fallback/006-live-dogfood/evidence/live/packet.md changes after its pre-restart hash or the implementer writes outside docs/tickets/conditional-spark-fallback/006-live-dogfood/evidence/live/implementer.marker and docs/tickets/conditional-spark-fallback/006-live-dogfood/evidence/live/implementer-report.json
+  - reviewer session writes any file or docs/tickets/conditional-spark-fallback/006-live-dogfood/evidence/live/reviewer-report.json is written by anyone other than broker/coordinator capture
+  - a lease uses an agent ID other than native-spark-implementer, opencode-spark-implementer, or opencode-spark-reviewer-code, a different run-id, a ticket ID other than FBK-006, or any path outside the six frozen lease names
+  - any transient .agent/leases/<run-id>--FBK-006--<agent-id>.json remains at completion, any required .final.json is missing, or a final record omits final outcome or remaining descendants
+  - descendants or leases remain
+commit_policy: coordinator
+review_lenses:
+  - spec-authority
+  - code-test
+  - operations-security
+verification:
+  red:
+    - the pre-restart checkpoint rejects opencode model discovery and all live delegation
+    - docs/tickets/conditional-spark-fallback/006-live-dogfood/evidence/live/implementer.marker, docs/tickets/conditional-spark-fallback/006-live-dogfood/evidence/live/implementer-report.json, and docs/tickets/conditional-spark-fallback/006-live-dogfood/evidence/live/reviewer-report.json are absent before the live sessions
+  repair_levels: [L0, L1, L2, L3]
+  landing_levels: [L0, L1, L2, L3, L4]
+  commands:
+    - node --test test/preset-fallback.test.js
+    - node --test test/node-control-plane.test.js
+    - node --test test/configuration.test.js test/presets.test.js test/create.test.js test/adopt.test.js test/upgrade-artifacts.test.js
+    - npm run lint
+    - npm test
+    - npm run check
+    - npm run pack:check
+    - npm run test:packed
+    - git diff --check
+    - workspace-template doctor . --json
+    - workspace-template preset status . --json
+    - node .agentic/scripts/validate_ticket_pack.mjs docs/tickets/workspace-upgrade --json
+    - node .agentic/scripts/validate_ticket_pack.mjs docs/tickets/conditional-spark-fallback --json
+    - node .agentic/scripts/check_architecture_budgets.mjs --root . --config docs/tickets/workspace-upgrade/policies/architecture-budgets.yaml
+    - node .agentic/scripts/check_architecture_budgets.mjs --root . --config docs/tickets/conditional-spark-fallback/policies/architecture-budgets.yaml
+  native_checks:
+    - after human restart opencode models openai exposes openai/gpt-5.3-codex-spark
+    - native Spark implementer proof is refused pre-start with no child identity and exact routing-state evidence
+    - docs/tickets/conditional-spark-fallback/006-live-dogfood/evidence/live/packet.md hash is unchanged from the pre-restart freeze through final verification
+    - brokered evidence-only implementer writes only docs/tickets/conditional-spark-fallback/006-live-dogfood/evidence/live/implementer.marker and docs/tickets/conditional-spark-fallback/006-live-dogfood/evidence/live/implementer-report.json in one fresh session
+    - fresh brokered reviewer-code session performs zero writes and broker/coordinator capture alone writes docs/tickets/conditional-spark-fallback/006-live-dogfood/evidence/live/reviewer-report.json
+    - safe-component run-id validation passes and controller output is limited exactly to .agent/runs/<run-id>/routing-state.json, .agent/runs/<run-id>/attempts/implementer-1.json, and .agent/runs/<run-id>/attempts/reviewer-code-1.json
+    - the lease trace is limited exactly to .agent/leases/<run-id>--FBK-006--native-spark-implementer.json, .agent/leases/<run-id>--FBK-006--opencode-spark-implementer.json, .agent/leases/<run-id>--FBK-006--opencode-spark-reviewer-code.json and their same-name .final.json evidence files
+    - completion removes all three transient lease .json files, retains all three .final.json files, and each final record states final outcome and remaining descendants
+    - exact allowed-write oracle proves no files other than the three exact live outputs, three exact .agent/runs/<run-id> controller files, and six exact lease paths were written during post-restart proof, with only the three live outputs, three controller files, and three .final.json lease records retained at completion
+    - final active preset is sol-codex and owned descendant and open lease counts are zero
+budgets:
+  locked_files:
+    - src/process-utils.js
+    - test/adopt.test.js
+    - test/presets.test.js
+    - test/skills-update.test.js
+  max_new_test_file_loc: 700
+  max_new_production_file_loc: 600
+  zero_owned_processes_after_run: true

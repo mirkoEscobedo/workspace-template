@@ -1,0 +1,99 @@
+schema_version: 1
+id: FBK-001
+title: Preset fallback contract and truthful routing
+legacy_ids: []
+status: ready
+parent: null
+public_outcome: sol-codex can describe and atomically materialize a truthful conditional Spark fallback while sol-only and legacy presets remain broker-free and compatible.
+behaviors:
+  - accept the exact optional fallbacks.codexChildModelRefusal object and reject unknown kinds, roles, aliases, targets, missing bindings, duplicates, or malformed values
+  - resolve terra-medium to GPT-5.6 Terra medium and all seven eligible semantic roles to native and OpenCode GPT-5.3 Codex Spark xhigh while coordinator and planner remain Sol high
+  - allocate a deterministic collision-safe native transport broker role ID, preferring opencode_spark_broker, only when the active preset declares the fallback
+  - render config, profile, and model-routing state with the resolved broker role ID and model, eligible roles, delegate target, OpenCode role IDs, models, and reasoning variants
+  - preserve the sol-only definition, default selection, current fingerprint, and absence of broker output
+  - plan and apply the complete preset artifact set atomically with precondition checks and exact-byte rollback across broker files, expanded state, reports, and managed manifest
+  - preserve user-owned or drifted artifacts through the existing partial/conflict policy and never delete or overwrite an unowned collision
+invariants:
+  - fallback metadata is optional in preset version 1
+  - coordinator and planner are never eligible
+  - the broker is transport-only and is not added to PRESET_ROLES
+  - active state never claims a broker or fallback route that was not materialized
+  - .agentic/managed-files.json commits last and rollback restores prior bytes and prior absence
+  - active routing remains sol-only with fingerprint 793606dafbcd5571feb039beaad992c501952fe7a8d33a913a035653a10420b6 throughout this ticket
+out_of_scope:
+  - running OpenCode
+  - coordinator refusal handling
+  - activating sol-codex in this repository
+  - release bump, push, publish, or deploy
+blocked_by: []
+risk_lane: 3
+preflight_required: true
+read_set:
+  - .agentic/policies/model-routing.yaml
+  - .agentic/presets/**
+  - assets/presets/**
+  - assets/configs/codex/**
+  - assets/configs/opencode/**
+  - src/presets/**
+  - src/plans/**
+  - src/checkpoints/**
+  - src/tooling/structured-edit.js
+  - test/configuration.test.js
+  - test/presets.test.js
+write_set:
+  - assets/presets/preset.schema.json
+  - assets/presets/builtin/sol-codex.json
+  - assets/configs/codex/agents/opencode-spark-broker.toml
+  - src/presets/**
+  - test/preset-fallback.test.js
+  - test/configuration.test.js
+conflict_keys:
+  - preset-version-1-schema
+  - builtin-sol-codex-definition
+  - preset-fingerprint-algorithm
+  - resolved-routing-state-shape
+  - generated-codex-agent-ids
+  - preset-apply-transaction
+  - managed-artifact-manifest
+skills:
+  - tdd
+  - test-topology
+  - implementation-style
+  - process-lifecycle
+  - verify
+human_gates:
+  - Any release bump, push, publish, deploy, or remote mutation requires separate explicit human authorization and is outside this ticket.
+stop_conditions:
+  - sol-only content, fingerprint, default selection, or broker absence would change
+  - preset version 1 compatibility cannot be preserved
+  - a broker collision would require overwriting or deleting user-owned content
+  - atomic apply cannot roll back broker, state, report, and managed-manifest paths exactly
+  - the active repository preset changes before FBK-006
+  - writes are needed outside the frozen set without contract repair
+commit_policy: coordinator
+review_lenses:
+  - spec-authority
+  - code-test
+  - operations-security
+verification:
+  red:
+    - node --test test/preset-fallback.test.js
+  repair_levels: [L0, L1, L2, L3]
+  landing_levels: [L0, L1, L2, L3, L4]
+  commands:
+    - node --test test/preset-fallback.test.js
+    - node --test test/configuration.test.js test/presets.test.js
+    - npm run lint
+    - workspace-template preset status . --json
+  native_checks:
+    - atomic preset apply failure injection restores exact prior bytes and absence for broker, expanded state, report, and managed manifest
+    - preset status confirms the repository remains on the baseline sol-only fingerprint
+budgets:
+  locked_files:
+    - src/process-utils.js
+    - test/adopt.test.js
+    - test/presets.test.js
+    - test/skills-update.test.js
+  max_new_test_file_loc: 700
+  max_new_production_file_loc: 600
+  zero_owned_processes_after_run: true

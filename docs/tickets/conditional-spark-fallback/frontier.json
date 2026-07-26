@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "generated_by": "frontier-loop/validate-ticket-pack",
+  "track": "conditional-spark-fallback",
+  "ready": [
+    "FBK-001"
+  ],
+  "aggregate_ready": [],
+  "active": [],
+  "blocked": [
+    {
+      "id": "FBK-002",
+      "remaining_blockers": [
+        "FBK-001"
+      ],
+      "source_status": "blocked"
+    },
+    {
+      "id": "FBK-003",
+      "remaining_blockers": [
+        "FBK-002"
+      ],
+      "source_status": "blocked"
+    },
+    {
+      "id": "FBK-004",
+      "remaining_blockers": [
+        "FBK-003"
+      ],
+      "source_status": "blocked"
+    },
+    {
+      "id": "FBK-005",
+      "remaining_blockers": [
+        "FBK-004"
+      ],
+      "source_status": "blocked"
+    },
+    {
+      "id": "FBK-006",
+      "remaining_blockers": [
+        "FBK-005"
+      ],
+      "source_status": "blocked"
+    }
+  ],
+  "planned": [],
+  "complete": [],
+  "parent_children": {},
+  "errors": [],
+  "warnings": []
+}

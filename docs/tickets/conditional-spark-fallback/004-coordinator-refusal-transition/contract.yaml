@@ -1,0 +1,100 @@
+schema_version: 1
+id: FBK-004
+title: Coordinator refusal transition
+legacy_ids: []
+status: blocked
+parent: null
+public_outcome: The Frontier coordinator selects native or broker routing exactly once from the first eligible native Spark attempt and stops truthfully for every non-eligible transition.
+behaviors:
+  - attempt the first scheduled eligible semantic role natively exactly once while the run circuit is closed
+  - lock the run to native mode when any child identity or start evidence is returned and never fallback later in that run
+  - open broker mode only for unsupported-model, unavailable-model, or refused-model before start with no child identity
+  - persist the verbatim refusal and normalized category before launching the Terra broker in the same semantic role and scheduling slot
+  - route subsequent eligible work according to the run's locked route without adding concurrency or a second native probe after broker activation
+  - keep writer roles sole-writer and create a fresh read-only broker session for each reviewer
+  - stop on unrecognized refusal, ambiguous/no state, fingerprint mismatch, child-start uncertainty, tool/test/review/cancel/ordinary ticket failure, broker auth/refusal/timeout/nonzero, or second routing failure
+  - teach generated coordinator instructions and scheduling procedures the exact transition and stop semantics
+invariants:
+  - coordinator and planner never enter the fallback path
+  - no fallback occurs after a native child identity or start
+  - no implementer reasoning or reviewer pass changes authority
+  - one writer and serial landing remain enforced
+  - the circuit is run-scoped and keyed by the exact active preset fingerprint
+  - active repository routing remains the baseline sol-only fingerprint during implementation
+out_of_scope:
+  - changing role semantics
+  - retrying failed semantic work
+  - automatic live dogfood
+  - activating sol-codex before FBK-006
+blocked_by:
+  - FBK-003
+risk_lane: 3
+preflight_required: true
+read_set:
+  - AGENTS.md
+  - assets/configs/opencode/prompts/orchestrator.txt
+  - assets/skills/execute-frontier/**
+  - src/agents-md.js
+  - src/fallback/**
+  - .agentic/policies/model-routing.yaml
+write_set:
+  - assets/configs/opencode/prompts/orchestrator.txt
+  - assets/skills/execute-frontier/SKILL.md
+  - assets/skills/execute-frontier/references/scheduling.md
+  - src/agents-md.js
+  - test/preset-fallback.test.js
+  - test/node-control-plane.test.js
+conflict_keys:
+  - frontier-coordinator-state-machine
+  - run-route-circuit
+  - refusal-category-authority
+  - semantic-scheduling-slot
+  - writer-limit
+  - generated-agent-instructions
+skills:
+  - tdd
+  - test-topology
+  - implementation-style
+  - process-lifecycle
+  - verify
+human_gates:
+  - Any release bump, push, publish, deploy, or remote mutation requires separate explicit human authorization and is outside this ticket.
+stop_conditions:
+  - the native refusal does not fit an approved normalized pre-start category
+  - any child identity or uncertain start state exists
+  - state persistence cannot complete before broker spawn
+  - the coordinator could select fallback for coordinator, planner, or an ordinary semantic failure
+  - routing would add a writer or scheduling slot
+  - active routing changes before FBK-006
+commit_policy: coordinator
+review_lenses:
+  - spec-authority
+  - code-test
+  - operations-security
+verification:
+  red:
+    - node --test test/preset-fallback.test.js test/node-control-plane.test.js
+  repair_levels: [L0, L1, L2, L3]
+  landing_levels: [L0, L1, L2, L3, L4]
+  commands:
+    - node --test test/preset-fallback.test.js
+    - node --test test/node-control-plane.test.js
+    - node assets/scripts/validate_ticket_pack.mjs docs/tickets/workspace-upgrade --json
+    - node assets/scripts/validate_ticket_pack.mjs docs/tickets/conditional-spark-fallback --json
+    - node assets/scripts/check_architecture_budgets.mjs --root . --config docs/tickets/workspace-upgrade/policies/architecture-budgets.yaml
+    - node assets/scripts/check_architecture_budgets.mjs --root . --config docs/tickets/conditional-spark-fallback/policies/architecture-budgets.yaml
+    - npm run lint
+    - npm test
+  native_checks:
+    - state-machine harness proves child identity locks native mode and no fallback process starts
+    - each allowed pre-start refusal persists verbatim and normalized evidence before exactly one broker attempt
+    - all forbidden failure categories stop with zero broker attempts, descendants, and open leases
+budgets:
+  locked_files:
+    - src/process-utils.js
+    - test/adopt.test.js
+    - test/presets.test.js
+    - test/skills-update.test.js
+  max_new_test_file_loc: 700
+  max_new_production_file_loc: 600
+  zero_owned_processes_after_run: true

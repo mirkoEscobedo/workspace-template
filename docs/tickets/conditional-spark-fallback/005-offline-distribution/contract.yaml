@@ -1,0 +1,137 @@
+schema_version: 1
+id: FBK-005
+title: Offline fallback distribution
+legacy_ids: []
+status: blocked
+parent: null
+public_outcome: Generated, adopted, upgraded, and packed workspaces receive and validate the Node-first conditional fallback offline without changing sol-only activation or user-owned content.
+behaviors:
+  - package the fallback preset schema, updated sol-codex definition, broker template, Node control plane, Node validators/checkers, Python compatibility assets, coordinator instructions, and policies
+  - create and adopt workspaces with the complete inactive preset catalog while sol-only remains the default and emits no broker
+  - upgrade existing workspaces atomically while preserving active preset, repository-owned local presets, user-owned collisions, drifted artifacts, durable agent memory, and product files
+  - generate Node-first Codex hooks and make doctor validate Node while treating Python as an optional compatibility fallback
+  - keep legacy version-1 presets without fallback metadata valid through create, adopt, upgrade, preset status, and doctor
+  - prove fake OpenCode fallback behavior and collision handling without network, authentication, model discovery, auto-update, or sharing
+  - prove the packed tarball contains and generates the fallback assets and can plan sol-codex activation without publishing
+  - install and run the Node ticket-pack validator and architecture-budget checker against workspace-upgrade and conditional-spark-fallback
+  - materialize the Node-first generated hook into this repository's .codex/hooks.json while retaining the Python compatibility fallback
+  - update this repository's managed inactive catalog/scripts/skills under sol-only through the reviewed upgrade transaction so FBK-006 can activate the installed sol-codex definition
+invariants:
+  - no product file, local preset, unowned agent, or drifted managed artifact is silently overwritten or deleted
+  - inactive sol-codex installation does not create the broker until sol-codex is selected
+  - packed smoke is offline and uses fake OpenCode only
+  - active repository routing remains sol-only with the baseline fingerprint
+  - no release/version bump, push, publish, or deploy
+out_of_scope:
+  - live OpenCode model discovery or authentication
+  - activating sol-codex
+  - live native refusal or broker proof
+  - rewriting durable ticket evidence outside this track
+blocked_by:
+  - FBK-004
+risk_lane: 3
+preflight_required: true
+read_set:
+  - src/create.js
+  - src/adoption-plan.js
+  - src/upgrade/**
+  - src/workspace-artifacts.js
+  - src/doctor.js
+  - src/self-check.js
+  - assets/**
+  - scripts/packed-smoke.js
+  - test/create.test.js
+  - test/adopt.test.js
+  - test/upgrade-artifacts.test.js
+  - test/python-fallback.test.js
+write_set:
+  - src/create.js
+  - src/adoption-plan.js
+  - src/upgrade/**
+  - src/workspace-artifacts.js
+  - src/doctor.js
+  - src/self-check.js
+  - assets/project-agent/docs/agent/PROCESS_POLICY.md
+  - scripts/packed-smoke.js
+  - test/create.test.js
+  - test/upgrade-artifacts.test.js
+  - test/python-fallback.test.js
+  - README.md
+  - docs/usage.md
+  - .agentic/presets/preset.schema.json
+  - .agentic/presets/builtin/sol-codex.json
+  - .agentic/scripts/frontier_control_plane.mjs
+  - .agentic/scripts/codex_stop_guard.mjs
+  - .agentic/scripts/validate_ticket_pack.mjs
+  - .agentic/scripts/check_architecture_budgets.mjs
+  - .agentic/skills/**
+  - .agents/skills/**
+  - .opencode/skills/**
+  - .codex/hooks.json
+  - .agentic/managed-files.json
+  - .agentic/managed-projections.json
+conflict_keys:
+  - packaged-artifact-inventory
+  - generated-workspace-substrate
+  - upgrade-managed-artifact-set
+  - managed-file-ownership
+  - managed-skill-projections
+  - doctor-runtime-contract
+  - packed-distribution-acceptance
+  - installed-node-validator-checker-set
+  - current-repository-codex-hooks
+skills:
+  - tdd
+  - test-topology
+  - implementation-style
+  - process-lifecycle
+  - verify
+human_gates:
+  - Any release bump, push, publish, deploy, or remote mutation requires separate explicit human authorization and is outside this ticket.
+stop_conditions:
+  - distribution or packed proof requires network, authentication, or a live model call
+  - upgrade cannot preserve active sol-only routing and exact user-owned or drifted artifacts
+  - an installed catalog/control-plane update cannot be applied and rolled back atomically
+  - inactive sol-codex materialization creates an active broker
+  - the baseline sol-only fingerprint changes
+  - a release/version bump, push, publish, or deploy is proposed
+  - the installed Node architecture checker or validator differs from the reviewed FBK-002 package asset
+  - current-repository hook materialization is not Node-first with the Python compatibility fallback intact
+commit_policy: coordinator
+review_lenses:
+  - spec-authority
+  - code-test
+  - operations-security
+verification:
+  red:
+    - node --test test/configuration.test.js test/presets.test.js test/create.test.js test/adopt.test.js test/upgrade-artifacts.test.js
+    - npm run test:packed
+  repair_levels: [L0, L1, L2, L3]
+  landing_levels: [L0, L1, L2, L3, L4]
+  commands:
+    - node --test test/configuration.test.js test/presets.test.js test/create.test.js test/adopt.test.js test/upgrade-artifacts.test.js
+    - npm run lint
+    - npm run check
+    - npm run pack:check
+    - npm run test:packed
+    - workspace-template doctor . --json
+    - workspace-template preset status . --json
+    - node .agentic/scripts/validate_ticket_pack.mjs docs/tickets/workspace-upgrade --json
+    - node .agentic/scripts/validate_ticket_pack.mjs docs/tickets/conditional-spark-fallback --json
+    - node .agentic/scripts/check_architecture_budgets.mjs --root . --config docs/tickets/workspace-upgrade/policies/architecture-budgets.yaml
+    - node .agentic/scripts/check_architecture_budgets.mjs --root . --config docs/tickets/conditional-spark-fallback/policies/architecture-budgets.yaml
+  native_checks:
+    - packed consumer generates the fallback artifacts and fake-OpenCode proof without network or publish
+    - upgrade failure injection restores installed broker/catalog/scripts/skills/manifests exactly
+    - preset status proves the repository remains on the baseline sol-only fingerprint with no active broker
+    - installed .agentic Node validators and architecture checkers match the package assets and pass both tracks
+    - current .codex/hooks.json is Node-first and retains the tested Python compatibility fallback
+budgets:
+  locked_files:
+    - src/process-utils.js
+    - test/adopt.test.js
+    - test/presets.test.js
+    - test/skills-update.test.js
+  max_new_test_file_loc: 700
+  max_new_production_file_loc: 600
+  zero_owned_processes_after_run: true

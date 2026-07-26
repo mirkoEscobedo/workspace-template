@@ -1,0 +1,37 @@
+schema_version: 1
+track: conditional-spark-fallback
+title: Conditional Terra to OpenCode Spark Fallback
+execution_mode: frontier
+continuous_local_coordinator: true
+landing_policy: serial
+default_writer_limit: 1
+max_writer_limit: 1
+allow_second_writer_when: []
+human_gates:
+  - id: codex-app-restart
+    ticket: FBK-006
+    trigger: sol-codex activation completed and restart-required evidence persisted
+    required_action: Human restarts the Codex App and explicitly resumes the coordinator
+    forbids_before_completion:
+      - opencode model discovery
+      - native Spark proof
+      - brokered OpenCode proof
+tickets:
+  - id: FBK-001
+    path: 001-preset-fallback-contract
+    status: ready
+  - id: FBK-002
+    path: 002-node-first-control-plane
+    status: blocked
+  - id: FBK-003
+    path: 003-terra-opencode-broker
+    status: blocked
+  - id: FBK-004
+    path: 004-coordinator-refusal-transition
+    status: blocked
+  - id: FBK-005
+    path: 005-offline-distribution
+    status: blocked
+  - id: FBK-006
+    path: 006-live-dogfood
+    status: blocked

@@ -1,0 +1,93 @@
+schema_version: 1
+levels:
+  L0:
+    purpose: baseline-available static checks
+    commands:
+      - npm run lint
+      - git diff --check
+  L1:
+    purpose: exact fallback behavior
+    commands:
+      - node --test test/preset-fallback.test.js
+      - node --test test/node-control-plane.test.js
+  L2:
+    purpose: affected preset and workspace behavior
+    commands:
+      - node --test test/configuration.test.js test/presets.test.js test/create.test.js test/adopt.test.js test/upgrade-artifacts.test.js
+  L3:
+    purpose: package and packed integration
+    commands:
+      - npm run pack:check
+      - npm run test:packed
+      - workspace-template doctor . --json
+      - workspace-template preset status . --json
+  L4:
+    purpose: full repository baseline
+    commands:
+      - npm test
+      - npm run check
+policy:
+  red_green: [L1]
+  implementer_handoff: [L0, L1, L2]
+  normal_repair: [L0, L1, L2]
+  integration_wave: [L3]
+  lane_3_landing: [L0, L1, L2, L3, L4]
+  command_availability:
+    FBK-001:
+      note: Only baseline-available commands may run; Node validator and architecture-checker assets do not exist yet.
+      added_commands: []
+    FBK-002:
+      note: Run newly implemented package assets directly; installed .agentic copies do not exist yet.
+      added_commands:
+        - node assets/scripts/validate_ticket_pack.mjs docs/tickets/workspace-upgrade --json
+        - node assets/scripts/validate_ticket_pack.mjs docs/tickets/conditional-spark-fallback --json
+        - node assets/scripts/check_architecture_budgets.mjs --root . --config docs/tickets/workspace-upgrade/policies/architecture-budgets.yaml
+        - node assets/scripts/check_architecture_budgets.mjs --root . --config docs/tickets/conditional-spark-fallback/policies/architecture-budgets.yaml
+    FBK-003:
+      note: Use the FBK-002 package assets directly; do not call nonexistent installed .agentic copies.
+      added_commands:
+        - node assets/scripts/validate_ticket_pack.mjs docs/tickets/workspace-upgrade --json
+        - node assets/scripts/validate_ticket_pack.mjs docs/tickets/conditional-spark-fallback --json
+        - node assets/scripts/check_architecture_budgets.mjs --root . --config docs/tickets/workspace-upgrade/policies/architecture-budgets.yaml
+        - node assets/scripts/check_architecture_budgets.mjs --root . --config docs/tickets/conditional-spark-fallback/policies/architecture-budgets.yaml
+    FBK-004:
+      note: Use the FBK-002 package assets directly; do not call nonexistent installed .agentic copies.
+      added_commands:
+        - node assets/scripts/validate_ticket_pack.mjs docs/tickets/workspace-upgrade --json
+        - node assets/scripts/validate_ticket_pack.mjs docs/tickets/conditional-spark-fallback --json
+        - node assets/scripts/check_architecture_budgets.mjs --root . --config docs/tickets/workspace-upgrade/policies/architecture-budgets.yaml
+        - node assets/scripts/check_architecture_budgets.mjs --root . --config docs/tickets/conditional-spark-fallback/policies/architecture-budgets.yaml
+    FBK-005:
+      note: Installed .agentic Node validators and checkers become mandatory only after distribution materializes them.
+      added_commands:
+        - node .agentic/scripts/validate_ticket_pack.mjs docs/tickets/workspace-upgrade --json
+        - node .agentic/scripts/validate_ticket_pack.mjs docs/tickets/conditional-spark-fallback --json
+        - node .agentic/scripts/check_architecture_budgets.mjs --root . --config docs/tickets/workspace-upgrade/policies/architecture-budgets.yaml
+        - node .agentic/scripts/check_architecture_budgets.mjs --root . --config docs/tickets/conditional-spark-fallback/policies/architecture-budgets.yaml
+    FBK-006:
+      note: Use the installed .agentic Node validators and checkers before activation and in final verification.
+      added_commands:
+        - node .agentic/scripts/validate_ticket_pack.mjs docs/tickets/workspace-upgrade --json
+        - node .agentic/scripts/validate_ticket_pack.mjs docs/tickets/conditional-spark-fallback --json
+        - node .agentic/scripts/check_architecture_budgets.mjs --root . --config docs/tickets/workspace-upgrade/policies/architecture-budgets.yaml
+        - node .agentic/scripts/check_architecture_budgets.mjs --root . --config docs/tickets/conditional-spark-fallback/policies/architecture-budgets.yaml
+  final_exact_command_set:
+    - node --test test/preset-fallback.test.js
+    - node --test test/node-control-plane.test.js
+    - node --test test/configuration.test.js test/presets.test.js test/create.test.js test/adopt.test.js test/upgrade-artifacts.test.js
+    - npm run lint
+    - npm test
+    - npm run check
+    - npm run pack:check
+    - npm run test:packed
+    - git diff --check
+    - workspace-template doctor . --json
+    - workspace-template preset status . --json
+    - node .agentic/scripts/validate_ticket_pack.mjs docs/tickets/workspace-upgrade --json
+    - node .agentic/scripts/validate_ticket_pack.mjs docs/tickets/conditional-spark-fallback --json
+    - node .agentic/scripts/check_architecture_budgets.mjs --root . --config docs/tickets/workspace-upgrade/policies/architecture-budgets.yaml
+    - node .agentic/scripts/check_architecture_budgets.mjs --root . --config docs/tickets/conditional-spark-fallback/policies/architecture-budgets.yaml
+  live_model_calls:
+    ordinary_tickets: forbidden
+    ticket: FBK-006
+    phase: post-human-restart-only

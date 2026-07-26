@@ -1,0 +1,120 @@
+schema_version: 1
+id: FBK-002
+title: Node-first fallback control plane
+legacy_ids: []
+status: blocked
+parent: null
+public_outcome: A generated Node 24 control plane durably owns fallback route state and every child process on POSIX and Windows, with a compatible Python fallback and fail-closed lease normalization.
+behaviors:
+  - persist one run-scoped routing-state.json keyed by active preset fingerprint with closed, native, broker, restart-gate, stopped, and completed terminal semantics
+  - record the first eligible semantic role, native attempt, verbatim refusal, normalized refusal category, child identity presence, selected route, broker attempts, timestamps, and final state
+  - accept and normalize the existing Python snake_case lease form and UpgradeVerificationRunner camelCase form into one versioned internal lease record
+  - reject unknown, ambiguous, mixed-conflicting, identity-less, fingerprint-mismatched, or unsafe lease/routing schemas before spawn or cleanup
+  - create leases containing run, ticket, and agent IDs, PID/start identity, command digest, validated cwd, start time, deadline, platform ownership handle, final state, and remaining descendants
+  - launch POSIX children in a dedicated process group with bounded TERM/KILL, identity checks, pipe closure, wait/reap, and zero-descendant verification
+  - launch Windows children under a kill-on-close Job Object through a PowerShell/PInvoke host that receives an encoded argument array and never an interpolated command string
+  - prefer Node 24 from generated hooks and allow the existing Python lifecycle as a compatibility fallback
+  - provide a Node ticket-pack validator equivalent to the bundled Python validator so generated Node-only workspaces can validate both existing and fallback tracks
+  - provide a Node architecture-budget checker equivalent to the bundled Python checker, including YAML rejection, invalid-lock reporting, locked-file enforcement, warnings, JSON output, output-file behavior, and intentional --capture-baseline mutation
+  - run both Node validators and both Node architecture-budget checks against workspace-upgrade and conditional-spark-fallback from the package assets
+  - render assets/configs/codex/hooks.json Node-first while retaining an explicit Python compatibility fallback, with tests against the generated hook source
+invariants:
+  - route state is scoped to one run and one active preset fingerprint
+  - no executable-name or broad process killing
+  - no command is accepted as started before ownership and lease persistence
+  - normal exit, failure, cancellation, timeout, and coordinator stop use the same bounded cleanup path
+  - completion requires zero descendants and zero open leases
+  - src/process-utils.js remains no-growth
+  - active routing remains the baseline sol-only fingerprint
+out_of_scope:
+  - OpenCode-specific argv
+  - semantic-role prompts
+  - live model calls
+  - replacing compatible Python lifecycle behavior
+blocked_by:
+  - FBK-001
+risk_lane: 3
+preflight_required: true
+read_set:
+  - assets/scripts/managed_command.py
+  - assets/scripts/codex_stop_guard.py
+  - assets/scripts/check_architecture_budgets.py
+  - assets/scripts/validate_ticket_pack.py
+  - assets/configs/codex/hooks.json
+  - src/process-utils.js
+  - src/process-spawn-wrapper.js
+  - src/workspace/verify.js
+  - test/process-utils.test.js
+  - test/python-fallback.test.js
+  - test/python-scripts.test.js
+  - docs/tickets/workspace-upgrade/policies/architecture-budgets.yaml
+  - docs/tickets/conditional-spark-fallback/policies/architecture-budgets.yaml
+write_set:
+  - src/fallback/control-plane/**
+  - assets/scripts/frontier_control_plane.mjs
+  - assets/scripts/codex_stop_guard.mjs
+  - assets/scripts/validate_ticket_pack.mjs
+  - assets/scripts/check_architecture_budgets.mjs
+  - assets/configs/codex/hooks.json
+  - test/node-control-plane.test.js
+conflict_keys:
+  - fallback-routing-state-schema
+  - process-lease-schema
+  - process-start-identity
+  - windows-job-owner
+  - posix-process-group-owner
+  - generated-lifecycle-entrypoint
+  - architecture-budget-validator
+  - generated-codex-hook-source
+skills:
+  - tdd
+  - test-topology
+  - implementation-style
+  - process-lifecycle
+  - verify
+human_gates:
+  - Any release bump, push, publish, deploy, or remote mutation requires separate explicit human authorization and is outside this ticket.
+stop_conditions:
+  - an existing snake_case or camelCase lease cannot be normalized without guessing identity or ownership
+  - Windows launch requires interpolating caller input into a PowerShell command string
+  - POSIX or Windows cleanup cannot prove owned identity and zero descendants
+  - the implementation requires growth in src/process-utils.js
+  - a route can transition more than once or across preset fingerprints
+  - active routing changes before FBK-006
+  - Node validator or architecture checker diverges from Python behavior for invalid YAML, invalid locks, baseline capture, or exit status
+  - the generated hook source cannot remain Node-first with a working Python compatibility fallback
+commit_policy: coordinator
+review_lenses:
+  - spec-authority
+  - code-test
+  - operations-security
+verification:
+  red:
+    - node --test test/node-control-plane.test.js
+  repair_levels: [L0, L1, L2, L3]
+  landing_levels: [L0, L1, L2, L3, L4]
+  commands:
+    - node --test test/node-control-plane.test.js
+    - node assets/scripts/validate_ticket_pack.mjs docs/tickets/workspace-upgrade --json
+    - node assets/scripts/validate_ticket_pack.mjs docs/tickets/conditional-spark-fallback --json
+    - node assets/scripts/check_architecture_budgets.mjs --root . --config docs/tickets/workspace-upgrade/policies/architecture-budgets.yaml
+    - node assets/scripts/check_architecture_budgets.mjs --root . --config docs/tickets/conditional-spark-fallback/policies/architecture-budgets.yaml
+    - npm run lint
+    - npm test
+  native_checks:
+    - native Windows Job Object launch receives an argument array and closes all measured members
+    - native POSIX process-group timeout and cancellation close and reap all measured members
+    - snake_case and camelCase lease fixtures normalize identically while unknown or conflicting schemas fail closed
+    - Node ticket validators report zero errors for workspace-upgrade and conditional-spark-fallback
+    - Node architecture-budget checkers report zero violations for workspace-upgrade and conditional-spark-fallback
+    - Node and Python validators/checkers agree on valid output, invalid YAML, invalid lock rules, exit status, and intentional baseline capture
+    - generated assets/configs/codex/hooks.json selects the Node stop guard first and retains a tested Python compatibility fallback
+budgets:
+  locked_files:
+    - src/process-utils.js
+    - test/adopt.test.js
+    - test/presets.test.js
+    - test/skills-update.test.js
+  max_new_test_file_loc: 700
+  max_new_production_file_loc: 600
+  zero_owned_processes_after_run: true

@@ -30,6 +30,39 @@
       "historical_amendments": [
         "baseline-repair-c-2026-07-26"
       ]
+    },
+    {
+      "id": "conditional-spark-fallback",
+      "path": "docs/tickets/conditional-spark-fallback",
+      "active": [],
+      "blocked": [
+        "FBK-002",
+        "FBK-003",
+        "FBK-004",
+        "FBK-005",
+        "FBK-006"
+      ],
+      "complete": [],
+      "pending": [
+        "FBK-001"
+      ],
+      "baseline": {
+        "commit": "fe7e325958ff56eefa3bd97a54fabed58c845de6",
+        "preset": "sol-only",
+        "fingerprint": "793606dafbcd5571feb039beaad992c501952fe7a8d33a913a035653a10420b6"
+      },
+      "human_gates": [
+        {
+          "id": "codex-app-restart",
+          "ticket": "FBK-006",
+          "status": "not-reached"
+        }
+      ],
+      "landing": {
+        "status": "planned",
+        "policy": "serial",
+        "writer_limit": 1
+      }
     }
   ]
 }

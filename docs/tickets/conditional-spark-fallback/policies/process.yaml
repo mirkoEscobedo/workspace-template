@@ -1,0 +1,62 @@
+schema_version: 1
+ownership:
+  lease_dir: .agent/leases
+  routing_state_dir: .agent/runs
+  require_run_id: true
+  require_ticket_id: true
+  require_agent_id: true
+  require_process_start_identity: true
+  require_command_digest: true
+  require_deadline: true
+  require_platform_ownership_handle: true
+  run_id_validation: safe-component
+  live_dogfood_controller_paths:
+    - .agent/runs/<run-id>/routing-state.json
+    - .agent/runs/<run-id>/attempts/implementer-1.json
+    - .agent/runs/<run-id>/attempts/reviewer-code-1.json
+  live_dogfood_agent_ids:
+    - native-spark-implementer
+    - opencode-spark-implementer
+    - opencode-spark-reviewer-code
+  live_dogfood_transient_lease_paths:
+    - .agent/leases/<run-id>--FBK-006--native-spark-implementer.json
+    - .agent/leases/<run-id>--FBK-006--opencode-spark-implementer.json
+    - .agent/leases/<run-id>--FBK-006--opencode-spark-reviewer-code.json
+  live_dogfood_final_lease_paths:
+    - .agent/leases/<run-id>--FBK-006--native-spark-implementer.final.json
+    - .agent/leases/<run-id>--FBK-006--opencode-spark-implementer.final.json
+    - .agent/leases/<run-id>--FBK-006--opencode-spark-reviewer-code.final.json
+postconditions:
+  zero_owned_processes: true
+  zero_open_leases: true
+  routing_state_terminal_or_restart_gate: true
+  live_dogfood_transient_leases_removed: true
+  live_dogfood_final_lease_evidence_retained: true
+  live_dogfood_final_evidence_requires:
+    - final_outcome
+    - remaining_descendants
+  live_dogfood_zero_other_lease_paths: true
+termination:
+  graceful_seconds: 8
+  kill_after_seconds: 15
+platforms:
+  posix:
+    ownership: dedicated-process-group
+    graceful_signal: TERM
+    force_signal: KILL
+    require_wait_and_reap: true
+  windows:
+    ownership: job-object-kill-on-close
+    launch_host: powershell-pinvoke-argument-array
+    interpolated_command_string: forbidden
+limits:
+  max_subagents: 3
+  max_write_agents: 1
+  max_processes_per_ticket: 128
+  open_code_attempts_per_broker_attempt: 1
+  route_transitions_per_run: 1
+safety:
+  kill_by_executable_name: forbidden
+  session_reuse: forbidden
+  broad_environment_dump: forbidden
+  credential_dump: forbidden
