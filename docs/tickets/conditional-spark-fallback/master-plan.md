@@ -179,6 +179,15 @@ through FBK-004 invoke newly created `assets/scripts/*.mjs`; installed
 | FBK-005 | Offline fallback distribution | 3 | FBK-004 |
 | FBK-006 | Sol-only and fallback live dogfood | 3 | FBK-005 |
 
+## Expand/migrate landing sequence
+
+FBK-001 through FBK-004 land on L0â€“L2 while the repository intentionally
+retains its old installed inactive catalog. FBK-005 owns distribution
+materialization and is the first integration-wave ticket required to pass
+L3/L4 and the complete repository suite. Intermediate upgrade-suite reports
+that only describe the intentionally pending installed catalog are recorded as
+deferred integration evidence, never as passing L4.
+
 ## Completion rule
 
 All six tickets are committed or explicitly superseded; the exact acceptance

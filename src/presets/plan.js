@@ -16,11 +16,18 @@ import { architectureNote } from "../workspace-artifacts.js";
 import { selectPreset } from "./catalog.js";
 import {
   activePresetState,
+  codexBrokerArtifactPath,
+  isSafeBrokerRoleId,
   modelRoutingYaml,
+  overrideBlocksFallback,
   renderCodexArtifacts,
   renderOpenCodeArtifacts,
   resolveRoleIds,
 } from "./render.js";
+import {
+  assertNoPendingPresetTransaction,
+  capturePresetParentIdentity,
+} from "./transaction.js";
 
 function jsonBuffer(value) {
   return Buffer.from(`${JSON.stringify(value, null, 2)}\n`, "utf8");
@@ -38,6 +45,14 @@ function operation(relative, content, current) {
     proposedHash,
     contentEncoding: "base64",
     content: content.toString("base64"),
+  };
+}
+
+function reportOperation(current) {
+  return {
+    kind: current ? "update-preset-report" : "create-preset-report",
+    path: ".agentic/preset-report.json",
+    currentHash: current ? hashBuffer(current) : null,
   };
 }
 
@@ -162,6 +177,15 @@ async function renderedHarness(root, agentTargets, resolved, roleIds, managed) {
       artifacts.push({ path: desiredConfig.path, content: Buffer.from(merged.content) });
     }
   }
+  const fallback = resolved.fallbacks?.codexChildModelRefusal;
+  if (overrides.some((override) => overrideBlocksFallback(override, fallback))) {
+    const brokerRoleId = roleIds.broker?.codexChildModelRefusal;
+    if (brokerRoleId) {
+      const brokerPath = codexBrokerArtifactPath(brokerRoleId);
+      const index = artifacts.findIndex((artifact) => artifact.path === brokerPath);
+      if (index >= 0) artifacts.splice(index, 1);
+    }
+  }
   return { artifacts, overrides, settings };
 }
 
@@ -190,12 +214,13 @@ function updatedProfile(profile, presetState) {
   return value;
 }
 
-function updateManagedManifest(managed, operations, settings) {
+function updateManagedManifest(managed, operations, settings, retiredPaths = []) {
   const value = structuredClone(managed);
   value.version = Math.max(3, value.version ?? 0);
   value.generator = "workspace-template";
   value.files ??= {};
   value.settings = settings;
+  for (const relative of retiredPaths) delete value.files[relative];
   for (const relative of Object.keys(settings)) delete value.files[relative];
   for (const item of operations) {
     if (!["create-preset-managed", "update-preset-managed", "noop"].includes(item.kind)) continue;
@@ -205,15 +230,46 @@ function updateManagedManifest(managed, operations, settings) {
   return value;
 }
 
+async function retiredBroker(root, previousPreset, nextPreset, managed) {
+  const previousRoleId = previousPreset?.fallbacks?.codexChildModelRefusal?.brokerRoleId;
+  const nextRoleId = nextPreset?.fallbacks?.codexChildModelRefusal?.brokerRoleId;
+  if (!previousRoleId || previousRoleId === nextRoleId) {
+    return { operations: [], paths: [], preserved: [] };
+  }
+  if (!isSafeBrokerRoleId(previousRoleId)) {
+    return { operations: [], paths: [], preserved: [] };
+  }
+  const relative = codexBrokerArtifactPath(previousRoleId);
+  const record = managed.files?.[relative];
+  if (!record) return { operations: [], paths: [], preserved: [] };
+  const current = await currentBuffer(root, relative);
+  if (!current) return { operations: [], paths: [relative], preserved: [] };
+  const currentHash = hashBuffer(current);
+  if (!record.hash || record.hash === currentHash) {
+    return {
+      operations: [{
+        kind: "delete-preset-managed",
+        path: relative,
+        currentHash,
+        proposedHash: null,
+      }],
+      paths: [relative],
+      preserved: [],
+    };
+  }
+  return { operations: [], paths: [relative], preserved: [relative] };
+}
+
 export async function buildPresetPlan(rootDirectory, options = {}) {
   const root = path.resolve(rootDirectory);
+  await assertNoPendingPresetTransaction(root);
   const configPath = path.join(root, ".agentic", "config.json");
   if (!(await exists(configPath))) throw new Error("Agent presets require an adopted workspace with .agentic/config.json");
   const config = await readJson(configPath);
   if (config.generator !== "workspace-template") throw new Error(".agentic/config.json is not owned by workspace-template");
   const agentTargets = config.agentTargets ?? [];
   const selection = await selectPreset(root, options.preset, agentTargets, { catalog: options.catalog });
-  const roleIds = await resolveRoleIds(root, agentTargets, config.execution?.preset);
+  const roleIds = await resolveRoleIds(root, agentTargets, config.execution?.preset, selection.resolved);
   const managedPath = path.join(root, ".agentic", "managed-files.json");
   const managed = await readJsonIfExists(managedPath) ?? { version: 3, generator: "workspace-template", files: {}, settings: {} };
   const harness = await renderedHarness(root, agentTargets, selection.resolved, roleIds, managed);
@@ -241,10 +297,17 @@ export async function buildPresetPlan(rootDirectory, options = {}) {
     const current = await currentBuffer(root, artifact.path);
     operations.push(operation(artifact.path, Buffer.isBuffer(artifact.content) ? artifact.content : Buffer.from(artifact.content), current));
   }
-  const nextManaged = updateManagedManifest(managed, operations, harness.settings);
+  const retired = await retiredBroker(root, config.execution?.preset, presetState, managed);
+  operations.push(...retired.operations);
+  const nextManaged = updateManagedManifest(managed, operations, harness.settings, retired.paths);
+  const currentReport = await currentBuffer(root, ".agentic/preset-report.json");
+  operations.push(reportOperation(currentReport));
   const currentManaged = await currentBuffer(root, ".agentic/managed-files.json");
-  operations.push(operation(".agentic/managed-files.json", jsonBuffer(nextManaged), currentManaged));
   operations.sort((left, right) => left.path.localeCompare(right.path));
+  operations.push(operation(".agentic/managed-files.json", jsonBuffer(nextManaged), currentManaged));
+  for (const item of operations) {
+    await capturePresetParentIdentity(root, item.path, { allowMissing: true });
+  }
   const fingerprintPaths = [
     ".agentic/config.json",
     ".agentic/profile.json",
@@ -261,9 +324,14 @@ export async function buildPresetPlan(rootDirectory, options = {}) {
     preconditions: await repositoryPreconditions(root, [...new Set(fingerprintPaths)], { allowDirty: options.allowDirty }),
     operations,
     approvals: { dirtyTree: Boolean(options.allowDirty) },
-    warnings: harness.overrides.length > 0
-      ? [`Preset will be partially active because ${harness.overrides.length} user-owned setting(s) are preserved.`]
-      : [],
+    warnings: [
+      ...(harness.overrides.length > 0
+        ? [`Preset will be partially active because ${harness.overrides.length} user-owned setting(s) are preserved.`]
+        : []),
+      ...(retired.preserved.length > 0
+        ? [`Preserved drifted retired broker artifact(s): ${retired.preserved.join(", ")}.`]
+        : []),
+    ],
     conflicts: [],
     metadata: {
       preset: presetState,

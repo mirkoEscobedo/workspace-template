@@ -24,6 +24,15 @@ export const PRESET_ROLES = Object.freeze([
   "integrator",
 ]);
 export const PRESET_TARGETS = Object.freeze(["codex", "opencode"]);
+export const FALLBACK_ELIGIBLE_ROLES = Object.freeze([
+  "scout",
+  "implementer",
+  "reviewer-spec",
+  "reviewer-code",
+  "reviewer-ops",
+  "repairer",
+  "integrator",
+]);
 const REASONING_EFFORTS = new Set(["low", "medium", "high", "xhigh", "max", "ultra"]);
 const ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -45,6 +54,7 @@ export function validatePreset(value, source = "<preset>", options = {}) {
     "stability",
     "models",
     "roles",
+    "fallbacks",
   ]);
   if (options.allowLoaderMetadata) {
     for (const key of ["source", "path", "relativePath", "fingerprint"]) topLevelKeys.add(key);
@@ -77,6 +87,79 @@ export function validatePreset(value, source = "<preset>", options = {}) {
     const alias = value.roles[role];
     if (typeof alias !== "string" || !Object.hasOwn(value.models, alias)) {
       throw new Error(`${source}: role '${role}' must reference a declared model alias`);
+    }
+  }
+  if (value.fallbacks !== undefined) {
+    assertPlainObject(value.fallbacks, `${source}: fallbacks`);
+    const fallbackKinds = Object.keys(value.fallbacks);
+    if (fallbackKinds.length !== 1 || fallbackKinds[0] !== "codexChildModelRefusal") {
+      throw new Error(`${source}: fallbacks must contain only codexChildModelRefusal`);
+    }
+    const fallback = value.fallbacks.codexChildModelRefusal;
+    assertPlainObject(fallback, `${source}: fallbacks.codexChildModelRefusal`);
+    const fallbackKeys = Object.keys(fallback);
+    const unsupported = fallbackKeys.filter((key) => !["roles", "brokerModel", "delegateTarget"].includes(key));
+    if (unsupported.length > 0) {
+      throw new Error(`${source}: fallbacks.codexChildModelRefusal has unsupported field(s): ${unsupported.join(", ")}`);
+    }
+    for (const required of ["roles", "brokerModel", "delegateTarget"]) {
+      if (!Object.hasOwn(fallback, required)) {
+        throw new Error(`${source}: fallbacks.codexChildModelRefusal.${required} is required`);
+      }
+    }
+    if (!Array.isArray(fallback.roles)) {
+      throw new Error(`${source}: fallbacks.codexChildModelRefusal.roles must be an array`);
+    }
+    const duplicateRoles = fallback.roles.filter((role, index) => fallback.roles.indexOf(role) !== index);
+    if (duplicateRoles.length > 0) {
+      throw new Error(`${source}: fallbacks.codexChildModelRefusal.roles contains duplicate role(s): ${[...new Set(duplicateRoles)].join(", ")}`);
+    }
+    const unknownRoles = fallback.roles.filter((role) => !FALLBACK_ELIGIBLE_ROLES.includes(role));
+    if (unknownRoles.length > 0) {
+      throw new Error(`${source}: fallbacks.codexChildModelRefusal contains ineligible role(s): ${unknownRoles.join(", ")}`);
+    }
+    const missingRoles = FALLBACK_ELIGIBLE_ROLES.filter((role) => !fallback.roles.includes(role));
+    if (missingRoles.length > 0 || fallback.roles.length !== FALLBACK_ELIGIBLE_ROLES.length) {
+      throw new Error(`${source}: fallbacks.codexChildModelRefusal.roles must contain all seven eligible roles`);
+    }
+    if (fallback.brokerModel !== "terra-medium") {
+      throw new Error(`${source}: fallbacks.codexChildModelRefusal.brokerModel must reference a declared model alias (terra-medium)`);
+    }
+    if (!Object.hasOwn(value.models, fallback.brokerModel)) {
+      throw new Error(`${source}: fallback broker model '${fallback.brokerModel}' must reference a declared model alias`);
+    }
+    const broker = value.models[fallback.brokerModel];
+    if (!broker.targets.codex) {
+      throw new Error(`${source}: fallback broker model '${fallback.brokerModel}' has no codex model binding`);
+    }
+    if (broker.targets.codex !== "gpt-5.6-terra" || broker.reasoningEffort !== "medium") {
+      throw new Error(
+        `${source}: fallback broker model '${fallback.brokerModel}' must be gpt-5.6-terra with medium reasoning`,
+      );
+    }
+    if (fallback.delegateTarget !== "opencode") {
+      throw new Error(`${source}: fallbacks.codexChildModelRefusal.delegateTarget must be opencode`);
+    }
+    for (const role of fallback.roles) {
+      const alias = value.roles[role];
+      if (alias !== "codex-spark-xhigh") {
+        throw new Error(`${source}: fallback role '${role}' must reference codex-spark-xhigh`);
+      }
+      const model = value.models[alias];
+      for (const target of ["codex", fallback.delegateTarget]) {
+        if (!model.targets[target]) {
+          throw new Error(`${source}: fallback role '${role}' has no ${target} model binding`);
+        }
+      }
+      if (
+        model.targets.codex !== "gpt-5.3-codex-spark"
+        || model.targets.opencode !== "openai/gpt-5.3-codex-spark"
+        || model.reasoningEffort !== "xhigh"
+      ) {
+        throw new Error(
+          `${source}: fallback role '${role}' must use native/OpenCode GPT-5.3 Codex Spark with xhigh reasoning`,
+        );
+      }
     }
   }
   return structuredClone(value);
@@ -138,7 +221,7 @@ export function resolvePreset(preset, agentTargets = PRESET_TARGETS) {
       targets: Object.fromEntries(targets.map((target) => [target, definition.targets[target]])),
     };
   }
-  return {
+  const resolved = {
     id: validated.id,
     source: preset.source ?? "builtin",
     fingerprint: preset.fingerprint ?? hashText(canonicalJson(validated)),
@@ -146,6 +229,23 @@ export function resolvePreset(preset, agentTargets = PRESET_TARGETS) {
     stability: validated.stability,
     roles,
   };
+  const fallback = validated.fallbacks?.codexChildModelRefusal;
+  if (fallback) {
+    const broker = validated.models[fallback.brokerModel];
+    resolved.fallbacks = {
+      codexChildModelRefusal: {
+        roles: [...FALLBACK_ELIGIBLE_ROLES],
+        brokerModel: {
+          alias: fallback.brokerModel,
+          target: "codex",
+          model: broker.targets.codex,
+          reasoningEffort: broker.reasoningEffort,
+        },
+        delegateTarget: fallback.delegateTarget,
+      },
+    };
+  }
+  return resolved;
 }
 
 export async function selectPreset(root, id, agentTargets, options = {}) {

@@ -92,7 +92,7 @@ verification:
   red:
     - node --test test/node-control-plane.test.js
   repair_levels: [L0, L1, L2, L3]
-  landing_levels: [L0, L1, L2, L3, L4]
+  landing_levels: [L0, L1, L2]
   commands:
     - node --test test/node-control-plane.test.js
     - node assets/scripts/validate_ticket_pack.mjs docs/tickets/workspace-upgrade --json

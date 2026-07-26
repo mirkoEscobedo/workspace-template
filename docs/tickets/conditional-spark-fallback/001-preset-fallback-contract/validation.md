@@ -13,7 +13,10 @@ fresh evidence. Do not use implementer reasoning as proof.
 
 - Run the focused preset fallback RED/GREEN tests and preset/config regressions.
 - Inspect collision and partial-state tests for independent expectations.
-- Confirm locked files do not grow and new modules remain within budgets.
+- Confirm `test/presets.test.js` remains exactly 139 LOC and
+  `test/adopt.test.js` remains exactly 380 LOC; each changes only its authorized
+  `sol-codex` model/variant assertion.
+- Confirm other locked files do not grow and new modules remain within budgets.
 
 ## Operations and security
 
