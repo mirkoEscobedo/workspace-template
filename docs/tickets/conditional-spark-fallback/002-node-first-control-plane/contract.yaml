@@ -2,7 +2,7 @@ schema_version: 1
 id: FBK-002
 title: Node-first fallback control plane
 legacy_ids: []
-status: blocked
+status: ready
 parent: null
 public_outcome: A generated Node 24 control plane durably owns fallback route state and every child process on POSIX and Windows, with a compatible Python fallback and fail-closed lease normalization.
 behaviors:

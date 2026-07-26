@@ -870,3 +870,25 @@ Exact-current verification:
 No product file, activation, OpenCode execution, commit, release, or remote
 state changed. Independent review must use the final exact diff; no review
 pass is claimed here.
+
+## Final independent review and integration
+
+- Landed candidate commit:
+  `86b716a4a56de448b9bd9265dc47c9b3f201539b`
+  (`feat: add conditional Spark fallback preset contract`).
+- Specification/authority: PASS against the exact final candidate.
+- Code/test: PASS against the exact final candidate after the portable and
+  concurrency-isolated process-test repairs.
+- Operations/security: PASS against the exact final candidate, including
+  bootstrap collision preservation, metadata-only pre-journal failure,
+  private recovery bytes, exact scoped worker/native leases, bounded reaping,
+  and zero current-run temporary-root delta.
+- Neutral integration: PASS for the 27-file candidate; all writes were inside
+  the FBK-001 or coordinator-owned planning-repair sets.
+- Final coordinator landing gates: fallback 9/9, security 14/14, process 4/4,
+  affected L2 35/35, lint, diff check, conditional ticket validation with zero
+  errors/warnings, active `sol-only` fingerprint
+  `793606dafbcd5571feb039beaad992c501952fe7a8d33a913a035653a10420b6`,
+  and zero repository transaction/lease residue.
+- L3/L4 remain intentionally deferred to FBK-005; no full-suite pass is
+  claimed here.

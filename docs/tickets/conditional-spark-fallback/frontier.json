@@ -3,18 +3,11 @@
   "generated_by": "frontier-loop/validate-ticket-pack",
   "track": "conditional-spark-fallback",
   "ready": [
-    "FBK-001"
+    "FBK-002"
   ],
   "aggregate_ready": [],
   "active": [],
   "blocked": [
-    {
-      "id": "FBK-002",
-      "remaining_blockers": [
-        "FBK-001"
-      ],
-      "source_status": "blocked"
-    },
     {
       "id": "FBK-003",
       "remaining_blockers": [
@@ -45,7 +38,9 @@
     }
   ],
   "planned": [],
-  "complete": [],
+  "complete": [
+    "FBK-001"
+  ],
   "parent_children": {},
   "errors": [],
   "warnings": []

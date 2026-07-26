@@ -2,7 +2,7 @@ schema_version: 1
 id: FBK-001
 title: Preset fallback contract and truthful routing
 legacy_ids: []
-status: ready
+status: closed
 parent: null
 public_outcome: sol-codex can describe and atomically materialize a truthful conditional Spark fallback while sol-only and legacy presets remain broker-free and compatible.
 behaviors:
