@@ -51,7 +51,7 @@ export class UpgradeVerificationRunner {
 
   async run(command, args, options = {}) {
     if (this.platform !== "win32") {
-      throw new Error("POSIX upgrade verification cannot contain detached-session descendants; an external Ultima-owned orchestration capability is required");
+      throw new Error("POSIX upgrade verification cannot contain detached-session descendants without a native process owner");
     }
     const leaseDirectory = path.join(this.root, ".agent", "leases");
     const leasePath = path.join(leaseDirectory, `upgrade-verification-${randomUUID()}.json`);

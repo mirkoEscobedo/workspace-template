@@ -18,9 +18,9 @@
 
 ## Baseline repair
 
-- Restored the built-in `sol-codex` contract to GPT-5.3 Codex with high
-  reasoning for delegated roles; the premature Spark/xhigh fallback is not part
-  of this baseline.
+- Restored the built-in `sol-codex` contract to native GPT-5.3 Codex with high
+  reasoning and the matching GPT-5.3 Codex Spark model through OpenCode for
+  delegated roles; automatic rerouting behavior is not part of this baseline.
 - The currently materialized workspace remains `sol-only` under explicit user
   authority. Actual dogfood execution used GPT-5.6 Sol high fallback, so the
   intended Sol/Codex delegated topology was not validated.
@@ -61,10 +61,11 @@
 
 - Help, README, and usage now require sealed `--allow-network` approval for
   upgrade verification and document dependency-backed and POSIX verification
-  as unavailable until FBK-002.
+  as unavailable.
 - Public rollback remains repository-local. Source `node_modules` is neither
   copied nor exposed to the disposable checkpoint.
-- The guide's historical engineering route is restored to GPT-5.3-Codex/high.
+- The guide's historical engineering route is restored to native
+  GPT-5.3-Codex/high and matching OpenCode GPT-5.3 Codex Spark.
 - Windows signal coverage is explicitly an IPC/process-event bridge simulation,
   not OS-delivery evidence. Detached-verifier signal cases are Windows-only;
   the separate POSIX capability test verifies fail-closed behavior before
@@ -80,7 +81,8 @@ are superseded by this final block.
 - `npm run pack:check`: pass against the final archive manifest; 306 entries.
 - `npm run test:packed`: pass under the native Windows Job owner.
 - Packed smoke proves:
-  - default `sol-only` and historical `sol-codex` Codex/high rendering;
+  - default `sol-only` and historical `sol-codex` native Codex/high plus
+    OpenCode Codex Spark rendering;
   - dependency-backed isolated upgrade verification fails closed before a
     process starts;
   - dependency-free generated, adopted, and workspace upgrade paths;

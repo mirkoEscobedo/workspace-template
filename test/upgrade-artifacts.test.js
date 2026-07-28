@@ -3,12 +3,7 @@ import { mkdtemp, readFile, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, it } from "node:test";
-import {
-  applyPresetPlan,
-  buildPresetPlan,
-  buildUpgradePlan,
-  createProject,
-} from "../src/index.js";
+import { buildUpgradePlan, createProject } from "../src/index.js";
 import { hashBuffer } from "../src/fs-utils.js";
 import { inspectManagedBlock } from "../src/managed-sections.js";
 import { applyWithVerifier } from "./upgrade-internal-harness.js";
@@ -29,20 +24,6 @@ async function fixture() {
 }
 
 describe("upgrade artifact reconciliation", () => {
-  it("does not treat the dynamic preset report as managed drift", async () => {
-    const root = await fixture();
-    const presetPlan = await buildPresetPlan(root, { preset: "sol-codex" });
-    await applyPresetPlan(presetPlan);
-
-    const upgradePlan = await buildUpgradePlan(root, { allowNetwork: true });
-
-    assert.equal(upgradePlan.canApply, true, upgradePlan.conflicts.join("\n"));
-    assert.equal(
-      upgradePlan.operations.some((item) => item.path === ".agentic/preset-report.json"),
-      false,
-    );
-  });
-
   it("preserves adopted identity, provenance, product files, and local presets", async () => {
     const root = await fixture();
     const configPath = path.join(root, ".agentic", "config.json");

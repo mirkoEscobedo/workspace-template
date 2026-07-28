@@ -5,54 +5,6 @@
   "type": "object",
   "additionalProperties": false,
   "required": ["version", "id", "description", "stability", "models", "roles"],
-  "allOf": [
-    {
-      "if": { "required": ["fallbacks"] },
-      "then": {
-        "properties": {
-          "models": {
-            "required": ["terra-medium", "codex-spark-xhigh"],
-            "properties": {
-              "terra-medium": {
-                "properties": {
-                  "reasoningEffort": { "const": "medium" },
-                  "targets": {
-                    "required": ["codex"],
-                    "properties": {
-                      "codex": { "const": "gpt-5.6-terra" }
-                    }
-                  }
-                }
-              },
-              "codex-spark-xhigh": {
-                "properties": {
-                  "reasoningEffort": { "const": "xhigh" },
-                  "targets": {
-                    "required": ["codex", "opencode"],
-                    "properties": {
-                      "codex": { "const": "gpt-5.3-codex-spark" },
-                      "opencode": { "const": "openai/gpt-5.3-codex-spark" }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "roles": {
-            "properties": {
-              "scout": { "const": "codex-spark-xhigh" },
-              "implementer": { "const": "codex-spark-xhigh" },
-              "reviewer-spec": { "const": "codex-spark-xhigh" },
-              "reviewer-code": { "const": "codex-spark-xhigh" },
-              "reviewer-ops": { "const": "codex-spark-xhigh" },
-              "repairer": { "const": "codex-spark-xhigh" },
-              "integrator": { "const": "codex-spark-xhigh" }
-            }
-          }
-        }
-      }
-    }
-  ],
   "properties": {
     "$schema": { "type": "string" },
     "version": { "const": 1 },
@@ -103,39 +55,6 @@
         "reviewer-ops": { "type": "string" },
         "repairer": { "type": "string" },
         "integrator": { "type": "string" }
-      }
-    },
-    "fallbacks": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["codexChildModelRefusal"],
-      "properties": {
-        "codexChildModelRefusal": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["roles", "brokerModel", "delegateTarget"],
-          "properties": {
-            "roles": {
-              "type": "array",
-              "minItems": 7,
-              "maxItems": 7,
-              "uniqueItems": true,
-              "items": {
-                "enum": [
-                  "scout",
-                  "implementer",
-                  "reviewer-spec",
-                  "reviewer-code",
-                  "reviewer-ops",
-                  "repairer",
-                  "integrator"
-                ]
-              }
-            },
-            "brokerModel": { "const": "terra-medium" },
-            "delegateTarget": { "const": "opencode" }
-          }
-        }
       }
     }
   }

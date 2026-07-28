@@ -1,5 +1,0 @@
-# Ticket FBK-003 — Superseded
-
-This runtime broker ticket never started and is superseded by Wayfinder
-[D007](../../../agent/wayfinding/conditional-spark-fallback/decisions/D007-ultima-runtime-ownership.md).
-Ultima owns broker execution and OpenCode spawning.

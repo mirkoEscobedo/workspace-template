@@ -101,7 +101,7 @@ async function verificationAuthorityEntry(root, module) {
         dependencySections.length > 0 ? `manifest declares ${dependencySections.join(", ")}` : null,
         localBinScripts.length > 0 ? `sealed script(s) ${[...new Set(localBinScripts)].sort().join(", ")} reference node_modules/.bin` : null,
       ].filter(Boolean).join("; ");
-      violations.push(`${module.id} dependency-backed verification is unsupported by the isolated checkpoint (${evidence}); use an approved external Ultima orchestration capability`);
+      violations.push(`${module.id} dependency-backed verification is unsupported by the isolated checkpoint (${evidence})`);
     }
   }
   return {
@@ -130,7 +130,7 @@ export function assertLocalVerificationAuthority(authority) {
 export function upgradeVerificationPlatformConflict(platform = process.platform) {
   return platform === "win32"
     ? null
-    : "POSIX upgrade verification cannot contain detached-session descendants; an external Ultima-owned orchestration capability is required";
+    : "POSIX upgrade verification cannot contain detached-session descendants without a native process owner";
 }
 
 export function defaultUpgradePlanPath(plan) {

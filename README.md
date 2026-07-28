@@ -7,9 +7,7 @@ Version 0.6.0 combines:
 - Wayfinder planning and dependency-frontier ticket compilation;
 - one continuous, local-file-based coordinator workflow;
 - project-owned Agent Skills and conflict-safe harness projections;
-- a default `sol-only` route using GPT-5.6 Sol high for every role, plus a
-  declarative `sol-codex` contract for Sol planning and conditional Spark
-  delegation through an external Ultima runtime;
+- a default `sol-only` route using GPT-5.6 Sol high for every role, plus the historical `sol-codex` split using GPT-5.3 Codex high natively and the matching GPT-5.3 Codex Spark model through OpenCode for delegated engineering roles;
 - immutable inspect → plan → approve → apply → verify transactions;
 - workspace/monorepo discovery and dependency-aware verification;
 - explicit dependency/tooling installation;
@@ -100,13 +98,10 @@ The coordinator may continue through all ordinary local tickets in one conversat
 ### Swappable agent presets
 
 Every created or adopted repository receives the complete built-in preset
-catalog. `sol-only` is active by default. `sol-codex` declares Sol/high
-coordination and planning plus Spark/xhigh delegated roles and conditional
-runtime requirements. `workspace-template` validates and materializes that
-declaration; Ultima owns refusal handling, route selection, broker execution,
-process ownership, OpenCode spawning, and runtime evidence. Selecting a preset
-does not make `workspace-template` a runtime orchestrator and does not remove
-inactive presets.
+catalog. `sol-only` is active by default; `sol-codex` preserves the original
+Sol coordinator/planner and Codex worker split, using the matching Codex Spark
+model for OpenCode workers. Selecting a preset changes only
+the active routing—it does not remove inactive presets.
 
 ```bash
 workspace-template preset list .
@@ -154,10 +149,10 @@ definitions are preserved.
 The isolated upgrade checkpoint deliberately excludes source `node_modules`.
 For this baseline, a verified JavaScript/TypeScript manifest with any declared
 dependency section, or a selected verification script that names
-`node_modules/.bin`, blocks planning instead of running an incomplete check.
-Native whole-tree upgrade verification is currently supported only by the
-Windows Job Object owner. POSIX verification fails before payload or lease
-creation and requires an external Ultima-owned orchestration capability.
+`node_modules/.bin`, blocks planning instead of running an
+incomplete check. Native whole-tree upgrade verification is currently supported
+only by the Windows Job Object owner; POSIX upgrade verification fails before
+payload or lease creation when detached-session containment is unavailable.
 
 For fair A/B experiments, create sibling branches or worktrees from the same
 feature baseline, activate a different preset on each, and run equivalent

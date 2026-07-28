@@ -140,14 +140,14 @@ const generatedPresetApply = invokeJson([
 assert.equal(generatedPresetApply.ok, true);
 assert.equal(invokeJson(["preset", "status", generated, "--json"]).activeId, "sol-codex");
 const splitCodexConfig = await readFile(path.join(generated, ".codex", "config.toml"), "utf8");
-assert.match(splitCodexConfig, /default_subagent_model\s*=\s*"gpt-5\.3-codex-spark"/);
-assert.match(splitCodexConfig, /default_subagent_reasoning_effort\s*=\s*"xhigh"/);
+assert.match(splitCodexConfig, /default_subagent_model\s*=\s*"gpt-5\.3-codex"/);
+assert.match(splitCodexConfig, /default_subagent_reasoning_effort\s*=\s*"high"/);
 const splitImplementer = await readFile(path.join(generated, ".codex", "agents", "implementer.toml"), "utf8");
-assert.match(splitImplementer, /model\s*=\s*"gpt-5\.3-codex-spark"/);
-assert.match(splitImplementer, /model_reasoning_effort\s*=\s*"xhigh"/);
+assert.match(splitImplementer, /model\s*=\s*"gpt-5\.3-codex"/);
+assert.match(splitImplementer, /model_reasoning_effort\s*=\s*"high"/);
 const splitOpenCode = JSON.parse(await readFile(path.join(generated, "opencode.json"), "utf8"));
 assert.equal(splitOpenCode.agent["ticket-implementer"].model, "openai/gpt-5.3-codex-spark");
-assert.equal(splitOpenCode.agent["ticket-implementer"].reasoningEffort, "xhigh");
+assert.equal(splitOpenCode.agent["ticket-implementer"].reasoningEffort, "high");
 
 const generatedPackagePath = path.join(generated, "package.json");
 const generatedPackage = JSON.parse(await readFile(generatedPackagePath, "utf8"));

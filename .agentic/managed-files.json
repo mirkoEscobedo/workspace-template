@@ -57,7 +57,7 @@
     },
     ".agentic/presets/builtin/sol-codex.json": {
       "mode": "managed",
-      "hash": "12268246319bf086622ce3d92fb220b9b305b928c54d1d4fc2fcf79abd64967c"
+      "hash": "2873bab71fdf9080c028bcd13ae916df21b351414094a69ac90772eee60bc861"
     },
     ".agentic/presets/builtin/sol-only.json": {
       "mode": "managed",
@@ -1589,7 +1589,7 @@
     },
     "docs/agent/CURRENT_FRONTIER.json": {
       "mode": "managed",
-      "hash": "09619fb9dc68ff5c6cbb3ce3dc016445fbaa8ab852472f609d2c6b63d344f11d"
+      "hash": "2bf24bf3bb64d1409434a4314333710adb3c2ce5d96d285cdf97e69ec565c796"
     },
     "docs/agent/decisions/README.md": {
       "mode": "managed",

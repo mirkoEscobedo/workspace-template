@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
-import { randomUUID } from "node:crypto";
-import { mkdtemp, readFile, writeFile, mkdir, rm } from "node:fs/promises";
+import { mkdtemp, readFile, writeFile, mkdir } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
@@ -8,7 +7,6 @@ import { describe, it } from "node:test";
 import { adoptProject, applyAdoptionPlan } from "../src/adopt.js";
 import { parseArgs } from "../src/args.js";
 import { doctorProject } from "../src/doctor.js";
-import { assetsRoot } from "../src/workspace-artifacts.js";
 import { createPlanEnvelope } from "../src/plans/schema.js";
 import { exists, hashBuffer, hashFile, readJson } from "../src/fs-utils.js";
 
@@ -176,7 +174,7 @@ describe("adoptProject", () => {
     assert.equal(execution.result.ok, true, execution.result.doctor.errors.join("\n"));
     const config = await readJson(path.join(root, ".agentic", "config.json"));
     assert.equal(config.execution.preset.id, "sol-codex");
-    assert.equal(config.execution.workers.model, "gpt-5.3-codex-spark");
+    assert.equal(config.execution.workers.model, "gpt-5.3-codex");
     assert.equal(await exists(path.join(root, ".agentic", "presets", "builtin", "sol-only.json")), true);
   });
 
@@ -301,23 +299,18 @@ describe("adoptProject", () => {
 
   it("adopts a zero-byte file from sourceAsset", async () => {
     const root = await existingTypeScriptRepo({ customAgents: true, tickets: false });
-    const sourceAsset = `.adopt-empty-${randomUUID()}.txt`;
-    const sourcePath = path.join(assetsRoot, sourceAsset);
-    await writeFile(sourcePath, "");
+    const sourceAssetsRoot = await mkdtemp(path.join(os.tmpdir(), "workspace-template-adopt-assets-"));
+    const sourceAsset = "empty.txt";
+    await writeFile(path.join(sourceAssetsRoot, sourceAsset), "");
+    const plan = await planWithLeasePatch(root, (operation) => {
+      const { content, contentEncoding, ...base } = operation;
+      return { ...base, sourceAsset, proposedHash: emptyBase64Hash() };
+    });
+    const execution = await applyAdoptionPlan(plan, { assetsRoot: sourceAssetsRoot });
+    assert.equal(execution.ok, true, JSON.stringify(execution, null, 2));
 
-    try {
-      const plan = await planWithLeasePatch(root, (operation) => {
-        const { content, contentEncoding, ...base } = operation;
-        return { ...base, sourceAsset, proposedHash: emptyBase64Hash() };
-      });
-      const execution = await applyAdoptionPlan(plan);
-      assert.equal(execution.ok, true, JSON.stringify(execution, null, 2));
-
-      const leaseKeep = await readFile(path.join(root, leaseKeepPath));
-      assert.equal(leaseKeep.length, 0);
-    } finally {
-      await rm(sourcePath, { force: true });
-    }
+    const leaseKeep = await readFile(path.join(root, leaseKeepPath));
+    assert.equal(leaseKeep.length, 0);
   });
 
   it("adopts an empty UTF-8 content operation", async () => {

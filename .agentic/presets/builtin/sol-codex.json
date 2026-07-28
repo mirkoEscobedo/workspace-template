@@ -2,7 +2,7 @@
   "$schema": "../preset.schema.json",
   "version": 1,
   "id": "sol-codex",
-  "description": "Use GPT-5.6 Sol for coordination and planning, and GPT-5.3 Codex for delegated engineering roles.",
+  "description": "Use GPT-5.6 Sol for coordination and planning, with GPT-5.3 Codex natively and GPT-5.3 Codex Spark through OpenCode for delegated engineering roles.",
   "stability": "stable",
   "models": {
     "sol-high": {
@@ -16,7 +16,7 @@
       "reasoningEffort": "high",
       "targets": {
         "codex": "gpt-5.3-codex",
-        "opencode": "openai/gpt-5.3-codex"
+        "opencode": "openai/gpt-5.3-codex-spark"
       }
     }
   },

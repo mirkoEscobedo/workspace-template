@@ -28,9 +28,9 @@
   Independent specification, code/test, and operations/security review lenses
   passed. The intended Spark child never started: the first attempt used the
   wrong Codex model name and the reopened app then refused Spark before
-  returning a child identity. That truthful limitation is superseded by the
-  separately authorized fallback track; the historical GPT-5.3-Codex/high
-  track policy is preserved.
+  returning a child identity. That runtime limitation did not change the
+  shipped target mapping: native workers use GPT-5.3 Codex/high and OpenCode
+  workers use the matching GPT-5.3 Codex Spark model.
 
 ## Integration
 

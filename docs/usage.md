@@ -192,12 +192,10 @@ Frontier does not require an issue tracker. A repository may mirror contracts in
 
 Every workspace contains all built-ins under `.agentic/presets/builtin/`.
 `sol-only` is active by default and uses GPT-5.6 Sol with high reasoning for
-every role. `sol-codex` declares GPT-5.6 Sol/high coordination and planning,
-Spark/xhigh delegated roles, and conditional runtime requirements.
-`workspace-template` owns validation and safe materialization of that
-declaration. Ultima owns refusal handling, route selection, broker execution,
-process ownership, OpenCode spawning, and runtime proof. Repository-owned
-experimental presets live under `.agentic/presets/local/`.
+every role. `sol-codex` preserves the original split: GPT-5.6 Sol high for
+coordination/planning, GPT-5.3 Codex high for native delegated roles, and the
+matching GPT-5.3 Codex Spark model for delegated roles rendered to OpenCode.
+Repository-owned experimental presets live under `.agentic/presets/local/`.
 
 ```bash
 npx workspace-template preset list .
@@ -247,10 +245,10 @@ The disposable checkpoint never copies or exposes source `node_modules`.
 Consequently, JavaScript/TypeScript modules whose verified manifests declare
 dependencies, devDependencies, optionalDependencies, or peerDependencies—and
 selected scripts that explicitly use `node_modules/.bin`—receive a precise
-plan conflict. Dependency-free modules remain eligible. Windows uses a native
-Job Object for whole-tree ownership; POSIX upgrade verification is unavailable
-and fails before payload or lease creation unless an external Ultima-owned
-orchestration capability supplies detached-session containment.
+plan conflict. Dependency-free modules remain eligible. Windows uses a
+native Job Object for whole-tree ownership; POSIX upgrade verification is
+temporarily unavailable and fails before payload or lease creation until
+a native owner for detached sessions is available.
 
 Upgrade uses the installed CLI package as the incoming offline catalog. It
 preserves workspace origin and timestamps, active/local presets, structured

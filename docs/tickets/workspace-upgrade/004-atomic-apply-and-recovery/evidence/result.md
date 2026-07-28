@@ -111,7 +111,7 @@
   remain outside the repository-local rollback promise.
 - Routing distinguishes active `sol-only` (GPT-5.6 Sol/high for all roles) from
   historical `sol-codex` (GPT-5.3 Codex/high delegated roles). Future generated
-  routing work remains FBK-001 scope.
+  routing work remains out of scope.
 
 ### Repair RED/GREEN evidence
 
@@ -143,7 +143,7 @@
   planning when a verified manifest declares dependencies, devDependencies,
   optionalDependencies, or peerDependencies, or a sealed script explicitly
   names `node_modules/.bin`. The isolated copy never receives source
-  `node_modules`; FBK-002 owns a future dependency-capable checkpoint.
+  `node_modules`; dependency-capable checkpoints remain unsupported.
 - Repair C's POSIX measured-containment wording is superseded for the repaired
   diff. A POSIX process group cannot contain `setsid`/detached descendants, so
   upgrade plans and the UPG runner now fail before payload or lease creation on
@@ -159,7 +159,7 @@
   value, redacts before the final UTF-8 byte bound, and conservatively redacts a
   leading partial token after raw-prefix discard.
 - CLI help and public docs describe sealed `--allow-network` authority and the
-  dependency/POSIX FBK-002 limitations. The user-guide routing line is restored
+  dependency/POSIX limitations. The user-guide routing line is restored
   to GPT-5.3-Codex/high.
 
 ### Repair D RED/GREEN evidence
@@ -258,5 +258,4 @@ superseded by this final block.
 - Final cleanup: zero nonbaseline leases, zero mutex owners, no retained
   tarball, and no retained packed-smoke sandbox.
 - Status: UPG-004 closed. POSIX and dependency-backed upgrade verification
-  remain intentionally fail-closed until FBK-002 supplies the required
-  Node-first native control plane.
+  remain intentionally fail-closed without the required native process owner.

@@ -2,7 +2,7 @@
   "$schema": "../preset.schema.json",
   "version": 1,
   "id": "sol-codex",
-  "description": "Use GPT-5.6 Sol for coordination and planning, with a refusal-only Terra bridge to OpenCode Spark for delegated engineering roles.",
+  "description": "Use GPT-5.6 Sol for coordination and planning, with GPT-5.3 Codex natively and GPT-5.3 Codex Spark through OpenCode for delegated engineering roles.",
   "stability": "stable",
   "models": {
     "sol-high": {
@@ -12,44 +12,23 @@
         "opencode": "openai/gpt-5.6-sol"
       }
     },
-    "codex-spark-xhigh": {
-      "reasoningEffort": "xhigh",
+    "codex-high": {
+      "reasoningEffort": "high",
       "targets": {
-        "codex": "gpt-5.3-codex-spark",
+        "codex": "gpt-5.3-codex",
         "opencode": "openai/gpt-5.3-codex-spark"
-      }
-    },
-    "terra-medium": {
-      "reasoningEffort": "medium",
-      "targets": {
-        "codex": "gpt-5.6-terra"
       }
     }
   },
   "roles": {
     "coordinator": "sol-high",
     "planner": "sol-high",
-    "scout": "codex-spark-xhigh",
-    "implementer": "codex-spark-xhigh",
-    "reviewer-spec": "codex-spark-xhigh",
-    "reviewer-code": "codex-spark-xhigh",
-    "reviewer-ops": "codex-spark-xhigh",
-    "repairer": "codex-spark-xhigh",
-    "integrator": "codex-spark-xhigh"
-  },
-  "fallbacks": {
-    "codexChildModelRefusal": {
-      "roles": [
-        "scout",
-        "implementer",
-        "reviewer-spec",
-        "reviewer-code",
-        "reviewer-ops",
-        "repairer",
-        "integrator"
-      ],
-      "brokerModel": "terra-medium",
-      "delegateTarget": "opencode"
-    }
+    "scout": "codex-high",
+    "implementer": "codex-high",
+    "reviewer-spec": "codex-high",
+    "reviewer-code": "codex-high",
+    "reviewer-ops": "codex-high",
+    "repairer": "codex-high",
+    "integrator": "codex-high"
   }
 }

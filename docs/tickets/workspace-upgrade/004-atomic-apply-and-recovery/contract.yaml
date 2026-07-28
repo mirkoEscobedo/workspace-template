@@ -130,8 +130,8 @@ repair_amendments:
       - docs/tickets/workspace-upgrade/**
       - .agentic/managed-files.json
     authority_boundary:
-      - dependency-backed isolated verification is blocked until FBK-002; source node_modules is never copied or exposed
-      - non-Windows upgrade verification is blocked before payload launch until FBK-002 provides a native owner for detached sessions
+      - dependency-backed isolated verification is blocked; source node_modules is never copied or exposed
+      - non-Windows upgrade verification is blocked before payload launch unless a native owner contains detached sessions
       - Windows Job Object ownership behavior remains required
       - signal evidence distinguishes actual POSIX delivery from Windows IPC signal-bridge simulation
       - adoption/create writes are limited to atomic-upgrade manifest compatibility already present in the shared diff

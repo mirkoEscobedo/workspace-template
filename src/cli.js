@@ -136,8 +136,7 @@ Tooling authority:
 
 Upgrade verification authority:
   --allow-network records sealed approval because portable isolation cannot deny external filesystem or network reach
-  Dependency-backed JS/TS verification is unavailable in the isolated checkpoint
-  POSIX detached-session containment requires an external Ultima-owned orchestration capability
+  Dependency-backed JS/TS verification and POSIX detached-session containment are unavailable
 
 Skill update authority:
   --skill <name> --incoming-root <directory> --allow-risky-tool-changes

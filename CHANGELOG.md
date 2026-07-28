@@ -2,17 +2,6 @@
 
 All notable changes to this package are documented here.
 
-## Unreleased
-
-### Runtime ownership
-
-- Preserved the completed FBK-001 declarative conditional-routing contract.
-- Moved refusal handling, control-plane execution, broker behavior, process
-  ownership, OpenCode spawning, activation, and live proof to an external
-  Ultima runtime.
-- Superseded FBK-002 through FBK-006 and removed the uncommitted FBK-002
-  implementation without rewriting history.
-
 ## 0.6.0 — 2026-07-24
 
 ### Frontier Loop workflow

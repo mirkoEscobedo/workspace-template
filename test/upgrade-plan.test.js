@@ -85,7 +85,7 @@ describe("workspace upgrade", () => {
 
     assert.equal(plan.canApply, false);
     assert.equal(plan.conflicts.some((item) =>
-      /dependency-backed verification.*devDependencies.*Ultima/iu.test(item)), true);
+      /dependency-backed verification.*devDependencies/iu.test(item)), true);
     await assert.rejects(() => applyUpgradePlan(plan), /dependency-backed verification/iu);
     assert.equal(await exists(sentinel), false);
   });
@@ -93,7 +93,7 @@ describe("workspace upgrade", () => {
   it("reports the fail-closed POSIX upgrade verification capability conflict", () => {
     assert.match(
       upgradePlan.upgradeVerificationPlatformConflict("linux"),
-      /POSIX.*detached-session.*Ultima/iu,
+      /POSIX.*detached-session.*native process owner/iu,
     );
     assert.equal(upgradePlan.upgradeVerificationPlatformConflict("win32"), null);
   });

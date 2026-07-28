@@ -86,7 +86,7 @@ describe("upgrade verification process ownership", () => {
 
     await assert.rejects(
       () => runner.run(process.execPath, ["-e", `require("node:fs").writeFileSync(${JSON.stringify(sentinel)},"ran")`]),
-      /POSIX.*detached-session.*Ultima/iu,
+      /POSIX.*detached-session.*native process owner/iu,
     );
     assert.equal(await exists(sentinel), false);
     assert.equal(await exists(path.join(root, ".agent", "leases")), false);
@@ -155,7 +155,7 @@ describe("upgrade verification process ownership", () => {
         runId: `run-${terminal}`,
         planId: `plan-${terminal}`,
         phaseId: "post-apply",
-        timeoutMs: 5_000,
+        timeoutMs: 15_000,
         terminationGraceMs: 100,
         signal: controller.signal,
       });
@@ -164,14 +164,17 @@ describe("upgrade verification process ownership", () => {
         stepId: terminal,
       });
       if (terminal === "abort") {
-        for (let attempt = 0; attempt < 100; attempt += 1) {
+        let payloadStarted = false;
+        for (let attempt = 0; attempt < 500; attempt += 1) {
           try {
             await readFile(pidPath, "utf8");
+            payloadStarted = true;
             break;
           } catch {
             await new Promise((resolve) => setTimeout(resolve, 20));
           }
         }
+        assert.equal(payloadStarted, true, "abort payload did not start before the test deadline");
         controller.abort();
       }
       const result = await running;

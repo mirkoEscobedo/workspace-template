@@ -34,4 +34,20 @@ describe("Frontier harness preset rendering", () => {
       }
     }
   });
+
+  it("uses the OpenCode Spark model for sol-codex workers", async () => {
+    const preset = (await loadBuiltInPresets()).find((item) => item.id === "sol-codex");
+    const resolved = resolvePreset(preset, ["codex", "opencode"]);
+    const roleIds = structuredClone(PREFERRED_ROLE_IDS);
+    const codex = await renderCodexArtifacts(resolved, roleIds);
+    const codexConfig = codex.find((item) => item.path === ".codex/config.toml").content.toString("utf8");
+    assert.match(codexConfig, /^default_subagent_model = "gpt-5\.3-codex"$/m);
+
+    const opencode = await renderOpenCodeArtifacts(resolved, roleIds);
+    const document = JSON.parse(opencode.find((item) => item.path === "opencode.json").content.toString("utf8"));
+    assert.equal(
+      document.agent[roleIds.opencode.implementer].model,
+      "openai/gpt-5.3-codex-spark",
+    );
+  });
 });
