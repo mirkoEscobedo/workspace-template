@@ -44,6 +44,39 @@ describe("upgrade apply transaction", () => {
     assert.equal(report.ok, true);
   });
 
+  it("provides a local Git HEAD inside disposable verification copies", { skip: process.platform !== "win32" }, async () => {
+    const root = await fixture();
+    const packagePath = path.join(root, "package.json");
+    const packageJson = JSON.parse(await readFile(packagePath, "utf8"));
+    packageJson.scripts.check = "git rev-parse HEAD";
+    await writeFile(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
+    for (const args of [
+      ["init"],
+      ["config", "user.email", "workspace-template@example.invalid"],
+      ["config", "user.name", "Workspace Template Test"],
+      ["add", "."],
+      ["commit", "-m", "fixture"],
+    ]) {
+      const result = spawnSync("git", args, { cwd: root, encoding: "utf8", shell: false });
+      assert.equal(result.status, 0, result.stderr);
+    }
+    const sourceHead = spawnSync("git", ["rev-parse", "HEAD"], {
+      cwd: root,
+      encoding: "utf8",
+      shell: false,
+    }).stdout.trim();
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+
+    const report = await applyUpgradePlan(plan);
+
+    assert.equal(report.ok, true);
+    assert.equal(spawnSync("git", ["rev-parse", "HEAD"], {
+      cwd: root,
+      encoding: "utf8",
+      shell: false,
+    }).stdout.trim(), sourceHead);
+  });
+
   it("rejects a stale reviewed plan before writing", async () => {
     const root = await fixture();
     const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });

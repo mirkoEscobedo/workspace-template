@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { lstat, readFile, rename, rm } from "node:fs/promises";
+import { lstat, readFile, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { createCheckpoint, createFileBackup, restoreFileBackup } from "../checkpoints/index.js";
 import { doctorProject } from "../doctor.js";
@@ -146,6 +146,43 @@ async function installVerificationDependencies(root, authority, runner, options,
   return results;
 }
 
+async function initializeVerificationGit(root, runner, options, context) {
+  const results = [];
+  const run = async (args, stepId) => {
+    const result = await runner("git", args, {
+      cwd: root,
+      timeout: options.timeout,
+      maxOutputBytes: options.maxOutputBytes,
+      signal: options.signal,
+      phaseId: context.phaseId,
+      stepId,
+    });
+    const recorded = { ...result, state: result.status === 0 ? "passed" : "failed" };
+    results.push(recorded);
+    if (result.status !== 0) {
+      throw new Error(`Git initialization failed in disposable verification copy at ${stepId}`);
+    }
+  };
+  await run(["init", "--quiet"], "git-checkpoint:init");
+  const excludePath = path.join(root, ".git", "info", "exclude");
+  await ensureDirectory(path.dirname(excludePath));
+  await writeFile(excludePath, [
+    ".agent/",
+    ".agentic/verification-scratch/",
+    ".agentic/transactions/",
+    "node_modules/",
+    "",
+  ].join("\n"));
+  await run(["add", "-A"], "git-checkpoint:add");
+  await run([
+    "-c", "user.name=workspace-template",
+    "-c", "user.email=workspace-template@example.invalid",
+    "commit", "--quiet", "--no-gpg-sign", "--no-verify",
+    "-m", "workspace-template verification checkpoint",
+  ], "git-checkpoint:commit");
+  return results;
+}
+
 async function fullVerification(root, options, sealedAuthority, context, frozenWorkspace, runtime) {
   const checkpointAuthority = await upgradeVerificationAuthority(root, frozenWorkspace);
   assertLocalVerificationAuthority(checkpointAuthority);
@@ -154,7 +191,7 @@ async function fullVerification(root, options, sealedAuthority, context, frozenW
   }
   const dependencyInstalls = sealedDependencyInstalls(sealedAuthority);
   let runner = runtime.runner;
-  if (dependencyInstalls.length > 0 || !runtime.verifier) {
+  if (dependencyInstalls.length > 0 || context.gitRepository || !runtime.verifier) {
     const scratchRoot = path.join(root, ".agentic", "verification-scratch", context.phaseId);
     const scratchEnvironment = {
       ...process.env,
@@ -185,11 +222,18 @@ async function fullVerification(root, options, sealedAuthority, context, frozenW
       runner = ownedRunner.run.bind(ownedRunner);
     }
   }
+  const gitCheckpointResults = context.gitRepository && !runtime.verifier
+    ? await initializeVerificationGit(root, runner, options, context)
+    : [];
   const dependencyInstallResults = dependencyInstalls.length > 0
     ? await installVerificationDependencies(root, sealedAuthority, runner, options, context)
     : [];
   if (runtime.verifier) {
-    return { ...await runtime.verifier(root), dependencyInstalls: dependencyInstallResults };
+    return {
+      ...await runtime.verifier(root),
+      gitCheckpoint: gitCheckpointResults,
+      dependencyInstalls: dependencyInstallResults,
+    };
   }
   const report = await verifyWorkspace(root, frozenWorkspace, {
     scope: "all",
@@ -219,6 +263,7 @@ async function fullVerification(root, options, sealedAuthority, context, frozenW
     }
     report.rootAggregate = rootReport;
   }
+  report.gitCheckpoint = gitCheckpointResults;
   report.dependencyInstalls = dependencyInstallResults;
   return report;
 }
@@ -456,7 +501,11 @@ async function applyUpgradePlanInternal(plan, options = {}, runtime = {}) {
       root,
       options,
       plan.metadata.verificationCommands,
-      { planId: plan.planId, phaseId: "pre-mutation" },
+      {
+        planId: plan.planId,
+        phaseId: "pre-mutation",
+        gitRepository: plan.preconditions.some((item) => item.kind === "git-root"),
+      },
       frozenWorkspace,
       runtime,
     );
@@ -486,7 +535,11 @@ async function applyUpgradePlanInternal(plan, options = {}, runtime = {}) {
         root,
         options,
         plan.metadata.verificationCommands,
-        { planId: plan.planId, phaseId: "post-apply" },
+        {
+          planId: plan.planId,
+          phaseId: "post-apply",
+          gitRepository: plan.preconditions.some((item) => item.kind === "git-root"),
+        },
         frozenWorkspace,
         runtime,
       );
