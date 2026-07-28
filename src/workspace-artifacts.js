@@ -256,6 +256,25 @@ export async function projectionArtifacts(agents) {
   return artifacts.sort((left, right) => left.path.localeCompare(right.path));
 }
 
+export async function disabledProjectionArtifact(agents, reason) {
+  const lock = await skillLock();
+  const skillNames = Object.keys(lock.skills).sort();
+  return {
+    path: ".agentic/managed-projections.json",
+    content: Buffer.from(JSON.stringify({
+      version: 2,
+      generator: "workspace-template",
+      generatedAt: null,
+      canonical: ".agentic/skills",
+      mode: "disabled",
+      reason,
+      agentTargets: [...agents].sort(),
+      skillNames,
+      projections: {},
+    }, null, 2) + "\n"),
+  };
+}
+
 export function normalizeArtifact(artifact) {
   const content = normalizeTextLineEndings(
     Buffer.isBuffer(artifact.content) ? artifact.content : Buffer.from(String(artifact.content), "utf8"),
@@ -306,6 +325,7 @@ function serializedWorkspace(workspace) {
     root: ".",
     kind: workspace.kind,
     fingerprint: workspace.fingerprint,
+    exclusions: workspace.exclusions ?? [],
     evidence: workspace.evidence ?? [],
     rootModule: workspace.rootModule ? {
       id: workspace.rootModule.id,

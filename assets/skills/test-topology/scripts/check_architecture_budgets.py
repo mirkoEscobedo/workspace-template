@@ -81,7 +81,7 @@ def main() -> int:
         count = loc(path)
         is_test = (
             matches(relative, test_globs)
-            or "tests" in relative_path.parts
+            or any(part in ("test", "tests", "__tests__") for part in relative_path.parts)
             or relative_path.name.startswith("test_")
             or any(marker in relative_path.name for marker in (".test.", ".spec.", "_test.", "_tests."))
         )

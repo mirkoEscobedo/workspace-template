@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { describe, it } from "node:test";
 import { commandExists, runCommandCapture } from "../src/process-utils.js";
@@ -87,6 +87,51 @@ concentration:
     const report = JSON.parse(result.stdout);
     assert.equal(report.violations.some((item) => item.kind === "locked-file-growth"), true);
     assert.equal(report.warnings.some((item) => item.kind === "test-warning"), true);
+  });
+
+  it("refuses to overwrite a schema-v2 frontier with the generic writer", async () => {
+    const track = await temporaryDirectory("caw-schema-v2-frontier-");
+    const ticket = path.join(track, "001-first");
+    await mkdir(ticket, { recursive: true });
+    await writeFile(path.join(ticket, "contract.yaml"), `
+id: T-001
+kind: implementation
+status: ready
+risk_lane: 1
+public_outcome: observable behavior
+blocked_by: []
+write_set:
+  - src/example.js
+conflict_keys: []
+human_gates: []
+review_lenses:
+  - code-test
+preflight_required: true
+budgets:
+  zero_owned_processes_after_run: true
+`.trimStart());
+    const frontierPath = path.join(track, "frontier.json");
+    const original = `${JSON.stringify({ schema_version: 2, preserved: true }, null, 2)}\n`;
+    await writeFile(frontierPath, original);
+    const script = path.resolve("assets", "scripts", "validate_ticket_pack.py");
+    const result = runPython(["-B", "-S", script, track, "--write-frontier", "--json"], { cwd: path.dirname(script) });
+    assert.equal(result.status, 1);
+    assert.match(result.stdout, /refusing to overwrite schema-v2 frontier/i);
+    assert.equal(await readFile(frontierPath, "utf8"), original);
+  });
+
+  it("classifies package-local test directories as tests", async () => {
+    const root = await temporaryDirectory("caw-package-test-classification-");
+    const packageTest = path.join(root, "packages", "worker", "test");
+    await mkdir(packageTest, { recursive: true });
+    await writeFile(path.join(packageTest, "runner.js"), "// test fixture\n");
+    const config = path.join(root, "budgets.yaml");
+    await writeFile(config, "file_defaults:\n  test_warn_loc: 500\nconcentration:\n  warn_top_10_share: 1.0\n");
+    const script = path.resolve("assets", "scripts", "check_architecture_budgets.py");
+    const result = runPython(["-B", "-S", script, "--root", root, "--config", config], { cwd: path.dirname(script) });
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.files["packages/worker/test/runner.js"].kind, "test");
   });
 
 });

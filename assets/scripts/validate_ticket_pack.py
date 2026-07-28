@@ -196,6 +196,18 @@ def main() -> int:
         "warnings": warnings,
     }
 
+    existing_frontier = track / "frontier.json"
+    if args.write_frontier and existing_frontier.exists():
+        try:
+            existing_schema = json.loads(existing_frontier.read_text(encoding="utf-8")).get("schema_version")
+        except (OSError, json.JSONDecodeError):
+            existing_schema = None
+        if existing_schema == 2:
+            errors.append(
+                "refusing to overwrite schema-v2 frontier; use the track-declared status-preserving updater"
+            )
+            frontier["errors"] = errors
+
     if args.write_frontier and not errors:
         (track / "frontier.json").write_text(json.dumps(frontier, indent=2) + "\n", encoding="utf-8")
     if args.as_json:

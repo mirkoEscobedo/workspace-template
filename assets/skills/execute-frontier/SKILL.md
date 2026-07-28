@@ -45,7 +45,7 @@ Lane 3 always has one writer.
 ## Continuous local loop
 
 1. Load `master-plan.md`, `track.yaml`, `frontier.json`, policies, the current Git state, and retained evidence. Conversation memory is useful context but is not canonical state.
-2. Validate the ticket pack and recompute the local frontier.
+2. Validate the ticket pack. When `frontier.json` is schema v2, run the updater declared by `track.yaml`; never use the generic schema-v1 `--write-frontier` path for that track.
 3. Select the first ready ticket by declared priority unless the user explicitly selected another.
 4. Run read-only preflight when the contract is uncertain, touches a locked file, or is Lane 2–3:
    - specification/authority lens;
@@ -57,7 +57,7 @@ Lane 3 always has one writer.
 8. Run the contract-required review lenses in fresh contexts. Reviewers receive the frozen contract, exact diff, and evidence—not the implementer's persuasive narrative.
 9. On failure, dispatch `repair-ticket` only for the failed axes. Re-run every review whose domain the repair touched.
 10. Send the passed candidate to the neutral integrator. It checks actual scope, review evidence, budgets, process leases, and landing verification; resolves only mechanical conflicts; then serially commits or cherry-picks.
-11. Append evidence, update statuses and metrics, recompute `frontier.json`, and immediately continue. Do not ask whether to proceed between ordinary tickets.
+11. Append evidence, update statuses and metrics, run the track-declared status-preserving updater, and immediately continue. For track 13 use `node docs/tickets/13-post-032-compiled-frontier/update-frontier.mjs --status ID=STATUS`. Do not ask whether to proceed between ordinary tickets.
 
 ## Compatibility fallback when subagents are unavailable
 

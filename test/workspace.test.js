@@ -171,6 +171,54 @@ describe("workspace discovery and orchestration", () => {
     assert.deepEqual(workspace.modules.map((module) => module.project).sort(), ["react", "rust"]);
   });
 
+  it("discovers root Cargo and nested Node modules while excluding reviewed non-product trees", async () => {
+    const root = await temporaryDirectory("caw-polyglot-exclusions-");
+    await writeFile(path.join(root, "Cargo.toml"), '[package]\nname = "kernel"\nversion = "0.1.0"\n');
+    await writeFile(path.join(root, "Cargo.lock"), "# lock\n");
+    await createNodeModule(root, "packages/worker", {
+      name: "@demo/worker",
+      scripts: { build: "tsc -p tsconfig.json", test: "node --test" },
+    });
+    await writeFile(path.join(root, "packages", "worker", "package-lock.json"), "{}\n");
+    await createNodeModule(root, "inspiration/reference-a", { name: "duplicate-reference" });
+    await createNodeModule(root, "inspiration/reference-b", { name: "duplicate-reference" });
+    await mkdir(path.join(root, ".agentic"), { recursive: true });
+    await writeJsonFile(path.join(root, ".agentic", "workspace.overrides.json"), {
+      version: 1,
+      excludePaths: ["inspiration/**"],
+      modules: {},
+    });
+
+    const workspace = await discoverWorkspace(root, { workspace: "all" });
+    assert.equal(workspace.canUse, true, workspace.conflicts.join("\n"));
+    assert.equal(workspace.kind, "polyglot");
+    assert.deepEqual(workspace.exclusions, ["inspiration/**"]);
+    assert.deepEqual(
+      workspace.modules.map(({ id, path: modulePath, project }) => ({ id, path: modulePath, project })),
+      [
+        { id: "kernel", path: ".", project: "rust" },
+        { id: "demo-worker", path: "packages/worker", project: "typescript" },
+      ],
+    );
+
+    const calls = [];
+    const report = await verifyWorkspace(root, workspace, {
+      scope: "all",
+      runner: async (command, args, options) => {
+        calls.push({
+          path: path.relative(root, options.cwd).replaceAll("\\", "/") || ".",
+          command,
+          args,
+        });
+        return { status: 0, signal: null, stdout: "", stderr: "" };
+      },
+    });
+    assert.equal(report.ok, true);
+    assert.deepEqual(new Set(report.selected), new Set(["demo-worker", "kernel"]));
+    assert.deepEqual(calls.filter((call) => call.path === ".").map(({ command }) => command), ["cargo", "cargo", "cargo"]);
+    assert.deepEqual(calls.filter((call) => call.path === "packages/worker").map(({ command }) => command), ["npm", "npm"]);
+  });
+
   it("blocks overlapping module roots and conflicting lockfile ownership", async () => {
     const root = await temporaryDirectory("caw-overlap-workspace-");
     await writeJsonFile(path.join(root, "package.json"), {

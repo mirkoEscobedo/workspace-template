@@ -71,6 +71,19 @@ async function expandPatterns(root, patterns, directories) {
   });
 }
 
+function excludeReviewedPaths(directories, patterns = []) {
+  const exclusions = patterns.map((raw) => {
+    const normalized = toPosixPath(String(raw)).replace(/^\.\//, "").replace(/\/$/, "");
+    return {
+      base: normalized.replace(/\/\*\*$/, ""),
+      regex: globToRegExp(normalized),
+    };
+  });
+  return directories.filter((relative) => !exclusions.some(({ base, regex }) => (
+    relative === base || relative.startsWith(`${base}/`) || regex.test(relative)
+  )));
+}
+
 async function rootWorkspacePatterns(root) {
   const patterns = [];
   const evidence = [];
@@ -118,7 +131,12 @@ function nodeCommands(packageJson, manager) {
   const scripts = packageJson?.scripts ?? {};
   const choose = (...names) => names.find((name) => typeof scripts[name] === "string");
   const aggregate = choose("check", "verify", "validate", "ci");
-  const ordered = [choose("typecheck", "type-check", "check:types", "types"), choose("lint"), choose("test")].filter(Boolean);
+  const ordered = [
+    choose("typecheck", "type-check", "check:types", "types"),
+    choose("lint"),
+    choose("build"),
+    choose("test"),
+  ].filter(Boolean);
   const run = (name) => manager === "yarn" ? { command: "yarn", args: [name] } : { command: manager, args: ["run", name] };
   return {
     scripts: Object.keys(scripts).sort(),
@@ -288,9 +306,12 @@ function connectDependencies(modules, overrides) {
 
 export async function discoverWorkspace(rootDirectory, options = {}) {
   const root = path.resolve(rootDirectory);
-  const directories = await walkDirectories(root, options.maxDepth ?? 7);
-  const { patterns, evidence } = await rootWorkspacePatterns(root);
   const overrides = await loadWorkspaceOverrides(root);
+  const directories = excludeReviewedPaths(
+    await walkDirectories(root, options.maxDepth ?? 7),
+    overrides.excludePaths,
+  );
+  const { patterns, evidence } = await rootWorkspacePatterns(root);
   let candidates = patterns.length > 0 ? await expandPatterns(root, patterns, directories) : [];
 
   if (options.workspace === "all" || (options.workspace !== "single" && candidates.length === 0)) {
@@ -361,6 +382,7 @@ export async function discoverWorkspace(rootDirectory, options = {}) {
     serializedRoot: ".",
     kind,
     evidence,
+    exclusions: overrides.excludePaths ?? [],
     rootModule,
     modules: selectedSorted,
     warnings,
@@ -370,6 +392,7 @@ export async function discoverWorkspace(rootDirectory, options = {}) {
   workspace.fingerprint = hashText(canonicalJson({
     kind: workspace.kind,
     evidence: workspace.evidence,
+    exclusions: workspace.exclusions,
     rootModule: workspace.rootModule ? (({ commands: _commands, ...module }) => module)(workspace.rootModule) : null,
     modules: workspace.modules.map(({ commands: _commands, ...module }) => module),
   }));

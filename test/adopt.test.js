@@ -272,9 +272,54 @@ describe("adoptProject", () => {
     assert.equal(execution.result.ok, true, JSON.stringify(execution.result, null, 2));
     const config = await readJson(path.join(root, ".agentic", "config.json"));
     assert.equal(config.hostBundles, "preserve");
+    assert.deepEqual(config.projections, {
+      mode: "disabled",
+      reason: "product-owned host bundles are preserved",
+      agentTargets: ["codex", "opencode"],
+    });
+    const projections = await readJson(path.join(root, ".agentic", "managed-projections.json"));
+    assert.equal(projections.mode, "disabled");
     const doctor = await doctorProject(root);
     assert.equal(doctor.ok, true, doctor.errors.join("\n"));
+    assert.doesNotMatch(doctor.warnings.join("\n"), /projection (?:missing|drift)/i);
     assert.match(doctor.warnings.join("\n"), /host bundle.*preserved|managed projection.*not required/i);
+  });
+
+  it("records an exact rejection of a stale AGENTS proposal", async () => {
+    const root = await existingTypeScriptRepo({ customAgents: true, tickets: false });
+    const proposal = path.join(root, ".agentic", "proposals", "AGENTS.md");
+    await mkdir(path.dirname(proposal), { recursive: true });
+    await writeFile(proposal, "# stale proposal\n");
+    git(root, ["add", "."]);
+    git(root, ["-c", "user.name=Test", "-c", "user.email=test@example.com", "commit", "-m", "stale proposal"]);
+
+    const execution = await adoptProject(adoptOptions(root, [
+      "--host-bundles", "preserve",
+      "--agents-proposal", "reject",
+      "--no-tickets",
+    ]));
+    assert.equal(execution.result.ok, true, JSON.stringify(execution.result, null, 2));
+    const disposition = await readJson(path.join(root, ".agentic", "proposal-disposition.json"));
+    assert.equal(disposition.status, "rejected");
+    assert.equal(disposition.path, ".agentic/proposals/AGENTS.md");
+    assert.equal(disposition.hash, await hashFile(proposal));
+    const doctor = await doctorProject(root);
+    assert.doesNotMatch(doctor.warnings.join("\n"), /proposal is awaiting/i);
+  });
+
+  it("preserves reviewed project memory and records its exact managed hash", async () => {
+    const root = await existingTypeScriptRepo({ tickets: false });
+    await mkdir(path.join(root, "docs", "agent"), { recursive: true });
+    const projectMap = path.join(root, "docs", "agent", "PROJECT_MAP.md");
+    await writeFile(projectMap, "# Project map\n\nReviewed repository facts.\n");
+    git(root, ["add", "."]);
+    git(root, ["-c", "user.name=Test", "-c", "user.email=test@example.com", "commit", "-m", "reviewed memory"]);
+
+    const execution = await adoptProject(adoptOptions(root, ["--agent-docs", "preserve", "--no-tickets"]));
+    assert.equal(execution.result.ok, true, JSON.stringify(execution.result, null, 2));
+    assert.equal(await readFile(projectMap, "utf8"), "# Project map\n\nReviewed repository facts.\n");
+    const managed = await readJson(path.join(root, ".agentic", "managed-files.json"));
+    assert.equal(managed.files["docs/agent/PROJECT_MAP.md"].hash, await hashFile(projectMap));
   });
 
   it("round-trips and revalidates a sealed preserve-host-bundles plan", async () => {

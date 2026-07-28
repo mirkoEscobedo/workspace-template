@@ -116,6 +116,8 @@ Adopt defaults:
   --workspace auto|single|all
   --nested-instructions auto|always|never
   --host-bundles managed|preserve (default managed)
+  --agents-proposal propose|reject (default propose)
+  --agent-docs template|preserve (default template)
   --plan-out <file> / --apply-plan <file>
 
 Shared advanced options:

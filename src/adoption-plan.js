@@ -24,6 +24,7 @@ import {
   canonicalSkillArtifacts,
   createAgenticConfig,
   dependencyNote,
+  disabledProjectionArtifact,
   harnessArtifacts,
   policyArtifacts,
   presetCatalogArtifacts,
@@ -278,6 +279,34 @@ async function classifyAgents(root, context, ownership, conflictMode) {
   return { ...classified, action: classified.action === "noop" ? "noop" : "propose", sourcePath: "AGENTS.md", ownership: "proposal" };
 }
 
+async function proposalDispositionArtifact(root, mode) {
+  if (mode !== "reject") return undefined;
+  const relative = ".agentic/proposals/AGENTS.md";
+  const destination = path.join(root, ...relative.split("/"));
+  return {
+    path: ".agentic/proposal-disposition.json",
+    content: jsonBuffer({
+      version: 1,
+      path: relative,
+      status: "rejected",
+      hash: await exists(destination) ? await hashFile(destination) : null,
+      reason: "repository-owned AGENTS.md remains canonical; generated proposal was explicitly rejected",
+    }),
+    reason: "record the reviewed AGENTS proposal disposition",
+  };
+}
+
+async function projectMemoryForAdoption(root, mode) {
+  const artifacts = await projectMemoryArtifacts();
+  if (mode !== "preserve") return artifacts;
+  return Promise.all(artifacts.map(async (artifact) => {
+    const destination = path.join(root, ...artifact.path.split("/"));
+    return await exists(destination)
+      ? { ...artifact, content: await readFile(destination), reason: "preserve reviewed project memory and bind its exact hash" }
+      : artifact;
+  }));
+}
+
 function commandVerification(snapshot, options) {
   const steps = snapshot.commands?.fullSteps ?? [];
   return {
@@ -343,6 +372,13 @@ async function desiredArtifacts(snapshot, options, context, selection, roleIds, 
     presetState,
     hostBundles: options.hostBundles ?? "managed",
   });
+  if ((options.hostBundles ?? "managed") === "preserve") {
+    config.projections = {
+      mode: "disabled",
+      reason: "product-owned host bundles are preserved",
+      agentTargets: [...context.agents].sort(),
+    };
+  }
   const profile = createProfile({ project: context.project, style: context.style, tdd: context.tdd, agents: context.agents, mode, presetState });
   const artifacts = [
     { path: ".agentic/README.md", content: agenticReadme(mode) },
@@ -356,9 +392,12 @@ async function desiredArtifacts(snapshot, options, context, selection, roleIds, 
     ...(await policyArtifacts(selection.resolved, presetState)),
     ...(await presetCatalogArtifacts()),
     ...(await scriptArtifacts()),
-    ...(options.docs === false ? [] : await projectMemoryArtifacts()),
+    ...(options.docs === false ? [] : await projectMemoryForAdoption(snapshot.root, options.agentDocs)),
     ...(await harnessArtifacts(context.agents, selection.resolved, roleIds)),
-    ...(await projectionArtifacts(context.agents)),
+    ...((options.hostBundles ?? "managed") === "preserve"
+      ? [await disabledProjectionArtifact(context.agents, "product-owned host bundles are preserved")]
+      : await projectionArtifacts(context.agents)),
+    ...([await proposalDispositionArtifact(snapshot.root, options.agentsProposal)].filter(Boolean)),
     ...(await workspaceStateArtifacts(snapshot.workspace, context, { nestedInstructions: options.nestedInstructions ?? "auto" })),
     ...(options.tickets === false ? [] : await ticketRetrofitArtifacts(snapshot.root, snapshot.ticketTracks, { ...options, presetState })),
   ];
@@ -417,7 +456,20 @@ export async function buildAdoptionPlan(snapshot, options) {
   context.presetState = presetState;
   const operations = [];
 
-  operations.push(await classifyAgents(snapshot.root, context, ownership, options.conflict));
+  if (options.agentsProposal === "reject") {
+    const destination = path.join(snapshot.root, "AGENTS.md");
+    operations.push({
+      path: "AGENTS.md",
+      action: "preserve",
+      currentHash: await hashFile(destination),
+      proposedHash: await hashFile(destination),
+      reason: "repository-owned AGENTS.md remains canonical; generated proposal explicitly rejected",
+      ownership: "user",
+      blocking: false,
+    });
+  } else {
+    operations.push(await classifyAgents(snapshot.root, context, ownership, options.conflict));
+  }
   for (const artifact of await desiredArtifacts(snapshot, options, context, selection, roleIds, presetState)) {
     operations.push(await classifyArtifact(snapshot.root, artifact, ownership, options.conflict));
   }
@@ -450,6 +502,8 @@ export async function buildAdoptionPlan(snapshot, options) {
     tickets: options.tickets !== false,
     conflict: options.conflict,
     hostBundles: options.hostBundles ?? "managed",
+    agentsProposal: options.agentsProposal ?? "propose",
+    agentDocs: options.agentDocs ?? "template",
     preset: presetId,
   };
   const preconditions = await repositoryPreconditions(

@@ -484,26 +484,46 @@ export async function doctorProject(rootDirectory) {
   await validateSkillLock(root, report.skills, report);
 
   if (config) {
-    try {
-      report.projections = await projectionStatus(root);
-      for (const projection of report.projections.results) {
-        if (!projection.exists) report.warnings.push(`projection missing for ${projection.agent}`);
-        else if (!projection.inSync) report.warnings.push(`projection drift detected for ${projection.agent}`);
-        if (!projection.instructionExists) {
-          report.warnings.push(`${projection.instructionFile} is missing for ${projection.agent}; AGENTS.md will not be loaded automatically`);
-        } else if (!projection.instructionLinked) {
-          report.warnings.push(`${projection.instructionFile} does not import AGENTS.md for ${projection.agent}; custom file was preserved`);
+    if (config.projections?.mode === "disabled") {
+      report.projections = {
+        mode: "disabled",
+        reason: config.projections.reason,
+        agentTargets: config.projections.agentTargets ?? config.agentTargets ?? [],
+        results: [],
+      };
+      report.checks.projections = "disabled";
+    } else {
+      try {
+        report.projections = await projectionStatus(root);
+        for (const projection of report.projections.results) {
+          if (!projection.exists) report.warnings.push(`projection missing for ${projection.agent}`);
+          else if (!projection.inSync) report.warnings.push(`projection drift detected for ${projection.agent}`);
+          if (!projection.instructionExists) {
+            report.warnings.push(`${projection.instructionFile} is missing for ${projection.agent}; AGENTS.md will not be loaded automatically`);
+          } else if (!projection.instructionLinked) {
+            report.warnings.push(`${projection.instructionFile} does not import AGENTS.md for ${projection.agent}; custom file was preserved`);
+          }
         }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        report.errors.push(`projection status failed: ${message}`);
       }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      report.errors.push(`projection status failed: ${message}`);
     }
     await validateHarnessConfiguration(root, config, managedFiles, report);
   }
 
-  if (await exists(path.join(root, ".agentic", "proposals", "AGENTS.md"))) {
-    report.warnings.push("an AGENTS.md proposal is awaiting manual integration");
+  const agentsProposal = path.join(root, ".agentic", "proposals", "AGENTS.md");
+  if (await exists(agentsProposal)) {
+    const dispositionPath = path.join(root, ".agentic", "proposal-disposition.json");
+    let rejected = false;
+    if (await exists(dispositionPath)) {
+      const disposition = await readJsonForDoctor(dispositionPath, report, "proposal disposition");
+      rejected = disposition?.status === "rejected"
+        && disposition.path === ".agentic/proposals/AGENTS.md"
+        && disposition.hash === await hashFile(agentsProposal);
+    }
+    if (!rejected) report.warnings.push("an AGENTS.md proposal is awaiting manual integration");
+    else report.checks.agentsProposal = "rejected";
   }
   if (!(await exists(path.join(root, "docs", "agent", "PROJECT_MAP.md")))) {
     report.warnings.push("durable docs/agent planning memory is not installed");

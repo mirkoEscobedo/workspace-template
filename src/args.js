@@ -146,6 +146,8 @@ function defaultsFor(command, subcommand) {
       workspace: "auto",
       nestedInstructions: "auto",
       hostBundles: "managed",
+      agentsProposal: "propose",
+      agentDocs: "template",
     };
   }
   return {
@@ -193,6 +195,8 @@ function validateAdopt(options) {
   if (!["auto", "single", "all"].includes(options.workspace)) throw new Error("--workspace must be auto, single, or all");
   if (!["auto", "always", "never"].includes(options.nestedInstructions)) throw new Error("--nested-instructions must be auto, always, or never");
   if (!["managed", "preserve"].includes(options.hostBundles)) throw new Error("--host-bundles must be managed or preserve");
+  if (!["propose", "reject"].includes(options.agentsProposal)) throw new Error("--agents-proposal must be propose or reject");
+  if (!["template", "preserve"].includes(options.agentDocs)) throw new Error("--agent-docs must be template or preserve");
 }
 
 function validateAdvanced(command, options) {
@@ -301,6 +305,8 @@ export function parseArgs(argv) {
       case "--workspace": options.workspace = valueFor().toLowerCase(); break;
       case "--nested-instructions": options.nestedInstructions = valueFor().toLowerCase(); break;
       case "--host-bundles": options.hostBundles = valueFor().toLowerCase(); break;
+      case "--agents-proposal": options.agentsProposal = valueFor().toLowerCase(); break;
+      case "--agent-docs": options.agentDocs = valueFor().toLowerCase(); break;
       case "--module": push(options, "modules", valueFor()); break;
       case "--scope": options.scope = valueFor().toLowerCase(); break;
       case "--concurrency": options.concurrency = integer(valueFor(), option); break;
