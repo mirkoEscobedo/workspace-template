@@ -86,7 +86,7 @@ describe("upgrade verification process ownership", () => {
 
     await assert.rejects(
       () => runner.run(process.execPath, ["-e", `require("node:fs").writeFileSync(${JSON.stringify(sentinel)},"ran")`]),
-      /POSIX.*detached-session.*FBK-002/iu,
+      /POSIX.*detached-session.*Ultima/iu,
     );
     assert.equal(await exists(sentinel), false);
     assert.equal(await exists(path.join(root, ".agent", "leases")), false);

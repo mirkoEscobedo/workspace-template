@@ -181,7 +181,11 @@ export async function planUpgradeArtifacts(snapshot, options = {}) {
     } : presetState, presetState)).filter((item) => item.path !== ".agentic/policies/model-routing.yaml"),
   ];
   const operations = [];
-  for (const item of presetPlan.operations.filter((entry) => entry.path !== ".agentic/managed-files.json")) {
+  const presetInternalPaths = new Set([
+    ".agentic/managed-files.json",
+    ".agentic/preset-report.json",
+  ]);
+  for (const item of presetPlan.operations.filter((entry) => !presetInternalPaths.has(entry.path))) {
     const record = snapshot.managed.files?.[item.path];
     const structured = snapshot.managed.settings?.[item.path];
     const identityFile = [".agentic/config.json", ".agentic/profile.json"].includes(item.path);

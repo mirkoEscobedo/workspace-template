@@ -1,5 +1,4 @@
 # FBK-004 Evidence
 
-Store the full transition matrix, persisted refusal examples, child-identity
-negative proof, generated instruction comparison, scheduling/writer evidence,
-exact diff, and three independent review reports here.
+No implementation was started or landed. The ticket is superseded by D007 and
+runtime refusal handling belongs to Ultima.

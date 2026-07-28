@@ -90,5 +90,8 @@ Frontier role.
 
 ## Newly visible work
 
-- Implement preset validation and truthful rendering in FBK-001.
-- Preserve catalog and prior-workspace compatibility in FBK-005.
+- FBK-001 completed preset validation, truthful rendering, and atomic
+  materialization.
+- The former FBK-005 follow-on is superseded by
+  [D007](D007-ultima-runtime-ownership.md); runtime delivery and orchestration
+  belong to Ultima.

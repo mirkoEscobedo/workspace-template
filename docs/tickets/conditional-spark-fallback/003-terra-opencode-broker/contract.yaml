@@ -2,93 +2,41 @@ schema_version: 1
 id: FBK-003
 title: Terra OpenCode broker
 legacy_ids: []
-status: blocked
+status: superseded
+superseded_by: D007
+supersession_reason: Runtime broker execution and OpenCode spawning moved to Ultima before this ticket started.
 parent: null
-public_outcome: The generated Terra transport broker can make exactly one safe, policy-derived OpenCode Spark xhigh semantic-role attempt from a frozen root-contained packet.
+public_outcome: No workspace-template runtime broker is implemented; Ultima owns broker execution.
 behaviors:
-  - accept only one eligible semantic role, a validated repository root, root-contained frozen packet files, run/ticket/agent IDs, and bounded deadline
-  - map the semantic role to the active policy's OpenCode role ID and verify its Spark model and xhigh variant before spawn
-  - resolve opencode on POSIX and opencode.cmd or its underlying executable on Windows without a shell
-  - construct the fixed argv opencode run --pure --agent ROLE --model openai/gpt-5.3-codex-spark --variant xhigh --format json --dir ROOT --file PACKET... FIXED_INSTRUCTION
-  - disable auto-update and sharing and reject --auto, --continue, --session, --share, credential dumps, environment dumps, free-form instructions, unsafe roots, and unsafe packet paths
-  - create one fresh OpenCode session for one attempt and return bounded structured evidence
-  - stop on broker refusal, authentication failure, timeout, nonzero exit, malformed JSON, unexpected routing, or second invocation
+  - retain this stable ticket ID only as a supersession record
 invariants:
-  - Terra performs transport only; the selected Spark semantic role owns task semantics and permissions
-  - the broker occupies the same scheduling slot and does not increase concurrency
-  - implementer, repairer, and integrator remain sole-writer roles
-  - every reviewer gets a fresh read-only OpenCode session
-  - no live model calls occur in ordinary tests
-  - active routing remains the baseline sol-only fingerprint
+  - FBK-001 declarative requirements remain retained
+  - no local broker execution is authorized
 out_of_scope:
-  - coordinator refusal classification
-  - arbitrary OpenCode commands, flags, agents, models, variants, directories, or instructions
-  - session reuse or retries
-  - live authentication or model discovery
+  - runtime broker adapter
+  - OpenCode process spawn
 blocked_by:
   - FBK-002
-risk_lane: 3
+risk_lane: 0
 preflight_required: true
 read_set:
-  - assets/configs/opencode/opencode.json
-  - assets/configs/opencode/prompts/**
-  - assets/configs/codex/agents/opencode-spark-broker.toml
-  - src/fallback/control-plane/**
-  - src/presets/render.js
-  - test/node-control-plane.test.js
-write_set:
-  - src/fallback/opencode/**
-  - assets/configs/codex/agents/opencode-spark-broker.toml
-  - test/node-control-plane.test.js
+  - docs/agent/wayfinding/conditional-spark-fallback/decisions/D007-ultima-runtime-ownership.md
+write_set: []
 conflict_keys:
-  - opencode-fixed-argv
-  - fallback-packet-schema
-  - transport-broker-authority
-  - opencode-role-id-resolution
-  - open-code-attempt-budget
+  - fallback-runtime-owner
 skills:
-  - tdd
-  - test-topology
-  - implementation-style
-  - process-lifecycle
   - verify
-human_gates:
-  - Any release bump, push, publish, deploy, or remote mutation requires separate explicit human authorization and is outside this ticket.
+human_gates: []
 stop_conditions:
-  - caller-controlled text can alter the executable, flags, model, variant, agent, or fixed instruction
-  - a packet path is not frozen and root-contained
-  - OpenCode requires a shell or session reuse
-  - the broker can edit, review, repair, or integrate directly
-  - a failure would trigger retry or a second route transition
-  - active routing changes before FBK-006
+  - any local broker implementation is proposed without a new authority decision
 commit_policy: coordinator
-review_lenses:
-  - spec-authority
-  - code-test
-  - operations-security
+review_lenses: []
 verification:
-  red:
-    - node --test test/node-control-plane.test.js
-  repair_levels: [L0, L1, L2, L3]
-  landing_levels: [L0, L1, L2]
+  red: []
+  repair_levels: []
+  landing_levels: []
   commands:
-    - node --test test/node-control-plane.test.js
-    - node --test test/preset-fallback.test.js
-    - node assets/scripts/validate_ticket_pack.mjs docs/tickets/workspace-upgrade --json
-    - node assets/scripts/validate_ticket_pack.mjs docs/tickets/conditional-spark-fallback --json
-    - node assets/scripts/check_architecture_budgets.mjs --root . --config docs/tickets/workspace-upgrade/policies/architecture-budgets.yaml
-    - node assets/scripts/check_architecture_budgets.mjs --root . --config docs/tickets/conditional-spark-fallback/policies/architecture-budgets.yaml
-    - npm run lint
-  native_checks:
-    - fake OpenCode records the exact argument array on Windows and POSIX paths
-    - fake OpenCode proves one fresh process and one attempt with no session continuation or sharing
-    - injected auth, refusal, timeout, nonzero, malformed JSON, and second-attempt cases stop with zero descendants and leases
+    - python -B assets/scripts/validate_ticket_pack.py docs/tickets/conditional-spark-fallback --json
+  native_checks: []
 budgets:
-  locked_files:
-    - src/process-utils.js
-    - test/adopt.test.js
-    - test/presets.test.js
-    - test/skills-update.test.js
-  max_new_test_file_loc: 700
-  max_new_production_file_loc: 600
   zero_owned_processes_after_run: true

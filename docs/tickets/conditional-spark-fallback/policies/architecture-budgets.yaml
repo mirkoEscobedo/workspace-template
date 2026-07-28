@@ -13,21 +13,19 @@ locked_files:
   src/process-utils.js:
     baseline_loc: 718
     allowed_growth: 0
-    reason: fallback lifecycle belongs in a focused Node control-plane module
+    reason: runtime orchestration moved to Ultima; do not grow the local process utility
   test/adopt.test.js:
     baseline_loc: 380
     allowed_growth: 0
-    reason: fallback behavior belongs in focused fallback tests
+    reason: preserve the landed FBK-001 assertion without growing the legacy test
   test/presets.test.js:
     baseline_loc: 139
     allowed_growth: 0
-    reason: fallback behavior belongs in test/preset-fallback.test.js
+    reason: preserve the landed FBK-001 assertion without growing the legacy test
   test/skills-update.test.js:
     baseline_loc: 123
     allowed_growth: 0
-    reason: projected fallback skill behavior belongs in focused fallback tests
+    reason: runtime integration requires a separately approved behavior module
 budgets:
   max_new_production_file_loc: 600
   max_new_test_file_loc: 700
-  max_fixed_argv_builder_loc: 250
-  max_routing_state_module_loc: 350

@@ -1,33 +1,28 @@
-# Current Sprint — Conditional Spark Fallback
+# Current Sprint — Declarative Conditional Spark Routing
 
 ## State
 
-- Planning compiled from clean base
-  `fe7e325958ff56eefa3bd97a54fabed58c845de6`.
 - Branch: `agent-preset/sol-sol`.
+- Change base: `f86efd3f143b40631d4a278e143949ca7ae28907`.
 - Active preset: `sol-only`.
 - Active fingerprint:
   `793606dafbcd5571feb039beaad992c501952fe7a8d33a913a035653a10420b6`.
-- This planner run is sol-only dogfood evidence.
-- FBK-001 is ready. FBK-002 through FBK-006 are dependency-blocked.
-- Writer limit: one. Landing: serial.
+- FBK-001 is closed and retained.
+- FBK-002 through FBK-006 are superseded by Wayfinder D007.
+- There is no ready, active, pending, or blocked local runtime ticket.
 
-## Restart checkpoint
+## Ownership
 
-FBK-006 contains a mandatory mid-ticket checkpoint. After atomic
-`sol-codex` activation, record the new active fingerprint and restart-required
-state, then stop. Do not run `opencode models`, native Spark delegation, or
-brokered proof until a human restarts the Codex App and explicitly resumes.
+`workspace-template` owns project creation/adoption, methodology and skills,
+declarative runtime requirements, validation, architecture budgets, and
+integration with an external Ultima runtime.
 
-The live packet is frozen before that stop at
-`006-live-dogfood/evidence/live/packet.md`. After restart, implementer output is
-limited to `implementer.marker` and `implementer-report.json`; the reviewer is
-read-only and broker/coordinator capture alone may write
-`reviewer-report.json`. A safe-component `<run-id>` owns only
-`routing-state.json`, `attempts/implementer-1.json`, and
-`attempts/reviewer-code-1.json`.
+Ultima owns runtime route selection, control-plane execution, broker behavior,
+refusal state, process ownership and leases, OpenCode spawning, activation,
+and live proof.
 
 ## Prohibited track actions
 
-No release/version bump, push, pull request, publish, deploy, or remote
-mutation.
+Do not implement local fallback orchestration, activate `sol-codex`, run or
+configure live models, or perform release/version, push, pull-request,
+publish, deploy, or other remote mutations.

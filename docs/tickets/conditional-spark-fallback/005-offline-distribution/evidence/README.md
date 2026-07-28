@@ -1,5 +1,4 @@
 # FBK-005 Evidence
 
-Store generated/adopted/upgrade inventories, rollback byte comparisons, doctor
-matrix, fake OpenCode and packed logs, active sol-only fingerprint, exact diff,
-architecture output, and independent review reports here.
+No implementation was started or landed. The ticket is superseded by D007;
+runtime distribution belongs to Ultima.

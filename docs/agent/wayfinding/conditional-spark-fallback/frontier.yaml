@@ -43,4 +43,11 @@ items:
     blocked_by: []
     claim: approved-plan
     artifact: decisions/D006-dogfood-activation-and-restart-authority.md
+  - id: D007
+    title: Ultima runtime ownership
+    type: human-decision
+    status: closed
+    blocked_by: []
+    claim: user-direction-2026-07-28
+    artifact: decisions/D007-ultima-runtime-ownership.md
 fog: []

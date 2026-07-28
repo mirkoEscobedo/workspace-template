@@ -206,7 +206,7 @@ describe("parseArgs", () => {
     }
     const help = output.join("\n");
     assert.match(help, /upgrade .*--allow-network/iu);
-    assert.match(help, /sealed.*external filesystem.*network.*FBK-002/isu);
+    assert.match(help, /sealed.*external filesystem.*network.*Ultima/isu);
   });
 
 });

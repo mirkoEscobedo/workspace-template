@@ -64,9 +64,8 @@ concurrency:
   default_writers: 1
   lane_3_writers: 1
 landing: serial
-transition:
-  ticket: FBK-006
-  target_preset: sol-codex
-  activation: atomic-reviewed-preset-plan
-  restart_required: true
-  note: Target routing is not copied here before activation; this policy is the truthful compilation-time sol-only routing.
+declarative_fallback:
+  source_ticket: FBK-001
+  execution_owner: ultima-ai
+  local_runtime_implemented: false
+  activation_authorized: false

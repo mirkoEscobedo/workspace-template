@@ -1,5 +1,8 @@
 # FBK-002 Evidence
 
-Store RED/GREEN output, lease-normalization fixtures, native ownership evidence
-for each available platform, timeout/cancel/failure cleanup, exact diff,
-architecture result, and three independent review reports here.
+FBK-002 produced no landed implementation evidence. The local implementation,
+untracked result transcript, runtime modules, tests, generated scripts, helper
+barriers, and FBK-002 lease residue were removed under D007.
+
+Git history retains the prior planning contract; the current disposition is
+`superseded`.
