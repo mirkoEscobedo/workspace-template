@@ -1,0 +1,14 @@
+[
+  {"query":"Implement the order approval flow using our clean architecture conventions","should_trigger":true},
+  {"query":"Where should I put the repository interface and Postgres adapter?","should_trigger":true},
+  {"query":"Can you keep the pricing rules pure and push Stripe to the boundary?","should_trigger":true},
+  {"query":"Build this React state transition with a reducer and thin UI","should_trigger":true},
+  {"query":"Refactor this Rust service so traits exist only at I/O boundaries","should_trigger":true},
+  {"query":"What project structure should this Flutter feature use?","should_trigger":true},
+  {"query":"Run the tests and tell me which fail","should_trigger":false},
+  {"query":"Fix the typo in README.md","should_trigger":false},
+  {"query":"Summarize this pull request","should_trigger":false},
+  {"query":"Why is the deployment pipeline timing out?","should_trigger":false},
+  {"query":"Generate a logo for the app","should_trigger":false},
+  {"query":"Update the package version and changelog only","should_trigger":false}
+]

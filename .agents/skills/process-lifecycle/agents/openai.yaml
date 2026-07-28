@@ -1,0 +1,6 @@
+interface:
+  display_name: "Process Lifecycle"
+  short_description: "Owns and cleans whole process trees before completion."
+  default_prompt: "Run spawned commands through process leases and enforce zero owned descendants before completion."
+policy:
+  allow_implicit_invocation: true

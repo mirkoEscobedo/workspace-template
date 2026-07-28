@@ -1,0 +1,6 @@
+interface:
+  display_name: "Frontier Loop"
+  short_description: "Routes planning, execution, and retrofit workflows."
+  default_prompt: "Use Frontier Loop to choose the appropriate planning, ticketing, execution, or retrofit mode."
+policy:
+  allow_implicit_invocation: true

@@ -30,11 +30,11 @@ function operationPriority(operation) {
   return 10;
 }
 
-async function operationContent(operation) {
+async function operationContent(operation, sourceAssetsRoot = assetsRoot) {
   let content;
   if (operation.sourceAsset) {
-    const source = path.resolve(assetsRoot, operation.sourceAsset);
-    if (!isPathInside(assetsRoot, source)) throw new Error(`Unsafe source asset path: ${operation.sourceAsset}`);
+    const source = path.resolve(sourceAssetsRoot, operation.sourceAsset);
+    if (!isPathInside(sourceAssetsRoot, source)) throw new Error(`Unsafe source asset path: ${operation.sourceAsset}`);
     content = await readFile(source);
   } else if (Object.hasOwn(operation, "content")) {
     if (operation.contentEncoding && operation.contentEncoding !== "base64") throw new Error(`Unsupported content encoding for ${operation.path}`);
@@ -107,7 +107,7 @@ export async function applyAdoptionPlan(plan, runtime = {}) {
     }
     if (kind === "conflict") throw new Error(`Blocking conflict reached apply: ${operation.path}: ${operation.reason}`);
     const destination = path.resolve(root, operation.path);
-    await writeBytesAtomic(destination, await operationContent(operation));
+    await writeBytesAtomic(destination, await operationContent(operation, runtime.assetsRoot));
     applied.push({ path: operation.path, action: kind, hash: operation.proposedHash });
   }
 

@@ -12,6 +12,7 @@ import {
   PROJECT_ALIASES,
   PROJECTS,
 } from "./constants.js";
+import { DEFAULT_PRESET_ID } from "./presets/catalog.js";
 
 const COMMANDS = new Set([
   "create",
@@ -25,6 +26,8 @@ const COMMANDS = new Set([
   "skills",
   "restructure",
   "align",
+  "preset",
+  "upgrade",
 ]);
 
 const SUBCOMMANDS = Object.freeze({
@@ -32,6 +35,7 @@ const SUBCOMMANDS = Object.freeze({
   skills: new Set(["update"]),
   restructure: new Set(["plan", "apply"]),
   align: new Set(["plan", "execute", "status", "resume"]),
+  preset: new Set(["list", "status", "plan", "apply"]),
 });
 
 function normalizeProject(value) {
@@ -80,6 +84,8 @@ function commonDefaults() {
     target: undefined,
     agents: [...DEFAULT_AGENTS],
     agentsExplicit: false,
+    preset: DEFAULT_PRESET_ID,
+    presetExplicit: false,
     dryRun: false,
     yes: false,
     json: false,
@@ -188,6 +194,15 @@ function validateAdopt(options) {
 }
 
 function validateAdvanced(command, options) {
+  if (command === "upgrade") {
+    const selectedModes = [options.dryRun, options.planOut !== undefined, options.applyPlan !== undefined].filter(Boolean);
+    if (selectedModes.length > 1) throw new Error("upgrade accepts only one of --dry-run, --plan-out, or --apply-plan");
+    if (options.planOut === "") throw new Error("--plan-out path must not be empty");
+    if (options.partial) throw new Error("upgrade is atomic and does not support --partial");
+    if (options.applyPlan && (options.presetExplicit || options.allowDirty || options.allowRiskyToolChanges || options.allowSkillRemoval)) {
+      throw new Error("--apply-plan uses only authority sealed into the plan");
+    }
+  }
   if (command === "verify" && !["root", "module", "affected", "all"].includes(options.scope)) throw new Error("--scope must be root, module, affected, or all");
   if (command === "tooling") {
     if (!new Set(["plan", "install"]).has(options.subcommand)) throw new Error("tooling requires plan or install");
@@ -212,6 +227,11 @@ function validateAdvanced(command, options) {
     if (!["required", "allow-existing", "waive"].includes(options.characterization)) throw new Error("Unknown --characterization value");
     if (!["requirements-and-quality", "quality", "none"].includes(options.review)) throw new Error("--review must be requirements-and-quality, quality, or none");
     if (!["worktree", "copy", "patch"].includes(options.checkpoint)) throw new Error("--checkpoint must be worktree, copy, or patch");
+  }
+  if (command === "preset") {
+    if (!new Set(["list", "status", "plan", "apply"]).has(options.subcommand)) throw new Error("preset requires list, status, plan, or apply");
+    if (options.subcommand === "plan" && !options.presetExplicit) throw new Error("preset plan requires --preset <id>");
+    if (options.preset && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(options.preset)) throw new Error("--preset must use lower-case kebab-case");
   }
 }
 
@@ -249,6 +269,7 @@ export function parseArgs(argv) {
       case "--tdd": options.tdd = valueFor().toLowerCase(); break;
       case "--package-manager": case "--pm": options.packageManager = valueFor().toLowerCase(); break;
       case "--agents": options.agents = parseAgents(valueFor()); options.agentsExplicit = true; break;
+      case "--preset": options.preset = valueFor().toLowerCase(); options.presetExplicit = true; break;
       case "--install": options.install = true; options.installExplicit = true; break;
       case "--no-install": options.install = false; options.installExplicit = true; break;
       case "--git": options.git = true; options.gitExplicit = true; break;
@@ -266,7 +287,14 @@ export function parseArgs(argv) {
       case "--current-ticket": options.currentTicket = valueFor(); break;
       case "--current-status": options.currentStatus = valueFor().toLowerCase(); break;
       case "--trust-current-dependencies": options.trustCurrentDependencies = true; break;
-      case "--plan-out": options.planOut = valueFor(); break;
+      case "--plan-out": {
+        if (command === "upgrade" && inlineValue === undefined && (tokens[index + 1] === undefined || tokens[index + 1].startsWith("-"))) {
+          options.planOut = true;
+        } else {
+          options.planOut = valueFor();
+        }
+        break;
+      }
       case "--apply-plan": options.applyPlan = valueFor(); break;
       case "--workspace": options.workspace = valueFor().toLowerCase(); break;
       case "--nested-instructions": options.nestedInstructions = valueFor().toLowerCase(); break;

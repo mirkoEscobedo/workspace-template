@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
-import { randomUUID } from "node:crypto";
-import { mkdtemp, readFile, writeFile, mkdir, rm } from "node:fs/promises";
+import { mkdtemp, readFile, writeFile, mkdir } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
@@ -8,7 +7,6 @@ import { describe, it } from "node:test";
 import { adoptProject, applyAdoptionPlan } from "../src/adopt.js";
 import { parseArgs } from "../src/args.js";
 import { doctorProject } from "../src/doctor.js";
-import { assetsRoot } from "../src/workspace-artifacts.js";
 import { createPlanEnvelope } from "../src/plans/schema.js";
 import { exists, hashBuffer, hashFile, readJson } from "../src/fs-utils.js";
 
@@ -111,7 +109,7 @@ describe("adoptProject", () => {
     assert.equal([...paths].some((item) => item.startsWith("src/")), false);
   });
 
-  it("applies additively, preserves custom instructions, and installs the Sol/Codex role split", async () => {
+  it("applies additively, preserves custom instructions, and installs the complete preset catalog", async () => {
     const root = await existingTypeScriptRepo({ customAgents: true });
     const protectedPaths = ["package.json", "package-lock.json", "tsconfig.json", "README.md", "src/index.ts", "AGENTS.md"];
     const before = Object.fromEntries(await Promise.all(protectedPaths.map(async (relative) => [relative, await hashFile(path.join(root, relative))])));
@@ -130,16 +128,19 @@ describe("adoptProject", () => {
 
     const config = await readJson(path.join(root, ".agentic", "config.json"));
     assert.deepEqual(config.execution.coordinator, { model: "gpt-5.6-sol", reasoningEffort: "high" });
-    assert.deepEqual(config.execution.workers, { model: "gpt-5.3-codex", reasoningEffort: "high" });
+    assert.deepEqual(config.execution.workers, { model: "gpt-5.6-sol", reasoningEffort: "high" });
+    assert.equal(config.execution.preset.id, "sol-only");
+    assert.equal(await exists(path.join(root, ".agentic", "presets", "builtin", "sol-codex.json")), true);
+    assert.equal(await exists(path.join(root, ".agentic", "presets", "builtin", "sol-only.json")), true);
     assert.deepEqual(config.agentTargets, ["codex", "opencode"]);
 
     const codex = await readFile(path.join(root, ".codex", "config.toml"), "utf8");
     assert.match(codex, /model = "gpt-5\.6-sol"/);
-    assert.match(codex, /default_subagent_model = "gpt-5\.3-codex"/);
+    assert.match(codex, /default_subagent_model = "gpt-5\.6-sol"/);
     assert.match(codex, /default_subagent_reasoning_effort = "high"/);
     const opencode = await readJson(path.join(root, "opencode.json"));
     assert.equal(opencode.agent["frontier-orchestrator"].model, "openai/gpt-5.6-sol");
-    assert.equal(opencode.agent["ticket-implementer"].model, "openai/gpt-5.3-codex");
+    assert.equal(opencode.agent["ticket-implementer"].model, "openai/gpt-5.6-sol");
 
     const frontier = await readJson(path.join(root, "docs", "tickets", "current-push", "frontier.json"));
     assert.deepEqual(frontier.active, ["002"]);
@@ -147,6 +148,34 @@ describe("adoptProject", () => {
 
     const doctor = await doctorProject(root);
     assert.equal(doctor.ok, true, doctor.errors.join("\n"));
+  });
+
+  it("infers sol-codex when adopting a legacy generator-owned routing configuration", async () => {
+    const root = await existingTypeScriptRepo({ tickets: false });
+    await mkdir(path.join(root, ".agentic"), { recursive: true });
+    await writeFile(path.join(root, ".agentic", "config.json"), `${JSON.stringify({
+      version: 2,
+      generator: "workspace-template",
+      mode: "adopted",
+      project: "typescript",
+      style: "domain",
+      tdd: "mockist",
+      agentTargets: ["codex", "opencode"],
+      execution: {
+        coordinator: { model: "gpt-5.6-sol", reasoningEffort: "high" },
+        planner: { model: "gpt-5.6-sol", reasoningEffort: "high" },
+        workers: { model: "gpt-5.3-codex", reasoningEffort: "high" },
+      },
+    }, null, 2)}\n`);
+    git(root, ["add", ".agentic/config.json"]);
+    git(root, ["-c", "user.name=Test", "-c", "user.email=test@example.com", "commit", "-m", "legacy routing"]);
+
+    const execution = await adoptProject(adoptOptions(root, ["--no-tickets"]));
+    assert.equal(execution.result.ok, true, execution.result.doctor.errors.join("\n"));
+    const config = await readJson(path.join(root, ".agentic", "config.json"));
+    assert.equal(config.execution.preset.id, "sol-codex");
+    assert.equal(config.execution.workers.model, "gpt-5.3-codex");
+    assert.equal(await exists(path.join(root, ".agentic", "presets", "builtin", "sol-only.json")), true);
   });
 
   it("blocks a dirty Git worktree unless explicitly authorized", async () => {
@@ -270,23 +299,18 @@ describe("adoptProject", () => {
 
   it("adopts a zero-byte file from sourceAsset", async () => {
     const root = await existingTypeScriptRepo({ customAgents: true, tickets: false });
-    const sourceAsset = `.adopt-empty-${randomUUID()}.txt`;
-    const sourcePath = path.join(assetsRoot, sourceAsset);
-    await writeFile(sourcePath, "");
+    const sourceAssetsRoot = await mkdtemp(path.join(os.tmpdir(), "workspace-template-adopt-assets-"));
+    const sourceAsset = "empty.txt";
+    await writeFile(path.join(sourceAssetsRoot, sourceAsset), "");
+    const plan = await planWithLeasePatch(root, (operation) => {
+      const { content, contentEncoding, ...base } = operation;
+      return { ...base, sourceAsset, proposedHash: emptyBase64Hash() };
+    });
+    const execution = await applyAdoptionPlan(plan, { assetsRoot: sourceAssetsRoot });
+    assert.equal(execution.ok, true, JSON.stringify(execution, null, 2));
 
-    try {
-      const plan = await planWithLeasePatch(root, (operation) => {
-        const { content, contentEncoding, ...base } = operation;
-        return { ...base, sourceAsset, proposedHash: emptyBase64Hash() };
-      });
-      const execution = await applyAdoptionPlan(plan);
-      assert.equal(execution.ok, true, JSON.stringify(execution, null, 2));
-
-      const leaseKeep = await readFile(path.join(root, leaseKeepPath));
-      assert.equal(leaseKeep.length, 0);
-    } finally {
-      await rm(sourcePath, { force: true });
-    }
+    const leaseKeep = await readFile(path.join(root, leaseKeepPath));
+    assert.equal(leaseKeep.length, 0);
   });
 
   it("adopts an empty UTF-8 content operation", async () => {

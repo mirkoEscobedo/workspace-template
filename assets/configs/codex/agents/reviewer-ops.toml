@@ -1,6 +1,6 @@
 name = "reviewer_operations_security"
 description = "Read-only reviewer for process ownership, cleanup, persistence, native boundaries, resources, and security."
-model = "gpt-5.3-codex"
+model = "preset-rendered"
 model_reasoning_effort = "high"
 sandbox_mode = "read-only"
 developer_instructions = """

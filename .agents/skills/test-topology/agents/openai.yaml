@@ -1,0 +1,6 @@
+interface:
+  display_name: "Test Topology"
+  short_description: "Prevents megafile growth and guides behavior-oriented splits."
+  default_prompt: "Audit the affected tests against architecture budgets and choose a non-megafile placement."
+policy:
+  allow_implicit_invocation: true

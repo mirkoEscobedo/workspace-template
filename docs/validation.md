@@ -81,7 +81,7 @@ and then invokes the installed binary. The packed smoke test passed these gates:
 
 1. package version and required packed payload;
 2. TypeScript project creation and `doctor`;
-3. GPT-5.6 Sol / GPT-5.3-Codex generated harness configuration;
+3. GPT-5.6 Sol high / native GPT-5.3 Codex high / OpenCode GPT-5.3 Codex Spark `sol-codex` generated harness configuration;
 4. immutable adoption-plan persist/load/apply round trip;
 5. existing source and custom `AGENTS.md` byte preservation plus proposal generation;
 6. project-owned skill-update check;

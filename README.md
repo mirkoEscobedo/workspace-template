@@ -7,7 +7,7 @@ Version 0.6.0 combines:
 - Wayfinder planning and dependency-frontier ticket compilation;
 - one continuous, local-file-based coordinator workflow;
 - project-owned Agent Skills and conflict-safe harness projections;
-- GPT-5.6 Sol high for orchestration/planning and GPT-5.3-Codex high for all delegated engineering roles;
+- a default `sol-only` route using GPT-5.6 Sol high for every role, plus the historical `sol-codex` split using GPT-5.3 Codex high natively and the matching GPT-5.3 Codex Spark model through OpenCode for delegated engineering roles;
 - immutable inspect → plan → approve → apply → verify transactions;
 - workspace/monorepo discovery and dependency-aware verification;
 - explicit dependency/tooling installation;
@@ -95,19 +95,69 @@ The coordinator may continue through all ordinary local tickets in one conversat
 - **Compile Master Plan** converts a stable route into vertical ticket contracts with dependencies, conflict keys, risk lanes, verification levels, architecture budgets, and stop conditions.
 - **Execute Frontier** runs the ready local frontier. Read-only investigation and independent reviews may be parallel; overlapping mutation and authority transitions remain serialized.
 
-### Default model routing
+### Swappable agent presets
 
-| Role | Model | Reasoning |
-|---|---|---|
-| Coordinator/orchestrator | `gpt-5.6-sol` | high |
-| Wayfinder/planner | `gpt-5.6-sol` | high |
-| Scout | `gpt-5.3-codex` | high |
-| Implementer | `gpt-5.3-codex` | high |
-| Spec/authority reviewer | `gpt-5.3-codex` | high |
-| Code/test reviewer | `gpt-5.3-codex` | high |
-| Operations/security reviewer | `gpt-5.3-codex` | high |
-| Repairer | `gpt-5.3-codex` | high |
-| Integrator | `gpt-5.3-codex` | high |
+Every created or adopted repository receives the complete built-in preset
+catalog. `sol-only` is active by default; `sol-codex` preserves the original
+Sol coordinator/planner and Codex worker split, using the matching Codex Spark
+model for OpenCode workers. Selecting a preset changes only
+the active routing—it does not remove inactive presets.
+
+```bash
+workspace-template preset list .
+workspace-template preset plan . --preset sol-codex --plan-out ../sol-codex-plan.json
+workspace-template preset apply . --apply-plan ../sol-codex-plan.json
+workspace-template preset status .
+```
+
+Repository-owned experimental definitions live in
+`.agentic/presets/local/`. Built-ins live in `.agentic/presets/builtin/`, and
+the expanded active policy lives in `.agentic/policies/model-routing.yaml`.
+Start a new agent session after switching because an existing session retains
+the configuration it loaded at startup.
+
+### Seamless workspace upgrades
+
+Created and adopted repositories now share one atomic upgrade path:
+
+```bash
+workspace-template upgrade . --allow-network
+workspace-template upgrade . --dry-run
+workspace-template upgrade . --dry-run --json
+workspace-template upgrade . --plan-out --allow-network
+workspace-template upgrade . --apply-plan ".agentic/plans/upgrades/upgrade-0.6.0-to-0.7.0-<id>.json"
+```
+
+Bare `upgrade` seals the exact plan, runs doctor plus every sealed module/root
+verification command, stages and validates the proposed tree, backs up its
+write set, applies, then repeats doctor and verification. Any write or
+verification failure restores the exact pre-upgrade state of the reviewed
+repository-local write set. Verification runs only in disposable repository
+copies, so `.git`, dependency trees, reports, transaction outputs, and deletion
+of the copy cannot mutate the source repository. Because portable confinement
+cannot prevent a command from reaching other filesystem paths or the network,
+verification requires explicit `--allow-network`; external effects are not
+claimed reversible. The sealed plan,
+journal, backup metadata, and report remain under
+`.agentic/transactions/<plan-id>/` for recovery and audit. `--dry-run` prints
+that same plan without writing. Bare `--plan-out` creates a deterministic reviewed-plan name
+under `.agentic/plans/upgrades/`, prints its path and exact apply command, and
+does not apply. The active preset, generated/adopted identity, original
+timestamp, product files, durable planning memory, and repository-local preset
+definitions are preserved.
+
+The isolated upgrade checkpoint deliberately excludes source `node_modules`.
+For this baseline, a verified JavaScript/TypeScript manifest with any declared
+dependency section, or a selected verification script that names
+`node_modules/.bin`, blocks planning instead of running an
+incomplete check. Native whole-tree upgrade verification is currently supported
+only by the Windows Job Object owner; POSIX upgrade verification fails before
+payload or lease creation when detached-session containment is unavailable.
+
+For fair A/B experiments, create sibling branches or worktrees from the same
+feature baseline, activate a different preset on each, and run equivalent
+tasks and verification. Switching a preset never resets code or commits from a
+previous attempt.
 
 Generated Codex roles are under `.codex/agents/`; generated OpenCode role prompts are under `.opencode/prompts/frontier-loop/`. Planners and reviewers are read-only. Write access is limited to implementation, repair, and integration roles. The default child-agent cap is three.
 
@@ -166,6 +216,9 @@ workspace-template adopt|retrofit [directory]
 workspace-template sync [directory]
 workspace-template doctor [directory]
 workspace-template verify [directory] --scope root|module|affected|all
+workspace-template preset list|status [directory]
+workspace-template preset plan [directory] --preset <id> --plan-out <file>
+workspace-template preset apply [directory] --apply-plan <file>
 
 workspace-template tooling plan [directory] ...
 workspace-template tooling install [directory] --apply-plan <file> ...

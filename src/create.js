@@ -14,6 +14,8 @@ import {
 } from "./fs-utils.js";
 import { dartPackageName, displayNameFromTarget, npmName, rustCrateName } from "./names.js";
 import { createProfile, profileSchema } from "./profile.js";
+import { DEFAULT_PRESET_ID, selectPreset } from "./presets/catalog.js";
+import { activePresetState, resolveRoleIds } from "./presets/render.js";
 import { commandExists, runCommandAsync } from "./process-utils.js";
 import { createScaffold, scaffoldStructure } from "./scaffolds/index.js";
 import { generatedReadme } from "./scaffolds/shared.js";
@@ -26,6 +28,7 @@ import {
   dependencyNote,
   harnessArtifacts,
   policyArtifacts,
+  presetCatalogArtifacts,
   projectMemoryArtifacts,
   scriptArtifacts,
   skillBaselineArtifacts,
@@ -172,11 +175,15 @@ function filterMemoryArtifacts(artifacts, options) {
 
 function managedFilesFor(artifacts) {
   return {
-    version: 2,
+    version: 3,
     generator: "workspace-template",
     generatorVersion: PACKAGE_VERSION,
+    settings: {},
     files: Object.fromEntries(
       artifacts
+        .filter((artifact) => !artifact.path.startsWith("docs/agent/")
+          && !artifact.path.startsWith("docs/tickets/")
+          && !artifact.path.startsWith(".agentic/presets/local/"))
         .map((artifact) => {
           const content = Buffer.isBuffer(artifact.content) ? artifact.content : Buffer.from(String(artifact.content));
           return [artifact.path, { mode: "managed", hash: hashBuffer(content) }];
@@ -187,12 +194,16 @@ function managedFilesFor(artifacts) {
 }
 
 async function generatedArtifacts(context, options) {
+  const selection = await selectPreset(context.root, options.preset ?? DEFAULT_PRESET_ID, context.agents, { allowEmpty: true });
+  const roleIds = await resolveRoleIds(context.root, context.agents);
+  const presetState = activePresetState(selection.resolved, roleIds);
   const profile = createProfile({
     project: context.project,
     style: context.style,
     tdd: context.tdd,
     agents: context.agents,
     mode: "generated",
+    presetState,
   });
   const config = createAgenticConfig({
     mode: "generated",
@@ -203,23 +214,25 @@ async function generatedArtifacts(context, options) {
     agents: context.agents,
     docs: options.docs !== false,
     tickets: options.tickets !== false,
+    presetState,
   });
 
   const memory = filterMemoryArtifacts(await projectMemoryArtifacts(), options);
   const artifacts = [
     { path: "AGENTS.md", content: Buffer.from(generateAgentsMd({ ...context, mode: "generated" })) },
     { path: ".agentic/README.md", content: Buffer.from(agenticReadme("generated")) },
-    { path: ".agentic/implementation-profile.md", content: Buffer.from(architectureNote({ ...context, mode: "generated" })) },
+    { path: ".agentic/implementation-profile.md", content: Buffer.from(architectureNote({ ...context, mode: "generated", presetState })) },
     { path: ".agentic/dependency-snapshot.md", content: Buffer.from(dependencyNote(context.project)) },
     { path: ".agentic/profile.json", content: jsonBuffer(profile) },
     { path: ".agentic/profile.schema.json", content: jsonBuffer(profileSchema()) },
     { path: ".agentic/config.json", content: jsonBuffer(config) },
     ...(await canonicalSkillArtifacts()),
     ...(await skillBaselineArtifacts()),
-    ...(await policyArtifacts()),
+    ...(await policyArtifacts(selection.resolved, presetState)),
+    ...(await presetCatalogArtifacts()),
     ...(await scriptArtifacts()),
     ...memory,
-    ...(await harnessArtifacts(context.agents)),
+    ...(await harnessArtifacts(context.agents, selection.resolved, roleIds)),
     ...(await workspaceStateArtifacts(generatedWorkspace(context), context, { nestedInstructions: "never" })),
   ].sort((left, right) => left.path.localeCompare(right.path));
 
@@ -244,12 +257,14 @@ export async function createProject(options) {
   assertSafeTarget(root);
   const projectName = displayNameFromTarget(root);
   const context = {
+    root,
     projectName,
     project: options.project,
     style: options.style,
     tdd: options.tdd,
     packageManager: options.packageManager,
     agents: options.agents,
+    preset: options.preset ?? DEFAULT_PRESET_ID,
     npmName: npmName(projectName),
     rustCrateName: rustCrateName(projectName),
     dartPackageName: dartPackageName(projectName),

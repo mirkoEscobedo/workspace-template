@@ -28,6 +28,44 @@ import {
   renderAlignmentTickets,
   resumeAlignmentPlan,
 } from "./align/index.js";
+import {
+  applyPresetPlan,
+  buildPresetPlan,
+  listPresets,
+  presetStatus,
+} from "./presets/index.js";
+import {
+  applyUpgradePlan,
+  buildUpgradePlan,
+  defaultUpgradePlanPath,
+  persistUpgradePlan,
+} from "./upgrade/index.js";
+
+async function applyUpgradeWithSignalBridge(plan, options = {}) {
+  const controller = new AbortController();
+  let interruptedBy;
+  const interrupt = (signal) => {
+    interruptedBy ??= signal;
+    controller.abort(new Error(`Upgrade interrupted by ${signal}`));
+  };
+  const onSigint = () => interrupt("SIGINT");
+  const onSigterm = () => interrupt("SIGTERM");
+  process.once("SIGINT", onSigint);
+  process.once("SIGTERM", onSigterm);
+  try {
+    const report = await applyUpgradePlan(plan, { ...options, signal: controller.signal });
+    if (interruptedBy) throw new Error(`Upgrade interrupted by ${interruptedBy} after process cleanup`);
+    return report;
+  } catch (error) {
+    if (interruptedBy) {
+      throw new Error(`Upgrade interrupted by ${interruptedBy} after process cleanup: ${error.message}`, { cause: error });
+    }
+    throw error;
+  } finally {
+    process.removeListener("SIGINT", onSigint);
+    process.removeListener("SIGTERM", onSigterm);
+  }
+}
 
 function helpText() {
   return `workspace-template ${PACKAGE_VERSION}
@@ -41,9 +79,13 @@ Core commands:
   create [directory] --project <type>
   inspect [directory]
   adopt|retrofit [directory]
+  upgrade [directory] [--allow-network] [--dry-run | --plan-out [file] | --apply-plan <file>]
   sync [directory]
   doctor [directory]
   verify [directory] [--scope all|module|affected|root]
+  preset list|status [directory]
+  preset plan [directory] --preset <id> --plan-out <file>
+  preset apply [directory] --apply-plan <file>
 
 Advanced commands:
   tooling plan [directory] --pack <name> [--plan-out <file>]
@@ -83,6 +125,7 @@ Shared advanced options:
   --dry-run                   Render without mutation
   --json                      Machine-readable output
   --timeout <milliseconds>    Bound a verification or executor command
+  --preset <id>              Select the initial or next active agent preset
 
 Tooling authority:
   --pack <name> --dependency <name[@version]> --kind development|runtime|build
@@ -90,6 +133,10 @@ Tooling authority:
   --allow-runtime
   --lifecycle-scripts deny|allow
   --scripts propose|managed-block|fail|preserve
+
+Upgrade verification authority:
+  --allow-network records sealed approval because portable isolation cannot deny external filesystem or network reach
+  Dependency-backed JS/TS verification and POSIX detached-session containment are unavailable
 
 Skill update authority:
   --skill <name> --incoming-root <directory> --allow-risky-tool-changes
@@ -108,9 +155,8 @@ Alignment authority:
 
 Frontier uses local repository files and one coordinator session; it does not require GitHub issues, webhooks, or a repository watcher.
 
-Default role routing:
-  Coordinator/planner: gpt-5.6-sol, high
-  All scouts/workers/reviewers/repair/integration: gpt-5.3-codex, high
+Default agent preset: sol-only. Every workspace receives the complete built-in
+preset catalog; --preset selects which routing is materialized.
 `;
 }
 
@@ -128,8 +174,7 @@ function printCreateResult(result) {
   console.log(`\nCreated ${result.context.project} project at ${result.root}`);
   console.log(`Style: ${result.context.style}; TDD: ${result.context.tdd}`);
   console.log("Execution: local Frontier Loop");
-  console.log("Coordinator/planner: gpt-5.6-sol high");
-  console.log("Other roles: gpt-5.3-codex high");
+  console.log(`Active agent preset: ${result.context.preset ?? "sol-only"}`);
   for (const warning of result.warnings) console.warn(`Warning: ${warning}`);
 }
 
@@ -201,6 +246,15 @@ async function loadApplyPlan(options, expected) {
   return loadPlan(options.applyPlan, expected);
 }
 
+function quoteArgument(value) {
+  return `"${String(value).replaceAll('"', '\\"')}"`;
+}
+
+function printUpgradeResult(value) {
+  console.log(`\nWorkspace ${value.status === "current" ? "is already current" : "upgrade completed"} at ${value.root}`);
+  console.log(`Transaction plan: ${value.transactionPlan}`);
+}
+
 export async function main(argv) {
   const { command, subcommand, options } = parseArgs(argv);
   if (options.version) return console.log(PACKAGE_VERSION);
@@ -226,6 +280,38 @@ export async function main(argv) {
     return;
   }
 
+  if (command === "upgrade") {
+    if (options.applyPlan) {
+      const planPath = path.resolve(options.applyPlan);
+      const plan = await loadPlan(planPath, { command: "upgrade" });
+      if (options.target && path.resolve(options.target) !== path.resolve(plan.root)) {
+        throw new Error(`Upgrade target does not match the sealed plan root: ${plan.root}`);
+      }
+      const relative = path.relative(plan.root, planPath).replaceAll("\\", "/");
+      const allowedDirtyPaths = !relative.startsWith("../") && relative !== ".." ? [relative] : [];
+      const report = await applyUpgradeWithSignalBridge(plan, { ...options, allowedDirtyPaths });
+      return emit(report, options, printUpgradeResult);
+    }
+    const plan = await buildUpgradePlan(root, options);
+    if (options.dryRun) {
+      await emit(plan, options, printPlan);
+      if (!plan.canApply) process.exitCode = 1;
+      return;
+    }
+    if (options.planOut !== undefined) {
+      const planPath = path.resolve(plan.root, options.planOut === true ? defaultUpgradePlanPath(plan) : options.planOut);
+      await persistUpgradePlan(planPath, plan);
+      if (options.json) {
+        return emit({ status: "planned", planPath, applyCommand: `workspace-template upgrade . --apply-plan ${quoteArgument(planPath)}`, plan }, options);
+      }
+      printPlan(plan);
+      console.log(`\nUpgrade plan saved:\n${planPath}\n\nApply with:\nworkspace-template upgrade . --apply-plan ${quoteArgument(planPath)}`);
+      return;
+    }
+    const report = await applyUpgradeWithSignalBridge(plan, { ...options, allowCurrentReplay: true });
+    return emit(report, options, printUpgradeResult);
+  }
+
   if (command === "sync") {
     const manifest = await syncSkills(root, options.agentsExplicit ? options.agents : undefined, { dryRun: options.dryRun });
     return emit(manifest, options, (value) => console.log(`Synchronized ${value.skillNames.length} skills to ${value.agentTargets.length} agent target(s).`));
@@ -248,6 +334,42 @@ export async function main(argv) {
     });
     if (!report.ok) process.exitCode = 1;
     return;
+  }
+
+  if (command === "preset") {
+    if (subcommand === "list") {
+      const report = await listPresets(root);
+      return emit(report, options, (value) => {
+        console.log(`Agent presets for ${value.root}`);
+        for (const preset of value.presets) console.log(`  ${preset.active ? "*" : " "} ${preset.id} [${preset.source}/${preset.stability}] — ${preset.description}`);
+      });
+    }
+    if (subcommand === "status") {
+      const report = await presetStatus(root);
+      await emit(report, options, (value) => {
+        console.log(`Agent preset ${value.activeId ?? "<none>"}: ${value.status.toUpperCase()}`);
+        for (const override of value.overrides ?? []) console.log(`  override ${override.path}${override.pointer}: ${override.reason}`);
+        for (const error of value.errors ?? []) console.log(`  error: ${error}`);
+      });
+      if (!["active", "partial"].includes(report.status)) process.exitCode = 1;
+      return;
+    }
+    if (subcommand === "plan") {
+      const plan = await maybePersist(await buildPresetPlan(root, options), options);
+      await emit(plan, options, printPlan);
+      if (!plan.canApply) process.exitCode = 1;
+      return;
+    }
+    const planPath = path.resolve(options.applyPlan ?? "");
+    const plan = await loadApplyPlan(options, { command: "preset", subcommand: "apply" });
+    const allowedDirtyPaths = planPath && path.dirname(planPath).startsWith(path.resolve(plan.root))
+      ? [path.relative(plan.root, planPath).replaceAll("\\", "/")]
+      : [];
+    const report = await applyPresetPlan(plan, { ...options, allowedDirtyPaths });
+    return emit(report, options, (value) => {
+      console.log(`Activated agent preset ${value.preset.id}${value.preset.status === "partial" ? " (partial)" : ""}.`);
+      console.log("Start a new Codex/OpenCode session so it loads the new project configuration.");
+    });
   }
 
   if (command === "tooling") {

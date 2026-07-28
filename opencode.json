@@ -1,0 +1,148 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "frontier-orchestrator",
+  "permission": {
+    "skill": {
+      "*": "allow"
+    },
+    "external_directory": "ask"
+  },
+  "agent": {
+    "frontier-orchestrator": {
+      "description": "Primary coordinator for continuous local Frontier execution.",
+      "mode": "primary",
+      "model": "openai/gpt-5.6-sol",
+      "reasoningEffort": "high",
+      "prompt": "{file:./.opencode/prompts/frontier-loop/orchestrator.txt}",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow",
+        "task": {
+          "*": "deny",
+          "frontier-planner": "allow",
+          "frontier-scout": "allow",
+          "ticket-implementer": "allow",
+          "reviewer-spec-authority": "allow",
+          "reviewer-code-test": "allow",
+          "reviewer-operations-security": "allow",
+          "ticket-repairer": "allow",
+          "frontier-integrator": "allow"
+        },
+        "skill": "allow",
+        "external_directory": "deny"
+      }
+    },
+    "frontier-planner": {
+      "description": "Read-only Wayfinder and ticket-contract planner.",
+      "mode": "subagent",
+      "model": "openai/gpt-5.6-sol",
+      "reasoningEffort": "high",
+      "prompt": "{file:./.opencode/prompts/frontier-loop/planner.txt}",
+      "permission": {
+        "edit": "deny",
+        "bash": "ask",
+        "task": "deny",
+        "skill": "allow",
+        "external_directory": "deny"
+      }
+    },
+    "frontier-scout": {
+      "description": "Fast read-only codebase and test-topology scout.",
+      "mode": "subagent",
+      "model": "openai/gpt-5.6-sol",
+      "reasoningEffort": "high",
+      "prompt": "{file:./.opencode/prompts/frontier-loop/scout.txt}",
+      "permission": {
+        "edit": "deny",
+        "bash": "allow",
+        "task": "deny",
+        "skill": "allow",
+        "external_directory": "deny"
+      }
+    },
+    "ticket-implementer": {
+      "description": "One-ticket write-capable implementer.",
+      "mode": "subagent",
+      "model": "openai/gpt-5.6-sol",
+      "reasoningEffort": "high",
+      "prompt": "{file:./.opencode/prompts/frontier-loop/implementer.txt}",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow",
+        "task": "deny",
+        "skill": "allow",
+        "external_directory": "deny"
+      }
+    },
+    "reviewer-spec-authority": {
+      "description": "Read-only specification and authority reviewer.",
+      "mode": "subagent",
+      "model": "openai/gpt-5.6-sol",
+      "reasoningEffort": "high",
+      "prompt": "{file:./.opencode/prompts/frontier-loop/reviewer-spec.txt}",
+      "permission": {
+        "edit": "deny",
+        "bash": "allow",
+        "task": "deny",
+        "skill": "allow",
+        "external_directory": "deny"
+      }
+    },
+    "reviewer-code-test": {
+      "description": "Read-only code and test architecture reviewer.",
+      "mode": "subagent",
+      "model": "openai/gpt-5.6-sol",
+      "reasoningEffort": "high",
+      "prompt": "{file:./.opencode/prompts/frontier-loop/reviewer-code.txt}",
+      "permission": {
+        "edit": "deny",
+        "bash": "allow",
+        "task": "deny",
+        "skill": "allow",
+        "external_directory": "deny"
+      }
+    },
+    "reviewer-operations-security": {
+      "description": "Read-only process, persistence, resource, and security reviewer.",
+      "mode": "subagent",
+      "model": "openai/gpt-5.6-sol",
+      "reasoningEffort": "high",
+      "prompt": "{file:./.opencode/prompts/frontier-loop/reviewer-ops.txt}",
+      "permission": {
+        "edit": "deny",
+        "bash": "allow",
+        "task": "deny",
+        "skill": "allow",
+        "external_directory": "deny"
+      }
+    },
+    "ticket-repairer": {
+      "description": "Write-capable targeted repairer.",
+      "mode": "subagent",
+      "model": "openai/gpt-5.6-sol",
+      "reasoningEffort": "high",
+      "prompt": "{file:./.opencode/prompts/frontier-loop/repairer.txt}",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow",
+        "task": "deny",
+        "skill": "allow",
+        "external_directory": "deny"
+      }
+    },
+    "frontier-integrator": {
+      "description": "Serial landing and integration agent.",
+      "mode": "subagent",
+      "model": "openai/gpt-5.6-sol",
+      "reasoningEffort": "high",
+      "prompt": "{file:./.opencode/prompts/frontier-loop/integrator.txt}",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow",
+        "task": "deny",
+        "skill": "allow",
+        "external_directory": "deny"
+      }
+    }
+  }
+}

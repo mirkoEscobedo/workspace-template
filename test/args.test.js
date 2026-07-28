@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { parseArgs } from "../src/args.js";
+import { main } from "../src/cli.js";
 
 describe("parseArgs", () => {
   it("parses a create command and normalizes project aliases", () => {
@@ -160,6 +161,52 @@ describe("parseArgs", () => {
     assert.throws(() => parseArgs(["restructure", "plan", ".", "--imports", "regex"]), /--imports/);
     assert.throws(() => parseArgs(["align", "plan", ".", "--review", "rubber-stamp"]), /--review/);
     assert.throws(() => parseArgs(["align", "plan", ".", "--max-files", "0"]), /--max-files/);
+  });
+
+  it("parses preset catalog and immutable switching commands", () => {
+    const plan = parseArgs(["preset", "plan", ".", "--preset", "sol-codex", "--plan-out", "../preset.json"]);
+    assert.equal(plan.command, "preset");
+    assert.equal(plan.subcommand, "plan");
+    assert.equal(plan.options.preset, "sol-codex");
+    assert.equal(plan.options.presetExplicit, true);
+    const status = parseArgs(["preset", "status", "."]);
+    assert.equal(status.subcommand, "status");
+    assert.throws(() => parseArgs(["preset", "plan", "."]), /requires --preset/);
+    assert.throws(() => parseArgs(["preset", "plan", ".", "--preset", "Bad ID"]), /kebab-case/);
+  });
+
+  it("parses the direct, preview, persisted, and exact-plan upgrade modes", () => {
+    const direct = parseArgs(["upgrade", "."]);
+    assert.equal(direct.command, "upgrade");
+    assert.equal(direct.options.target, ".");
+    assert.equal(direct.options.dryRun, false);
+    assert.equal(direct.options.planOut, undefined);
+
+    assert.equal(parseArgs(["upgrade", ".", "--dry-run"]).options.dryRun, true);
+    assert.equal(parseArgs(["upgrade", ".", "--plan-out"]).options.planOut, true);
+    assert.equal(parseArgs(["upgrade", ".", "--plan-out", "review.json"]).options.planOut, "review.json");
+    assert.equal(parseArgs(["upgrade", ".", "--plan-out=review.json"]).options.planOut, "review.json");
+    assert.equal(parseArgs(["upgrade", ".", "--apply-plan", "review.json"]).options.applyPlan, "review.json");
+  });
+
+  it("keeps upgrade execution modes mutually exclusive", () => {
+    assert.throws(() => parseArgs(["upgrade", ".", "--dry-run", "--plan-out"]), /only one/);
+    assert.throws(() => parseArgs(["upgrade", ".", "--dry-run", "--apply-plan", "review.json"]), /only one/);
+    assert.throws(() => parseArgs(["upgrade", ".", "--plan-out", "--apply-plan", "review.json"]), /only one/);
+  });
+
+  it("documents the sealed upgrade verification approval in CLI help", async () => {
+    const output = [];
+    const original = console.log;
+    console.log = (...values) => { output.push(values.join(" ")); };
+    try {
+      await main(["--help"]);
+    } finally {
+      console.log = original;
+    }
+    const help = output.join("\n");
+    assert.match(help, /upgrade .*--allow-network/iu);
+    assert.match(help, /sealed.*external filesystem.*network.*unavailable/isu);
   });
 
 });

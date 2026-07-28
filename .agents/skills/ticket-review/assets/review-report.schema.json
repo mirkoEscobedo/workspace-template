@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Frontier Loop Review Report",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "ticket_id",
+    "lens",
+    "verdict",
+    "findings",
+    "evidence_checked"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "ticket_id": {
+      "type": "string"
+    },
+    "lens": {
+      "enum": [
+        "combined",
+        "spec-authority",
+        "code-test",
+        "operations-security"
+      ]
+    },
+    "verdict": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "CANNOT_VERIFY"
+      ]
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "severity",
+          "summary",
+          "pass_condition"
+        ],
+        "properties": {
+          "severity": {
+            "enum": [
+              "BLOCKING",
+              "IMPORTANT",
+              "MINOR"
+            ]
+          },
+          "summary": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "consequence": {
+            "type": "string"
+          },
+          "pass_condition": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "evidence_checked": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

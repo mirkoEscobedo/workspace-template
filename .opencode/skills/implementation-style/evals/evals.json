@@ -1,0 +1,20 @@
+{
+  "skill_name": "implementation-style",
+  "evals": [
+    {
+      "id": "fcis-order",
+      "prompt": "Add order processing to a TypeScript service. Pricing must be testable without Postgres and the endpoint should persist the result.",
+      "expected_output": "The design identifies a pure pricing/state-transition core, an application shell, an application-owned storage port only if needed, a Postgres adapter, a composition root, and tests at domain and use-case seams without framework leakage."
+    },
+    {
+      "id": "avoid-ceremony",
+      "prompt": "Add a pure temperature conversion helper to a small JavaScript CLI configured with the simple style.",
+      "expected_output": "A focused function and behavior test are added without repository, service, factory, class, or global layer directories."
+    },
+    {
+      "id": "flutter-adaptive",
+      "prompt": "Create a Flutter settings screen backed only by local in-memory state; profile style is clean.",
+      "expected_output": "The result preserves inward dependencies and thin widgets but does not invent a repository or service without an external data boundary."
+    }
+  ]
+}

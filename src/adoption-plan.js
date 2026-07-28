@@ -14,6 +14,8 @@ import { inspectManagedBlock, upsertManagedBlock } from "./managed-sections.js";
 import { createPlanEnvelope, refreshPlanId } from "./plans/schema.js";
 import { repositoryPreconditions } from "./plans/fingerprint.js";
 import { createProfile, profileSchema } from "./profile.js";
+import { DEFAULT_PRESET_ID, LEGACY_PRESET_ID, selectPreset } from "./presets/catalog.js";
+import { activePresetState, resolveRoleIds } from "./presets/render.js";
 import { ticketRetrofitArtifacts } from "./retrofit-tickets.js";
 import {
   agenticReadme,
@@ -23,6 +25,7 @@ import {
   dependencyNote,
   harnessArtifacts,
   policyArtifacts,
+  presetCatalogArtifacts,
   projectMemoryArtifacts,
   projectionArtifacts,
   scriptArtifacts,
@@ -294,7 +297,37 @@ function planWarnings(snapshot) {
   return [...new Set(warnings)];
 }
 
-async function desiredArtifacts(snapshot, options, context) {
+function inferredPresetId(options, config) {
+  if (options.presetExplicit) return options.preset;
+  if (config?.execution?.preset?.id) return config.execution.preset.id;
+  const coordinator = config?.execution?.coordinator?.model;
+  const planner = config?.execution?.planner?.model;
+  const worker = config?.execution?.workers?.model;
+  if (coordinator === "gpt-5.6-sol" && planner === "gpt-5.6-sol" && worker === "gpt-5.3-codex") return LEGACY_PRESET_ID;
+  return options.preset ?? DEFAULT_PRESET_ID;
+}
+
+async function preservedHarnessOverrides(root, agents, ownership) {
+  const overrides = [];
+  for (const [agent, relative] of [["codex", ".codex/config.toml"], ["opencode", "opencode.json"]]) {
+    if (!agents.includes(agent)) continue;
+    const target = path.join(root, ...relative.split("/"));
+    if (!(await exists(target))) continue;
+    const currentHash = await hashFile(target);
+    if (isGeneratorOwned(relative, currentHash, ownership)) continue;
+    overrides.push({
+      target: agent,
+      path: relative,
+      pointer: "/",
+      current: "<preserved user-owned configuration>",
+      requested: "<active preset routing>",
+      reason: "existing root harness configuration is preserved; run preset plan/apply to merge non-conflicting settings",
+    });
+  }
+  return overrides;
+}
+
+async function desiredArtifacts(snapshot, options, context, selection, roleIds, presetState) {
   const mode = "adopted";
   const config = createAgenticConfig({
     mode,
@@ -305,24 +338,26 @@ async function desiredArtifacts(snapshot, options, context) {
     agents: context.agents,
     // Deterministic plan; the apply report carries the real timestamp.
     originalTimestamp: null,
+    presetState,
   });
-  const profile = createProfile({ project: context.project, style: context.style, tdd: context.tdd, agents: context.agents, mode });
+  const profile = createProfile({ project: context.project, style: context.style, tdd: context.tdd, agents: context.agents, mode, presetState });
   const artifacts = [
     { path: ".agentic/README.md", content: agenticReadme(mode) },
-    { path: ".agentic/implementation-profile.md", content: architectureNote({ ...context, mode }) },
+    { path: ".agentic/implementation-profile.md", content: architectureNote({ ...context, mode, presetState }) },
     { path: ".agentic/dependency-snapshot.md", content: dependencyNote(context.project) },
     { path: ".agentic/config.json", content: jsonBuffer(config) },
     { path: ".agentic/profile.json", content: jsonBuffer(profile) },
     { path: ".agentic/profile.schema.json", content: jsonBuffer(profileSchema()) },
     ...(await canonicalSkillArtifacts()),
     ...(await skillBaselineArtifacts()),
-    ...(await policyArtifacts()),
+    ...(await policyArtifacts(selection.resolved, presetState)),
+    ...(await presetCatalogArtifacts()),
     ...(await scriptArtifacts()),
     ...(options.docs === false ? [] : await projectMemoryArtifacts()),
-    ...(await harnessArtifacts(context.agents)),
+    ...(await harnessArtifacts(context.agents, selection.resolved, roleIds)),
     ...(await projectionArtifacts(context.agents)),
     ...(await workspaceStateArtifacts(snapshot.workspace, context, { nestedInstructions: options.nestedInstructions ?? "auto" })),
-    ...(options.tickets === false ? [] : await ticketRetrofitArtifacts(snapshot.root, snapshot.ticketTracks, options)),
+    ...(options.tickets === false ? [] : await ticketRetrofitArtifacts(snapshot.root, snapshot.ticketTracks, { ...options, presetState })),
   ];
 
   artifacts.push({ path: ".agentic/skills.lock.json", content: jsonBuffer(await skillLock()) });
@@ -334,10 +369,16 @@ function buildManagedManifest(operations) {
   for (const operation of operations) {
     if (!["create", "update-managed", "merge-managed-block", "propose", "noop"].includes(operation.action)) continue;
     if (!operation.proposedHash) continue;
-    files[operation.path] = {
+    const record = {
       mode: operation.action === "merge-managed-block" ? "managed-section" : operation.action === "propose" ? "proposal" : "managed",
       hash: operation.proposedHash,
     };
+    if (record.mode === "managed-section" && operation.content) {
+      const content = Buffer.from(operation.content, operation.contentEncoding ?? "base64").toString("utf8");
+      const block = inspectManagedBlock(content);
+      if (block.state === "valid") record.managedBlockHash = hashBuffer(Buffer.from(block.body));
+    }
+    files[operation.path] = record;
   }
   return {
     version: 2,
@@ -359,10 +400,20 @@ export async function buildAdoptionPlan(snapshot, options) {
     agents: options.agents,
   };
   const ownership = await loadOwnership(snapshot.root);
+  const presetId = inferredPresetId(options, ownership.config);
+  const selection = await selectPreset(snapshot.root, presetId, context.agents, { allowEmpty: true });
+  const roleIds = await resolveRoleIds(snapshot.root, context.agents, ownership.config?.execution?.preset);
+  const presetState = activePresetState(
+    selection.resolved,
+    roleIds,
+    await preservedHarnessOverrides(snapshot.root, context.agents, ownership),
+  );
+  context.preset = presetId;
+  context.presetState = presetState;
   const operations = [];
 
   operations.push(await classifyAgents(snapshot.root, context, ownership, options.conflict));
-  for (const artifact of await desiredArtifacts(snapshot, options, context)) {
+  for (const artifact of await desiredArtifacts(snapshot, options, context, selection, roleIds, presetState)) {
     operations.push(await classifyArtifact(snapshot.root, artifact, ownership, options.conflict));
   }
 
@@ -393,6 +444,7 @@ export async function buildAdoptionPlan(snapshot, options) {
     docs: options.docs !== false,
     tickets: options.tickets !== false,
     conflict: options.conflict,
+    preset: presetId,
   };
   const preconditions = await repositoryPreconditions(
     snapshot.root,

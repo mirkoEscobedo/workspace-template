@@ -1,6 +1,6 @@
 # Usage guide
 
-This guide covers new-project creation, safe repository adoption, local Frontier execution, workspace verification, explicit tooling changes, skill upgrades, source restructuring, and bounded architecture alignment.
+This guide covers new-project creation, safe repository adoption, swappable agent presets, local Frontier execution, workspace verification, explicit tooling changes, skill upgrades, source restructuring, and bounded architecture alignment.
 
 ## 1. Choose `create` or `adopt`
 
@@ -109,6 +109,7 @@ A changed Git HEAD, changed fingerprinted file, changed custom instruction, new 
 | `--tdd` | `preserve` | follow existing explicit policy; protect changed behavior pragmatically when no policy exists |
 | `--pm` | `auto` | infer lockfile/package-manager owner |
 | `--agents` | `codex,opencode` | install the default local harness role split |
+| `--preset` | `sol-only` | select the initial routing while installing the complete preset catalog |
 | `--conflict` | `propose` | preserve custom text and write a reviewable proposal |
 | dirty Git tree | refused | use `--allow-dirty` only for a known, fingerprinted state |
 | project verification | off | use `--verify` explicitly |
@@ -189,13 +190,76 @@ Frontier does not require an issue tracker. A repository may mirror contracts in
 
 ## 5. Configure Codex and OpenCode
 
-Generated defaults:
+Every workspace contains all built-ins under `.agentic/presets/builtin/`.
+`sol-only` is active by default and uses GPT-5.6 Sol with high reasoning for
+every role. `sol-codex` preserves the original split: GPT-5.6 Sol high for
+coordination/planning, GPT-5.3 Codex high for native delegated roles, and the
+matching GPT-5.3 Codex Spark model for delegated roles rendered to OpenCode.
+Repository-owned experimental presets live under `.agentic/presets/local/`.
 
-```text
-Coordinator/planner: GPT-5.6 Sol, high
-All other roles:     GPT-5.3-Codex, high
-Maximum subagents:   3
+```bash
+npx workspace-template preset list .
+npx workspace-template preset status .
+npx workspace-template preset plan . --preset sol-codex --plan-out ../preset-plan.json
+npx workspace-template preset apply . --apply-plan ../preset-plan.json
 ```
+
+The apply step changes only managed routing and reports preserved user-owned
+overrides as a partial activation. Start a fresh agent session after switching.
+For A/B experiments, prefer sibling branches or worktrees from the same base;
+switching presets never resets application changes.
+
+## 6. Upgrade an installed workspace
+
+The same command upgrades repositories originally created by the generator and
+repositories later adopted or retrofitted:
+
+```bash
+npx workspace-template upgrade . --allow-network
+npx workspace-template upgrade . --dry-run
+npx workspace-template upgrade . --dry-run --json
+npx workspace-template upgrade . --plan-out --allow-network
+npx workspace-template upgrade . --apply-plan ".agentic/plans/upgrades/upgrade-<from>-to-<to>-<id>.json"
+```
+
+`upgrade .` directly applies, but it is not blind: it first seals an immutable
+plan, keeps that plan in `.agentic/transactions/<plan-id>/plan.json`, creates a
+durable backup, and applies one atomic transaction. Before mutation it runs
+doctor and the exact sealed module/root verification commands; it also validates
+the complete proposed tree in staging. After mutation it repeats doctor and
+verification. A write, doctor, verification, or verification-side-effect
+failure restores the exact pre-upgrade state of the reviewed repository-local
+write set. Full verification runs in a disposable repository copy. Its writes
+to `.git`, dependency trees, reports, transactions, or the disposable root are
+discarded with that copy. Portable process isolation cannot deny every external
+filesystem or network access, so a reviewable plan requires explicit
+`--allow-network`; any external effect is outside the rollback promise. The
+transaction journal, plan,
+backup metadata, and report remain available for audit and interrupted recovery.
+`--dry-run` is the console-only agent preview.
+`--plan-out` saves the identical plan without applying; when no path is given,
+the filename is generated under `.agentic/plans/upgrades/` and the CLI prints
+the exact later apply command.
+
+The disposable checkpoint never copies or exposes source `node_modules`.
+Consequently, JavaScript/TypeScript modules whose verified manifests declare
+dependencies, devDependencies, optionalDependencies, or peerDependencies—and
+selected scripts that explicitly use `node_modules/.bin`—receive a precise
+plan conflict. Dependency-free modules remain eligible. Windows uses a
+native Job Object for whole-tree ownership; POSIX upgrade verification is
+temporarily unavailable and fails before payload or lease creation until
+a native owner for detached sessions is available.
+
+Upgrade uses the installed CLI package as the incoming offline catalog. It
+preserves workspace origin and timestamps, active/local presets, structured
+harness overrides, product code, manifests, lockfiles, workspace metadata, and
+durable agent documentation. Drift or three-way skill conflicts block before
+any target write.
+
+Saved plans are immutable capabilities, not suggestions: `--apply-plan` checks
+the plan integrity, repository/file preconditions, package catalog hash,
+verification command authority, process leases, active transactions, and
+symlink boundaries before writing. A stale or already-applied plan is rejected.
 
 ### Codex
 

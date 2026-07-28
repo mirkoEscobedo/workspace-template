@@ -119,16 +119,15 @@ for (const file of pythonFiles) {
 
 for (const [relative, requiredFragments] of Object.entries({
   "assets/configs/codex/config.toml": [
-    'model = "gpt-5.6-sol"',
+    'model = "preset-rendered"',
     'model_reasoning_effort = "high"',
-    'default_subagent_model = "gpt-5.3-codex"',
+    'default_subagent_model = "preset-rendered"',
     'default_subagent_reasoning_effort = "high"',
     "max_concurrent_threads_per_session = 3",
   ],
   "assets/configs/opencode/opencode.json": [
     '"frontier-orchestrator"',
-    '"openai/gpt-5.6-sol"',
-    '"openai/gpt-5.3-codex"',
+    '"preset-rendered"',
   ],
 })) {
   const absolute = path.join(root, relative);

@@ -1,0 +1,93 @@
+schema_version: 1
+id: UPG-002
+title: Managed substrate reconciliation
+legacy_ids: []
+status: closed
+parent: null
+public_outcome: Upgrade planning preserves workspace identity while reconciling the full non-skill managed substrate.
+behaviors:
+  - preserve generated or adopted identity and original timestamp
+  - render active routing from the incoming preset catalog
+  - preserve user-owned harness settings and local presets
+  - classify create update remove preserve and proposal operations by trustworthy ownership
+invariants:
+  - product and durable planning files are excluded
+  - config and profile modes agree
+  - managed setting ownership survives manifest migration
+out_of_scope:
+  - canonical skill merge
+  - applying operations
+blocked_by:
+  - UPG-001
+risk_lane: 2
+preflight_required: true
+read_set:
+  - src/adoption-plan.js
+  - src/create.js
+  - src/workspace-artifacts.js
+  - src/presets/**
+  - src/sync.js
+write_set:
+  - src/upgrade/**
+  - src/presets/catalog.js
+  - src/presets/plan.js
+  - src/workspace-artifacts.js
+  - src/doctor.js
+  - test/upgrade-artifacts.test.js
+conflict_keys:
+  - workspace-identity-schema
+  - managed-artifact-ownership
+  - preset-routing
+  - harness-setting-ownership
+skills:
+  - tdd
+  - test-topology
+  - implementation-style
+  - process-lifecycle
+  - verify
+human_gates: []
+stop_conditions:
+  - mode or provenance is ambiguous
+  - an operation requires product or durable-memory mutation
+commit_policy: coordinator
+review_lenses:
+  - spec-authority
+  - code-test
+  - operations-security
+verification:
+  red:
+    - npm run test -- test/upgrade-artifacts.test.js
+  repair_levels:
+    - L0
+    - L1
+    - L2
+  landing_levels:
+    - L0
+    - L1
+    - L2
+  commands:
+    - npm run test -- test/upgrade-plan.test.js test/upgrade-artifacts.test.js
+    - npm run lint
+  native_checks: []
+budgets:
+  locked_files:
+    - test/adopt.test.js
+    - test/presets.test.js
+  max_new_test_file_loc: 700
+  max_new_production_file_loc: 600
+  zero_owned_processes_after_run: true
+repair_amendments:
+  - id: baseline-repair-d-2026-07-26
+    authority: current user authorization
+    status: authorized_shared_compatibility
+    reason: Existing adoption/create manifest-shape changes are necessary so atomic upgrade inspection and reconciliation receive compatible identity and ownership records; reverting them would break the already-authorized upgrade path.
+    write_set:
+      - src/adoption-plan.js
+      - src/create.js
+      - test/adopt.test.js
+      - test/create.test.js
+      - docs/tickets/workspace-upgrade/**
+    authority_boundary:
+      - only manifest and workspace identity compatibility required by atomic upgrade reconciliation
+      - no product-source migration or unrelated creation/adoption behavior
+    completion_gate: Evidence lands through active UPG-004 repair D; historical UPG-002 closure is not rewritten.

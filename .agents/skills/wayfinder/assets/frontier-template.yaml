@@ -1,0 +1,12 @@
+schema_version: 1
+effort: <effort-slug>
+items:
+  - id: D001
+    title: <decision title>
+    type: research
+    status: ready
+    blocked_by: []
+    claim: null
+    artifact: decisions/D001-<decision-slug>.md
+fog:
+  - <not yet precise>

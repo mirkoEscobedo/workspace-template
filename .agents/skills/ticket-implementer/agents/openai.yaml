@@ -1,0 +1,6 @@
+interface:
+  display_name: "Ticket Implementer"
+  short_description: "Implements one frozen contract with bounded TDD."
+  default_prompt: "Implement this one ticket contract through public-interface TDD and write the structured handoff."
+policy:
+  allow_implicit_invocation: false

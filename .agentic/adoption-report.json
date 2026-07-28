@@ -1,0 +1,1709 @@
+{
+  "version": 2,
+  "generator": "workspace-template",
+  "generatorVersion": "0.6.0",
+  "planId": "dfcf2c0f943b6a78ee5796d840cb3fea",
+  "appliedAt": "2026-07-25T21:10:52.290Z",
+  "root": "G:\\dev\\Github\\workspace-template",
+  "selected": {
+    "project": "javascript",
+    "style": "preserve",
+    "tdd": "preserve",
+    "packageManager": "npm",
+    "agentTargets": [
+      "codex",
+      "opencode"
+    ],
+    "docs": true,
+    "tickets": true,
+    "conflict": "propose",
+    "preset": "sol-codex"
+  },
+  "applied": [
+    {
+      "path": ".agentic/implementation-profile.md",
+      "action": "update-managed",
+      "hash": "1f6c0f9d2708a1de1c003b93ed19982cd4d3c6a531ac07606bf3d51ef3a521df"
+    },
+    {
+      "path": ".agentic/managed-projections.json",
+      "action": "update-managed",
+      "hash": "544b1701292f2c1c9e9c4c842a43ecdfe49983c3f30caaecd06fb6d99715758b"
+    },
+    {
+      "path": ".agentic/policies/model-routing.yaml",
+      "action": "update-managed",
+      "hash": "eac3b41d94ed9c972346faad7b5053755457f665c6fd4251c0b72c16ed3e6e25"
+    },
+    {
+      "path": ".agentic/presets/builtin/sol-codex.json",
+      "action": "create",
+      "hash": "12268246319bf086622ce3d92fb220b9b305b928c54d1d4fc2fcf79abd64967c"
+    },
+    {
+      "path": ".agentic/presets/builtin/sol-only.json",
+      "action": "create",
+      "hash": "a1c6befd8171754ec88fd965da2be47d2679f4178c1a13e315305e5f6e8f620a"
+    },
+    {
+      "path": ".agentic/presets/local/README.md",
+      "action": "create",
+      "hash": "e93fc29133750576af5eda504ee40d510dc98594ee5acdac264a65d6d31b1b45"
+    },
+    {
+      "path": ".agentic/presets/preset.schema.json",
+      "action": "create",
+      "hash": "141034886a63dba2f94b4deef85bb733d39a066db5bd8dcc553705d81a94d299"
+    },
+    {
+      "path": ".agentic/profile.json",
+      "action": "update-managed",
+      "hash": "eee807227a5a613f0623d1423e2fa0f5653e024d1190aae294377e2fe9a84493"
+    },
+    {
+      "path": ".agentic/scripts/retrofit_tickets.py",
+      "action": "update-managed",
+      "hash": "a619298fcc18811edde1fdda188110d50914b4659e5cbdb45214e3f8c7607a1f"
+    },
+    {
+      "path": ".agentic/skill-baselines/compile-master-plan/assets/model-routing.yaml",
+      "action": "update-managed",
+      "hash": "808abd1bbbc5cf45fe40811e425fe87b7a575368c4a81ff55c5efa6db41f0b12"
+    },
+    {
+      "path": ".agentic/skill-baselines/compile-master-plan/SKILL.md",
+      "action": "update-managed",
+      "hash": "e2535a32ec224e67fe209b7ef3f041e2a8b27f5b79ee1d2646fb4be609ec1cd5"
+    },
+    {
+      "path": ".agentic/skill-baselines/execute-frontier/SKILL.md",
+      "action": "update-managed",
+      "hash": "42a428e51e7db231051ee1de61c909db538f9349db4171c00bea004ce3e5ed49"
+    },
+    {
+      "path": ".agentic/skill-baselines/retrofit-ticket-pack/scripts/retrofit_tickets.py",
+      "action": "update-managed",
+      "hash": "8812af0c293d43f2ab53428c965a2e3600651969e1388ac965bc4de1266a0984"
+    },
+    {
+      "path": ".agentic/skills/compile-master-plan/assets/model-routing.yaml",
+      "action": "update-managed",
+      "hash": "808abd1bbbc5cf45fe40811e425fe87b7a575368c4a81ff55c5efa6db41f0b12"
+    },
+    {
+      "path": ".agentic/skills/compile-master-plan/SKILL.md",
+      "action": "update-managed",
+      "hash": "e2535a32ec224e67fe209b7ef3f041e2a8b27f5b79ee1d2646fb4be609ec1cd5"
+    },
+    {
+      "path": ".agentic/skills/execute-frontier/SKILL.md",
+      "action": "update-managed",
+      "hash": "42a428e51e7db231051ee1de61c909db538f9349db4171c00bea004ce3e5ed49"
+    },
+    {
+      "path": ".agentic/skills/retrofit-ticket-pack/scripts/retrofit_tickets.py",
+      "action": "update-managed",
+      "hash": "8812af0c293d43f2ab53428c965a2e3600651969e1388ac965bc4de1266a0984"
+    },
+    {
+      "path": ".agents/skills/.managed-by-workspace-template.json",
+      "action": "update-managed",
+      "hash": "de92d38e2144a3087db245a1fec99619c506e9638eb73f45a68711b15bca0eed"
+    },
+    {
+      "path": ".agents/skills/compile-master-plan/assets/model-routing.yaml",
+      "action": "update-managed",
+      "hash": "808abd1bbbc5cf45fe40811e425fe87b7a575368c4a81ff55c5efa6db41f0b12"
+    },
+    {
+      "path": ".agents/skills/compile-master-plan/SKILL.md",
+      "action": "update-managed",
+      "hash": "e2535a32ec224e67fe209b7ef3f041e2a8b27f5b79ee1d2646fb4be609ec1cd5"
+    },
+    {
+      "path": ".agents/skills/execute-frontier/SKILL.md",
+      "action": "update-managed",
+      "hash": "42a428e51e7db231051ee1de61c909db538f9349db4171c00bea004ce3e5ed49"
+    },
+    {
+      "path": ".agents/skills/retrofit-ticket-pack/scripts/retrofit_tickets.py",
+      "action": "update-managed",
+      "hash": "8812af0c293d43f2ab53428c965a2e3600651969e1388ac965bc4de1266a0984"
+    },
+    {
+      "path": ".opencode/prompts/frontier-loop/orchestrator.txt",
+      "action": "update-managed",
+      "hash": "059331844e5f89c4463430052c9fa54baa87f5c0de62e2de90764964a3a271ad"
+    },
+    {
+      "path": ".opencode/skills/.managed-by-workspace-template.json",
+      "action": "update-managed",
+      "hash": "de92d38e2144a3087db245a1fec99619c506e9638eb73f45a68711b15bca0eed"
+    },
+    {
+      "path": ".opencode/skills/compile-master-plan/assets/model-routing.yaml",
+      "action": "update-managed",
+      "hash": "808abd1bbbc5cf45fe40811e425fe87b7a575368c4a81ff55c5efa6db41f0b12"
+    },
+    {
+      "path": ".opencode/skills/compile-master-plan/SKILL.md",
+      "action": "update-managed",
+      "hash": "e2535a32ec224e67fe209b7ef3f041e2a8b27f5b79ee1d2646fb4be609ec1cd5"
+    },
+    {
+      "path": ".opencode/skills/execute-frontier/SKILL.md",
+      "action": "update-managed",
+      "hash": "42a428e51e7db231051ee1de61c909db538f9349db4171c00bea004ce3e5ed49"
+    },
+    {
+      "path": ".opencode/skills/retrofit-ticket-pack/scripts/retrofit_tickets.py",
+      "action": "update-managed",
+      "hash": "8812af0c293d43f2ab53428c965a2e3600651969e1388ac965bc4de1266a0984"
+    },
+    {
+      "path": "opencode.json",
+      "action": "update-managed",
+      "hash": "aaee6b379c4484db681821a25163aba7c4d81e0518cb39932e7f92cc9084f25a"
+    },
+    {
+      "path": ".agentic/config.json",
+      "action": "update-managed",
+      "hash": "d1b978394691170a3d0486b8018ba7d835d1b4c8e2e2145a14e8d4b07577beb0"
+    },
+    {
+      "path": ".agentic/skills.lock.json",
+      "action": "update-managed",
+      "hash": "1dcdd7394905dacdb907723d544d72a2b27b7f572221d1913e43c30193baf7c5"
+    },
+    {
+      "path": ".agentic/managed-files.json",
+      "action": "update-managed",
+      "hash": "ca1383f064854e289e7a7e5f8113e3260ad6d084a9263ae4c3a5fd484a98d1e2"
+    }
+  ],
+  "unchanged": [
+    {
+      "path": ".agent/.gitignore",
+      "action": "noop"
+    },
+    {
+      "path": ".agent/leases/.gitkeep",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/dependency-snapshot.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/modules/workspace-template/commands.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/modules/workspace-template/profile.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/policies/architecture-budgets.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/policies/process.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/policies/verification.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/profile.schema.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/README.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/scripts/_mini_yaml.py",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/scripts/check_architecture_budgets.py",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/scripts/codex_stop_guard.py",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/scripts/managed_command.py",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/scripts/retrofit_docs.py",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/scripts/validate_ticket_pack.py",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/compile-master-plan/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/compile-master-plan/assets/architecture-budgets.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/compile-master-plan/assets/contract-template.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/compile-master-plan/assets/master-plan-template.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/compile-master-plan/assets/process-policy.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/compile-master-plan/assets/ticket-template.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/compile-master-plan/assets/track-template.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/compile-master-plan/assets/validation-template.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/compile-master-plan/assets/verification-policy.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/compile-master-plan/references/ticket-contract.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/compile-master-plan/schemas/ticket-contract.schema.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/compile-master-plan/scripts/validate_ticket_pack.py",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/diagnose/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/execute-frontier/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/execute-frontier/references/scheduling.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/frontier-loop/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/frontier-loop/references/mode-selection.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/frontier-loop/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/implementation-style/evals/evals.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/implementation-style/evals/trigger-evals.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/implementation-style/references/stack-flutter.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/implementation-style/references/stack-javascript.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/implementation-style/references/stack-react.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/implementation-style/references/stack-rust.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/implementation-style/references/stack-typescript.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/implementation-style/references/style-clean.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/implementation-style/references/style-functional-core.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/implementation-style/references/style-preserve.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/implementation-style/references/style-simple.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/implementation-style/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/integrate-wave/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/integrate-wave/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/process-lifecycle/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/process-lifecycle/references/windows-job-object.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/process-lifecycle/scripts/codex_stop_guard.py",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/process-lifecycle/scripts/managed_command.py",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/process-lifecycle/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/repair-ticket/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/repair-ticket/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/retrofit-agent-docs/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/retrofit-agent-docs/assets/architecture-baseline.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/retrofit-agent-docs/assets/AUTHORITY_MAP.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/retrofit-agent-docs/assets/CURRENT_FRONTIER.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/retrofit-agent-docs/assets/DOMAIN_GLOSSARY.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/retrofit-agent-docs/assets/FAILURE_CATALOG.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/retrofit-agent-docs/assets/PROCESS_POLICY.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/retrofit-agent-docs/assets/PROJECT_MAP.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/retrofit-agent-docs/assets/README.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/retrofit-agent-docs/assets/TEST_TOPOLOGY.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/retrofit-agent-docs/assets/tickets-README.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/retrofit-agent-docs/scripts/retrofit_docs.py",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/retrofit-agent-docs/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/retrofit-ticket-pack/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/retrofit-ticket-pack/references/migration-rules.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/retrofit-ticket-pack/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/tdd/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/tdd/references/deep-modules.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/tdd/references/independent-oracles.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/tdd/references/mocking.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/tdd/references/test-placement.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/tdd/references/tests.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/tdd/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/test-topology/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/test-topology/assets/architecture-budgets.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/test-topology/scripts/check_architecture_budgets.py",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/test-topology/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/ticket-implementer/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/ticket-implementer/assets/implementation-report.schema.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/ticket-implementer/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/ticket-review/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/ticket-review/assets/review-report.schema.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/ticket-review/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/verify/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/wayfinder/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/wayfinder/assets/decision-template.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/wayfinder/assets/frontier-template.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/wayfinder/assets/map-template.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/wayfinder/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/write-skill/evals/evals.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/write-skill/evals/trigger-evals.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/write-skill/references/evaluation.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skill-baselines/write-skill/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/compile-master-plan/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/compile-master-plan/assets/architecture-budgets.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/compile-master-plan/assets/contract-template.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/compile-master-plan/assets/master-plan-template.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/compile-master-plan/assets/process-policy.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/compile-master-plan/assets/ticket-template.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/compile-master-plan/assets/track-template.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/compile-master-plan/assets/validation-template.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/compile-master-plan/assets/verification-policy.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/compile-master-plan/references/ticket-contract.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/compile-master-plan/schemas/ticket-contract.schema.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/compile-master-plan/scripts/validate_ticket_pack.py",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/diagnose/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/execute-frontier/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/execute-frontier/references/scheduling.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/frontier-loop/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/frontier-loop/references/mode-selection.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/frontier-loop/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/implementation-style/evals/evals.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/implementation-style/evals/trigger-evals.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/implementation-style/references/stack-flutter.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/implementation-style/references/stack-javascript.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/implementation-style/references/stack-react.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/implementation-style/references/stack-rust.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/implementation-style/references/stack-typescript.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/implementation-style/references/style-clean.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/implementation-style/references/style-functional-core.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/implementation-style/references/style-preserve.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/implementation-style/references/style-simple.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/implementation-style/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/integrate-wave/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/integrate-wave/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/process-lifecycle/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/process-lifecycle/references/windows-job-object.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/process-lifecycle/scripts/codex_stop_guard.py",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/process-lifecycle/scripts/managed_command.py",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/process-lifecycle/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/repair-ticket/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/repair-ticket/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/retrofit-agent-docs/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/retrofit-agent-docs/assets/architecture-baseline.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/retrofit-agent-docs/assets/AUTHORITY_MAP.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/retrofit-agent-docs/assets/CURRENT_FRONTIER.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/retrofit-agent-docs/assets/DOMAIN_GLOSSARY.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/retrofit-agent-docs/assets/FAILURE_CATALOG.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/retrofit-agent-docs/assets/PROCESS_POLICY.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/retrofit-agent-docs/assets/PROJECT_MAP.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/retrofit-agent-docs/assets/README.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/retrofit-agent-docs/assets/TEST_TOPOLOGY.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/retrofit-agent-docs/assets/tickets-README.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/retrofit-agent-docs/scripts/retrofit_docs.py",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/retrofit-agent-docs/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/retrofit-ticket-pack/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/retrofit-ticket-pack/references/migration-rules.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/retrofit-ticket-pack/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/tdd/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/tdd/references/deep-modules.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/tdd/references/independent-oracles.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/tdd/references/mocking.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/tdd/references/test-placement.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/tdd/references/tests.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/tdd/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/test-topology/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/test-topology/assets/architecture-budgets.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/test-topology/scripts/check_architecture_budgets.py",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/test-topology/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/ticket-implementer/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/ticket-implementer/assets/implementation-report.schema.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/ticket-implementer/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/ticket-review/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/ticket-review/assets/review-report.schema.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/ticket-review/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/verify/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/wayfinder/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/wayfinder/assets/decision-template.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/wayfinder/assets/frontier-template.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/wayfinder/assets/map-template.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/wayfinder/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/write-skill/evals/evals.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/write-skill/evals/trigger-evals.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/write-skill/references/evaluation.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/skills/write-skill/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agentic/workspace.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/compile-master-plan/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/compile-master-plan/assets/architecture-budgets.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/compile-master-plan/assets/contract-template.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/compile-master-plan/assets/master-plan-template.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/compile-master-plan/assets/process-policy.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/compile-master-plan/assets/ticket-template.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/compile-master-plan/assets/track-template.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/compile-master-plan/assets/validation-template.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/compile-master-plan/assets/verification-policy.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/compile-master-plan/references/ticket-contract.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/compile-master-plan/schemas/ticket-contract.schema.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/compile-master-plan/scripts/validate_ticket_pack.py",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/diagnose/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/execute-frontier/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/execute-frontier/references/scheduling.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/frontier-loop/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/frontier-loop/references/mode-selection.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/frontier-loop/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/implementation-style/evals/evals.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/implementation-style/evals/trigger-evals.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/implementation-style/references/stack-flutter.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/implementation-style/references/stack-javascript.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/implementation-style/references/stack-react.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/implementation-style/references/stack-rust.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/implementation-style/references/stack-typescript.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/implementation-style/references/style-clean.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/implementation-style/references/style-functional-core.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/implementation-style/references/style-preserve.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/implementation-style/references/style-simple.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/implementation-style/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/integrate-wave/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/integrate-wave/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/process-lifecycle/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/process-lifecycle/references/windows-job-object.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/process-lifecycle/scripts/codex_stop_guard.py",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/process-lifecycle/scripts/managed_command.py",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/process-lifecycle/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/repair-ticket/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/repair-ticket/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/retrofit-agent-docs/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/retrofit-agent-docs/assets/architecture-baseline.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/retrofit-agent-docs/assets/AUTHORITY_MAP.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/retrofit-agent-docs/assets/CURRENT_FRONTIER.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/retrofit-agent-docs/assets/DOMAIN_GLOSSARY.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/retrofit-agent-docs/assets/FAILURE_CATALOG.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/retrofit-agent-docs/assets/PROCESS_POLICY.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/retrofit-agent-docs/assets/PROJECT_MAP.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/retrofit-agent-docs/assets/README.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/retrofit-agent-docs/assets/TEST_TOPOLOGY.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/retrofit-agent-docs/assets/tickets-README.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/retrofit-agent-docs/scripts/retrofit_docs.py",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/retrofit-agent-docs/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/retrofit-ticket-pack/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/retrofit-ticket-pack/references/migration-rules.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/retrofit-ticket-pack/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/tdd/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/tdd/references/deep-modules.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/tdd/references/independent-oracles.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/tdd/references/mocking.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/tdd/references/test-placement.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/tdd/references/tests.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/tdd/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/test-topology/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/test-topology/assets/architecture-budgets.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/test-topology/scripts/check_architecture_budgets.py",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/test-topology/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/ticket-implementer/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/ticket-implementer/assets/implementation-report.schema.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/ticket-implementer/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/ticket-review/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/ticket-review/assets/review-report.schema.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/ticket-review/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/verify/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/wayfinder/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/wayfinder/assets/decision-template.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/wayfinder/assets/frontier-template.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/wayfinder/assets/map-template.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/wayfinder/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/write-skill/evals/evals.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/write-skill/evals/trigger-evals.json",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/write-skill/references/evaluation.md",
+      "action": "noop"
+    },
+    {
+      "path": ".agents/skills/write-skill/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".codex/agents/implementer.toml",
+      "action": "noop"
+    },
+    {
+      "path": ".codex/agents/integrator.toml",
+      "action": "noop"
+    },
+    {
+      "path": ".codex/agents/planner.toml",
+      "action": "noop"
+    },
+    {
+      "path": ".codex/agents/repairer.toml",
+      "action": "noop"
+    },
+    {
+      "path": ".codex/agents/reviewer-code.toml",
+      "action": "noop"
+    },
+    {
+      "path": ".codex/agents/reviewer-ops.toml",
+      "action": "noop"
+    },
+    {
+      "path": ".codex/agents/reviewer-spec.toml",
+      "action": "noop"
+    },
+    {
+      "path": ".codex/agents/scout.toml",
+      "action": "noop"
+    },
+    {
+      "path": ".codex/config.toml",
+      "action": "noop"
+    },
+    {
+      "path": ".codex/hooks.json",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/prompts/frontier-loop/implementer.txt",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/prompts/frontier-loop/integrator.txt",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/prompts/frontier-loop/planner.txt",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/prompts/frontier-loop/repairer.txt",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/prompts/frontier-loop/reviewer-code.txt",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/prompts/frontier-loop/reviewer-ops.txt",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/prompts/frontier-loop/reviewer-spec.txt",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/prompts/frontier-loop/scout.txt",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/compile-master-plan/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/compile-master-plan/assets/architecture-budgets.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/compile-master-plan/assets/contract-template.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/compile-master-plan/assets/master-plan-template.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/compile-master-plan/assets/process-policy.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/compile-master-plan/assets/ticket-template.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/compile-master-plan/assets/track-template.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/compile-master-plan/assets/validation-template.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/compile-master-plan/assets/verification-policy.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/compile-master-plan/references/ticket-contract.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/compile-master-plan/schemas/ticket-contract.schema.json",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/compile-master-plan/scripts/validate_ticket_pack.py",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/diagnose/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/execute-frontier/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/execute-frontier/references/scheduling.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/frontier-loop/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/frontier-loop/references/mode-selection.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/frontier-loop/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/implementation-style/evals/evals.json",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/implementation-style/evals/trigger-evals.json",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/implementation-style/references/stack-flutter.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/implementation-style/references/stack-javascript.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/implementation-style/references/stack-react.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/implementation-style/references/stack-rust.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/implementation-style/references/stack-typescript.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/implementation-style/references/style-clean.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/implementation-style/references/style-functional-core.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/implementation-style/references/style-preserve.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/implementation-style/references/style-simple.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/implementation-style/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/integrate-wave/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/integrate-wave/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/process-lifecycle/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/process-lifecycle/references/windows-job-object.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/process-lifecycle/scripts/codex_stop_guard.py",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/process-lifecycle/scripts/managed_command.py",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/process-lifecycle/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/repair-ticket/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/repair-ticket/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/retrofit-agent-docs/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/retrofit-agent-docs/assets/architecture-baseline.json",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/retrofit-agent-docs/assets/AUTHORITY_MAP.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/retrofit-agent-docs/assets/CURRENT_FRONTIER.json",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/retrofit-agent-docs/assets/DOMAIN_GLOSSARY.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/retrofit-agent-docs/assets/FAILURE_CATALOG.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/retrofit-agent-docs/assets/PROCESS_POLICY.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/retrofit-agent-docs/assets/PROJECT_MAP.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/retrofit-agent-docs/assets/README.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/retrofit-agent-docs/assets/TEST_TOPOLOGY.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/retrofit-agent-docs/assets/tickets-README.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/retrofit-agent-docs/scripts/retrofit_docs.py",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/retrofit-agent-docs/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/retrofit-ticket-pack/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/retrofit-ticket-pack/references/migration-rules.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/retrofit-ticket-pack/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/tdd/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/tdd/references/deep-modules.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/tdd/references/independent-oracles.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/tdd/references/mocking.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/tdd/references/test-placement.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/tdd/references/tests.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/tdd/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/test-topology/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/test-topology/assets/architecture-budgets.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/test-topology/scripts/check_architecture_budgets.py",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/test-topology/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/ticket-implementer/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/ticket-implementer/assets/implementation-report.schema.json",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/ticket-implementer/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/ticket-review/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/ticket-review/assets/review-report.schema.json",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/ticket-review/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/verify/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/wayfinder/agents/openai.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/wayfinder/assets/decision-template.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/wayfinder/assets/frontier-template.yaml",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/wayfinder/assets/map-template.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/wayfinder/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/write-skill/evals/evals.json",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/write-skill/evals/trigger-evals.json",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/write-skill/references/evaluation.md",
+      "action": "noop"
+    },
+    {
+      "path": ".opencode/skills/write-skill/SKILL.md",
+      "action": "noop"
+    },
+    {
+      "path": "AGENTS.md",
+      "action": "noop"
+    },
+    {
+      "path": "docs/agent/architecture-baseline.json",
+      "action": "noop"
+    },
+    {
+      "path": "docs/agent/AUTHORITY_MAP.md",
+      "action": "noop"
+    },
+    {
+      "path": "docs/agent/CURRENT_FRONTIER.json",
+      "action": "noop"
+    },
+    {
+      "path": "docs/agent/decisions/README.md",
+      "action": "noop"
+    },
+    {
+      "path": "docs/agent/DOMAIN_GLOSSARY.md",
+      "action": "noop"
+    },
+    {
+      "path": "docs/agent/evidence/README.md",
+      "action": "noop"
+    },
+    {
+      "path": "docs/agent/FAILURE_CATALOG.md",
+      "action": "noop"
+    },
+    {
+      "path": "docs/agent/migrations/README.md",
+      "action": "noop"
+    },
+    {
+      "path": "docs/agent/PROCESS_POLICY.md",
+      "action": "noop"
+    },
+    {
+      "path": "docs/agent/PROJECT_MAP.md",
+      "action": "noop"
+    },
+    {
+      "path": "docs/agent/README.md",
+      "action": "noop"
+    },
+    {
+      "path": "docs/agent/TEST_TOPOLOGY.md",
+      "action": "noop"
+    },
+    {
+      "path": "docs/agent/wayfinding/README.md",
+      "action": "noop"
+    },
+    {
+      "path": "docs/tickets/README.md",
+      "action": "noop"
+    }
+  ],
+  "doctor": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "verification": {
+    "requested": false,
+    "ok": true,
+    "results": []
+  },
+  "ok": true
+}

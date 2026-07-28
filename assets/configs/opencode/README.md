@@ -4,9 +4,10 @@ OpenCode discovers the shared Agent Skills location `.agents/skills/`. Run `open
 
 The supplied routing is:
 
-- primary orchestrator: `openai/gpt-5.6-sol`, high;
-- Wayfinder/planner: `openai/gpt-5.6-sol`, high;
-- every scout, implementer, reviewer, repairer, and integrator: `openai/gpt-5.3-codex`, high.
+- every role is rendered from the active preset recorded in
+  `.agentic/policies/model-routing.yaml`;
+- switching presets changes only workspace-template-managed routing fields;
+- inactive preset definitions remain installed in `.agentic/presets/`.
 
 The primary coordinator drives local files and invokes named subagents. It does not watch GitHub issues or wait for repository events. Read-only roles deny edits. Write roles cannot recursively dispatch more agents. External-directory access is denied by default.
 

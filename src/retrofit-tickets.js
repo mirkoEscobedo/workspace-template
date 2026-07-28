@@ -182,7 +182,12 @@ fog:
 `;
 }
 
-function trackYaml(track, tickets) {
+function trackYaml(track, tickets, presetState) {
+  const route = (role) => {
+    const value = presetState?.roles?.[role];
+    const model = value?.targets?.codex ?? value?.targets?.opencode ?? "UNRESOLVED";
+    return `{ model: ${model}, reasoning_effort: ${value?.reasoningEffort ?? "UNRESOLVED"} }`;
+  };
   return `schema_version: 1
 id: ${quote(track.name)}
 title: ${quote(track.name.replaceAll("-", " "))}
@@ -194,9 +199,10 @@ source_authority:
   - repository-evidence
   - labeled-inference
 model_routing:
-  coordinator: { model: gpt-5.6-sol, reasoning_effort: high }
-  planner: { model: gpt-5.6-sol, reasoning_effort: high }
-  workers: { model: gpt-5.3-codex, reasoning_effort: high }
+  preset: ${presetState?.id ?? "UNRESOLVED"}
+  coordinator: ${route("coordinator")}
+  planner: ${route("planner")}
+  workers: ${route("implementer")}
 scheduler:
   default_writers: 1
   max_concurrent_subagents: 3
@@ -292,7 +298,7 @@ export async function ticketRetrofitArtifacts(root, tracks, options = {}) {
     const masterName = (await exists(path.join(trackRoot, "master-plan.md"))) ? "master-plan.md" : (await exists(path.join(trackRoot, "master-prompt.md"))) ? "master-prompt.md" : undefined;
     artifacts.push({ path: `${track.path}/wayfinder-retrofit.md`, content: wayfinderMap(track, masterName ? `./${masterName}` : undefined, options.currentTicket) });
     artifacts.push({ path: `${track.path}/wayfinder-frontier.yaml`, content: wayfinderFrontier(track) });
-    artifacts.push({ path: `${track.path}/track.yaml`, content: trackYaml(track, tickets) });
+    artifacts.push({ path: `${track.path}/track.yaml`, content: trackYaml(track, tickets, options.presetState) });
     artifacts.push({ path: `${track.path}/frontier.json`, content: JSON.stringify(frontierJson(track, tickets), null, 2) });
     for (let index = 0; index < tickets.length; index += 1) {
       const previous = index > 0 ? tickets[index - 1].id : undefined;

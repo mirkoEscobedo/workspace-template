@@ -1,0 +1,6 @@
+interface:
+  display_name: "Retrofit Ticket Pack"
+  short_description: "Adds Frontier Loop contracts to existing local tickets."
+  default_prompt: "Retrofit this existing master-plan ticket folder additively, preserving semantics and enabling both execution modes."
+policy:
+  allow_implicit_invocation: true

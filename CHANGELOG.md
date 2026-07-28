@@ -14,13 +14,20 @@ All notable changes to this package are documented here.
 ### Models and harnesses
 
 - Set GPT-5.6 Sol with high reasoning as the coordinator and planning default.
-- Set GPT-5.3-Codex with high reasoning as the default scout, implementer, reviewer, repairer, and integrator.
+- Set `sol-only` as the default, using GPT-5.6 Sol high for every role, and
+  retained the historical `sol-codex` split with GPT-5.3 Codex high for
+  delegated engineering roles.
 - Added project-local Codex custom-agent definitions, a three-child-agent cap, read-only reviewer/planner roles, write-limited implementation roles, and Stop/SubagentStop process-lease guards.
 - Added equivalent OpenCode role prompts and permission boundaries.
 
 ### Safe adoption and durable plans
 
 - Added first-class `adopt` and `retrofit` commands, separate from `create` and from `create --force`.
+- Added one seamless `upgrade` command for generated and adopted workspaces:
+  direct atomic apply, console/JSON dry-run, automatically named saved plans,
+  exact saved-plan replay, managed-section preservation, three-way skill and
+  projection reconciliation, sealed pre/post verification, durable transaction
+  evidence, stale-plan rejection, and automatic rollback.
 - Added read-only repository/workspace inspection, deterministic operation classification, persisted immutable plans, repository/file/Git fingerprints, stale-plan rejection, integrity checks, additive instruction proposals/managed blocks, idempotent apply, and adoption reports.
 - Added durable `docs/agent/` state, architecture/test/process policies, local evidence directories, and migration of existing local ticket tracks into Frontier contracts without replacing their prose.
 - Added workspace-aware adoption with scoped module metadata and nested instructions only where module policy materially differs.

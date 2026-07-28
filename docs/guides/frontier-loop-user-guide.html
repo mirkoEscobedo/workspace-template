@@ -291,38 +291,29 @@ is complete or a real human/contradiction/safety gate is reached.</code></pre>
     </section>
 
     <section id="models">
-      <h2>7. Models and subagent roles</h2>
+      <h2>7. Presets and subagent roles</h2>
+      <p>Every workspace contains the complete built-in preset catalog under <code>.agentic/presets/builtin/</code> and may add repository-owned experiments under <code>.agentic/presets/local/</code>. The versioned active selection in <code>.agentic/config.json</code> controls model and reasoning routing; role topology, permissions, prompts, concurrency, and landing policy remain stable.</p>
       <table>
-        <thead><tr><th>Role</th><th>Default model</th><th>Reasoning</th><th>Access</th></tr></thead>
+        <thead><tr><th>Role</th><th>Model source</th><th>Access</th></tr></thead>
         <tbody>
-          <tr><td>coordinator/orchestrator</td><td>GPT-5.6 Sol</td><td>high</td><td>session-level coordination</td></tr>
-          <tr><td>Wayfinder/planner</td><td>GPT-5.6 Sol</td><td>high</td><td>read-only</td></tr>
-          <tr><td>scout</td><td>GPT-5.3-Codex</td><td>high</td><td>read-only</td></tr>
-          <tr><td>implementer</td><td>GPT-5.3-Codex</td><td>high</td><td>workspace write</td></tr>
-          <tr><td>spec/authority reviewer</td><td>GPT-5.3-Codex</td><td>high</td><td>read-only</td></tr>
-          <tr><td>code/test reviewer</td><td>GPT-5.3-Codex</td><td>high</td><td>read-only</td></tr>
-          <tr><td>operations/security reviewer</td><td>GPT-5.3-Codex</td><td>high</td><td>read-only</td></tr>
-          <tr><td>repairer</td><td>GPT-5.3-Codex</td><td>high</td><td>workspace write</td></tr>
-          <tr><td>integrator</td><td>GPT-5.3-Codex</td><td>high</td><td>constrained workspace write</td></tr>
+          <tr><td>coordinator/orchestrator</td><td>active preset</td><td>session-level coordination</td></tr>
+          <tr><td>Wayfinder/planner</td><td>active preset</td><td>read-only</td></tr>
+          <tr><td>scout</td><td>active preset</td><td>read-only</td></tr>
+          <tr><td>implementer</td><td>active preset</td><td>workspace write</td></tr>
+          <tr><td>spec/authority reviewer</td><td>active preset</td><td>read-only</td></tr>
+          <tr><td>code/test reviewer</td><td>active preset</td><td>read-only</td></tr>
+          <tr><td>operations/security reviewer</td><td>active preset</td><td>read-only</td></tr>
+          <tr><td>repairer</td><td>active preset</td><td>workspace write</td></tr>
+          <tr><td>integrator</td><td>active preset</td><td>constrained workspace write</td></tr>
         </tbody>
       </table>
-      <p>Your GPT-5.3-Codex allocation is useful for the expensive engineering majority: implementation, repair, and review. Terra is not required by the standard profile. Test alternative models only after recording real ticket quality, repairs, time, and cost.</p>
+      <p>Use <code>workspace-template preset list</code> and <code>preset status</code> to inspect the catalog and active routing. Switch through a reviewed <code>preset plan</code> followed by <code>preset apply</code>, then start a fresh agent session. Checkpoint sequential experiments; use sibling branches or worktrees from one baseline for equivalent A/B comparisons.</p>
     </section>
 
     <section id="codex">
       <h2>8. Codex setup</h2>
       <p>Generated projects receive <code>.codex/config.toml</code>, role definitions under <code>.codex/agents/</code>, and process guards through hooks.</p>
-      <pre><code>model = "gpt-5.6-sol"
-model_reasoning_effort = "high"
-
-[agents]
-enabled = true
-max_concurrent_threads_per_session = 3
-default_subagent_model = "gpt-5.3-codex"
-default_subagent_reasoning_effort = "high"
-
-[features]
-hooks = true</code></pre>
+      <p>The canonical expanded routing policy is <code>.agentic/policies/model-routing.yaml</code>. The active preset materializes its target-specific bindings into <code>.codex/config.toml</code> and role files without removing inactive preset definitions.</p>
       <p>Planner/scout/reviewer role files use read-only sandboxes. Implementer, repairer, and integrator use workspace-write sandboxes. Start with one writer and no more than two read-only children. Stop/SubagentStop hooks reject completion while owned process leases remain open.</p>
     </section>
 
