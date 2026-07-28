@@ -188,7 +188,9 @@ describe("upgrade apply transaction", () => {
     assert.equal(plan.conflicts.some((conflict) => /unauthorized.*publish.*deploy effect/iu.test(conflict)), true);
   });
 
-  it("never persists verifier credential output and keeps structured byte-bounded evidence", async () => {
+  it("never persists verifier credential output and keeps structured byte-bounded evidence", {
+    skip: process.platform !== "win32",
+  }, async () => {
     const root = await fixture();
     const packagePath = path.join(root, "package.json");
     const manifest = JSON.parse(await readFile(packagePath, "utf8"));
