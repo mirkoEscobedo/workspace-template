@@ -173,11 +173,17 @@ async function initializeVerificationGit(root, runner, options, context) {
     "node_modules/",
     "",
   ].join("\n"));
+  await run([
+    "fetch", "--quiet", "--no-tags",
+    context.gitRepository.root,
+    context.gitRepository.head,
+  ], "git-checkpoint:fetch");
+  await run(["reset", "--mixed", "FETCH_HEAD"], "git-checkpoint:reset");
   await run(["add", "-A"], "git-checkpoint:add");
   await run([
     "-c", "user.name=workspace-template",
     "-c", "user.email=workspace-template@example.invalid",
-    "commit", "--quiet", "--no-gpg-sign", "--no-verify",
+    "commit", "--quiet", "--allow-empty", "--no-gpg-sign", "--no-verify",
     "-m", "workspace-template verification checkpoint",
   ], "git-checkpoint:commit");
   return results;
@@ -191,7 +197,7 @@ async function fullVerification(root, options, sealedAuthority, context, frozenW
   }
   const dependencyInstalls = sealedDependencyInstalls(sealedAuthority);
   let runner = runtime.runner;
-  if (dependencyInstalls.length > 0 || context.gitRepository || !runtime.verifier) {
+  if (dependencyInstalls.length > 0 || !runtime.verifier) {
     const scratchRoot = path.join(root, ".agentic", "verification-scratch", context.phaseId);
     const scratchEnvironment = {
       ...process.env,
@@ -464,6 +470,9 @@ async function applyUpgradePlanInternal(plan, options = {}, runtime = {}) {
     await assertPlanApplicable(plan, { expected: { command: "upgrade" }, allowedDirtyPaths: options.allowedDirtyPaths });
   }
   const frozenWorkspace = await workspaceWithSealedVerificationAuthority(root, plan.metadata.verificationCommands);
+  const gitRoot = plan.preconditions.find((item) => item.kind === "git-root")?.value;
+  const gitHead = plan.preconditions.find((item) => item.kind === "git-head")?.value;
+  const gitRepository = gitRoot && gitHead ? { root: gitRoot, head: gitHead } : undefined;
 
   const transaction = path.join(root, ".agentic", "transactions", plan.planId);
   const lockPath = path.join(root, ".agentic", "transactions", "upgrade.lock");
@@ -504,7 +513,7 @@ async function applyUpgradePlanInternal(plan, options = {}, runtime = {}) {
       {
         planId: plan.planId,
         phaseId: "pre-mutation",
-        gitRepository: plan.preconditions.some((item) => item.kind === "git-root"),
+        gitRepository,
       },
       frozenWorkspace,
       runtime,
@@ -538,7 +547,7 @@ async function applyUpgradePlanInternal(plan, options = {}, runtime = {}) {
         {
           planId: plan.planId,
           phaseId: "post-apply",
-          gitRepository: plan.preconditions.some((item) => item.kind === "git-root"),
+          gitRepository,
         },
         frozenWorkspace,
         runtime,

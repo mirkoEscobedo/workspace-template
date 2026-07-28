@@ -46,16 +46,28 @@ describe("upgrade apply transaction", () => {
 
   it("provides a local Git HEAD inside disposable verification copies", { skip: process.platform !== "win32" }, async () => {
     const root = await fixture();
-    const packagePath = path.join(root, "package.json");
-    const packageJson = JSON.parse(await readFile(packagePath, "utf8"));
-    packageJson.scripts.check = "git rev-parse HEAD";
-    await writeFile(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
     for (const args of [
       ["init"],
       ["config", "user.email", "workspace-template@example.invalid"],
       ["config", "user.name", "Workspace Template Test"],
       ["add", "."],
       ["commit", "-m", "fixture"],
+    ]) {
+      const result = spawnSync("git", args, { cwd: root, encoding: "utf8", shell: false });
+      assert.equal(result.status, 0, result.stderr);
+    }
+    const historicalHead = spawnSync("git", ["rev-parse", "HEAD"], {
+      cwd: root,
+      encoding: "utf8",
+      shell: false,
+    }).stdout.trim();
+    const packagePath = path.join(root, "package.json");
+    const packageJson = JSON.parse(await readFile(packagePath, "utf8"));
+    packageJson.scripts.check = `git cat-file -e ${historicalHead}`;
+    await writeFile(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
+    for (const args of [
+      ["add", "package.json"],
+      ["commit", "-m", "require historical evidence"],
     ]) {
       const result = spawnSync("git", args, { cwd: root, encoding: "utf8", shell: false });
       assert.equal(result.status, 0, result.stderr);
