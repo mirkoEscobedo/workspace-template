@@ -64,6 +64,7 @@ export async function sealVerificationInputs(root, excludedPaths = []) {
 async function verificationAuthorityEntry(root, module) {
   const manifestPath = module.manifest ? path.join(root, ...module.manifest.split("/")) : undefined;
   const violations = [];
+  let dependencyInstall = null;
   const commandText = (module.commands?.fullSteps ?? [])
     .map((step) => [step.command, ...(step.args ?? [])].join(" "))
     .join("\n");
@@ -101,7 +102,17 @@ async function verificationAuthorityEntry(root, module) {
         dependencySections.length > 0 ? `manifest declares ${dependencySections.join(", ")}` : null,
         localBinScripts.length > 0 ? `sealed script(s) ${[...new Set(localBinScripts)].sort().join(", ")} reference node_modules/.bin` : null,
       ].filter(Boolean).join("; ");
-      violations.push(`${module.id} dependency-backed verification is unsupported by the isolated checkpoint (${evidence})`);
+      if (module.packageManager === "npm") {
+        const cwd = module.lockOwner ?? module.path;
+        const hasLockfile = await exists(path.join(root, ...cwd.split("/"), "package-lock.json"));
+        dependencyInstall = {
+          command: "npm",
+          args: [hasLockfile ? "ci" : "install", "--ignore-scripts"],
+          cwd,
+        };
+      } else {
+        violations.push(`${module.id} dependency-backed verification uses unsupported package manager '${module.packageManager}' (${evidence})`);
+      }
     }
   }
   return {
@@ -110,6 +121,7 @@ async function verificationAuthorityEntry(root, module) {
     manifest: module.manifest ?? null,
     manifestHash: manifestPath && await exists(manifestPath) ? await hashFile(manifestPath) : null,
     fullSteps: module.commands?.fullSteps ?? [],
+    dependencyInstall,
     authorityViolations: violations,
   };
 }

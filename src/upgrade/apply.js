@@ -106,40 +106,89 @@ async function assertVerificationInputsUnchanged(root, plan) {
   }
 }
 
+function sealedDependencyInstalls(authority) {
+  const seen = new Set();
+  return [...authority.modules, authority.root]
+    .filter(Boolean)
+    .map((entry) => entry.dependencyInstall)
+    .filter((install) => {
+      if (!install) return false;
+      const key = JSON.stringify([install.command, install.args, install.cwd]);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+}
+
+async function installVerificationDependencies(root, authority, runner, options, context) {
+  const results = [];
+  for (const [index, install] of sealedDependencyInstalls(authority).entries()) {
+    const cwd = path.join(root, ...install.cwd.split("/"));
+    if (!isPathInside(root, cwd)) {
+      throw new Error(`Sealed dependency install cwd escapes disposable verification copy: ${install.cwd}`);
+    }
+    const result = await runner(install.command, install.args, {
+      cwd,
+      timeout: options.timeout,
+      maxOutputBytes: options.maxOutputBytes,
+      signal: options.signal,
+      phaseId: context.phaseId,
+      stepId: `dependency-install:${index + 1}`,
+    });
+    const recorded = { ...result, state: result.status === 0 ? "passed" : "failed" };
+    results.push(recorded);
+    if (result.status !== 0) {
+      throw new Error(`Dependency installation failed in disposable verification copy at ${install.cwd}`);
+    }
+  }
+  return results;
+}
+
 async function fullVerification(root, options, sealedAuthority, context, frozenWorkspace, runtime) {
   const checkpointAuthority = await upgradeVerificationAuthority(root, frozenWorkspace);
   assertLocalVerificationAuthority(checkpointAuthority);
   if (JSON.stringify(checkpointAuthority) !== JSON.stringify(sealedAuthority)) {
     throw new Error("Disposable verification copy does not match the sealed verification authority");
   }
-  if (runtime.verifier) return runtime.verifier(root);
-  const scratchRoot = path.join(root, ".agentic", "verification-scratch", context.phaseId);
-  const scratchEnvironment = {
-    ...process.env,
-    HOME: path.join(scratchRoot, "home"),
-    USERPROFILE: path.join(scratchRoot, "home"),
-    APPDATA: path.join(scratchRoot, "appdata"),
-    LOCALAPPDATA: path.join(scratchRoot, "localappdata"),
-    TEMP: path.join(scratchRoot, "temp"),
-    TMP: path.join(scratchRoot, "temp"),
-    TMPDIR: path.join(scratchRoot, "temp"),
-  };
-  for (const directory of new Set(Object.values(scratchEnvironment)
-    .filter((value) => typeof value === "string" && value.startsWith(scratchRoot)))) {
-    await ensureDirectory(directory);
+  const dependencyInstalls = sealedDependencyInstalls(sealedAuthority);
+  let runner = runtime.runner;
+  if (dependencyInstalls.length > 0 || !runtime.verifier) {
+    const scratchRoot = path.join(root, ".agentic", "verification-scratch", context.phaseId);
+    const scratchEnvironment = {
+      ...process.env,
+      HOME: path.join(scratchRoot, "home"),
+      USERPROFILE: path.join(scratchRoot, "home"),
+      APPDATA: path.join(scratchRoot, "appdata"),
+      LOCALAPPDATA: path.join(scratchRoot, "localappdata"),
+      TEMP: path.join(scratchRoot, "temp"),
+      TMP: path.join(scratchRoot, "temp"),
+      TMPDIR: path.join(scratchRoot, "temp"),
+    };
+    for (const directory of new Set(Object.values(scratchEnvironment)
+      .filter((value) => typeof value === "string" && value.startsWith(scratchRoot)))) {
+      await ensureDirectory(directory);
+    }
+    if (!runner) {
+      const ownedRunner = new UpgradeVerificationRunner({
+        root,
+        runId: options.runId ?? `upgrade-${context.planId}`,
+        planId: context.planId,
+        phaseId: context.phaseId,
+        timeoutMs: options.timeout,
+        terminationGraceMs: options.terminationGraceMs,
+        maxOutputBytes: options.maxOutputBytes,
+        signal: options.signal,
+        environment: scratchEnvironment,
+      });
+      runner = ownedRunner.run.bind(ownedRunner);
+    }
   }
-  const ownedRunner = new UpgradeVerificationRunner({
-    root,
-    runId: options.runId ?? `upgrade-${context.planId}`,
-    planId: context.planId,
-    phaseId: context.phaseId,
-    timeoutMs: options.timeout,
-    terminationGraceMs: options.terminationGraceMs,
-    maxOutputBytes: options.maxOutputBytes,
-    signal: options.signal,
-    environment: scratchEnvironment,
-  });
-  const runner = ownedRunner.run.bind(ownedRunner);
+  const dependencyInstallResults = dependencyInstalls.length > 0
+    ? await installVerificationDependencies(root, sealedAuthority, runner, options, context)
+    : [];
+  if (runtime.verifier) {
+    return { ...await runtime.verifier(root), dependencyInstalls: dependencyInstallResults };
+  }
   const report = await verifyWorkspace(root, frozenWorkspace, {
     scope: "all",
     concurrency: 1,
@@ -168,6 +217,7 @@ async function fullVerification(root, options, sealedAuthority, context, frozenW
     }
     report.rootAggregate = rootReport;
   }
+  report.dependencyInstalls = dependencyInstallResults;
   return report;
 }
 
@@ -465,7 +515,10 @@ export async function applyUpgradePlan(plan, options = {}) {
 export function createUpgradeApplyTestHarness(dependencies = {}) {
   return {
     apply(plan, options = {}) {
-      return applyUpgradePlanInternal(plan, options, { verifier: dependencies.verifier });
+      return applyUpgradePlanInternal(plan, options, {
+        verifier: dependencies.verifier,
+        runner: dependencies.runner,
+      });
     },
   };
 }

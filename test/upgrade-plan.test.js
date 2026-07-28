@@ -71,7 +71,7 @@ describe("workspace upgrade", () => {
     assert.match(approved.metadata.verificationInputs.hash, /^[a-f0-9]{64}$/u);
   });
 
-  it("blocks dependency-backed checkpoint verification before any process starts", async () => {
+  it("seals a network-approved npm install for dependency-backed checkpoint verification", async () => {
     const root = await generatedWorkspace();
     const sentinel = path.join(root, "dependency-verifier-started");
     const manifestPath = path.join(root, "package.json");
@@ -80,13 +80,42 @@ describe("workspace upgrade", () => {
     manifest.scripts.check = `node_modules/.bin/biome check . && node -e "require('node:fs').writeFileSync(${JSON.stringify(sentinel)},'ran')"`;
     await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 
-    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+    const blocked = await buildSupportedUpgradePlan(root);
+    assert.equal(blocked.canApply, false);
+    assert.equal(blocked.conflicts.some((item) => /pass --allow-network/iu.test(item)), true);
 
-    assert.equal(plan.canApply, false);
-    assert.equal(plan.conflicts.some((item) =>
-      /dependency-backed verification.*devDependencies/iu.test(item)), true);
-    await assert.rejects(() => applyUpgradePlan(plan), /dependency-backed verification/iu);
+    const approved = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+    const installs = [...approved.metadata.verificationCommands.modules, approved.metadata.verificationCommands.root]
+      .filter(Boolean)
+      .map((item) => item.dependencyInstall)
+      .filter(Boolean);
+    assert.equal(approved.canApply, true);
+    assert.deepEqual(installs, [
+      { command: "npm", args: ["install", "--ignore-scripts"], cwd: "." },
+    ]);
     assert.equal(await exists(sentinel), false);
+
+    const invocations = [];
+    const report = await applyWithVerifier(
+      approved,
+      async () => ({ ok: true }),
+      {},
+      {
+        runner: async (command, args, options) => {
+          invocations.push({ command, args, cwd: options.cwd, stepId: options.stepId });
+          return { command, args, cwd: options.cwd, status: 0 };
+        },
+      },
+    );
+    assert.equal(report.ok, true);
+    assert.equal(invocations.length, 2);
+    assert.equal(invocations.every((item) =>
+      item.command === "npm"
+      && item.args.join(" ") === "install --ignore-scripts"
+      && path.resolve(item.cwd) !== path.resolve(root)), true);
+    assert.deepEqual(report.preVerification.dependencyInstalls.map((item) => item.state), ["passed"]);
+    assert.deepEqual(report.postVerification.dependencyInstalls.map((item) => item.state), ["passed"]);
+    assert.equal(await exists(path.join(root, "node_modules")), false);
   });
 
   it("reports the fail-closed POSIX upgrade verification capability conflict", () => {

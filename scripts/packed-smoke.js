@@ -151,7 +151,7 @@ assert.equal(splitOpenCode.agent["ticket-implementer"].reasoningEffort, "high");
 
 const generatedPackagePath = path.join(generated, "package.json");
 const generatedPackage = JSON.parse(await readFile(generatedPackagePath, "utf8"));
-const dependencyBlockedResult = spawnSync(process.execPath, [
+const dependencyApprovedResult = spawnSync(process.execPath, [
   cli, "upgrade", generated, "--dry-run", "--allow-network", "--json",
 ], {
   encoding: "utf8",
@@ -159,9 +159,15 @@ const dependencyBlockedResult = spawnSync(process.execPath, [
   stdio: "pipe",
   timeout: 180_000,
 });
-assert.equal(dependencyBlockedResult.status, 1);
-const dependencyBlockedPlan = JSON.parse(dependencyBlockedResult.stdout);
-assert.match(dependencyBlockedPlan.conflicts.join("\n"), /dependency-backed verification is unsupported by the isolated checkpoint/i);
+assert.equal(dependencyApprovedResult.status, 0);
+const dependencyApprovedPlan = JSON.parse(dependencyApprovedResult.stdout);
+assert.equal(dependencyApprovedPlan.canApply, true);
+assert.deepEqual(
+  dependencyApprovedPlan.metadata.verificationCommands.modules
+    .map((module) => module.dependencyInstall)
+    .filter(Boolean),
+  [{ command: "npm", args: ["install", "--ignore-scripts"], cwd: "." }],
+);
 generatedPackage.scripts.check = "node -e \"process.exit(0)\"";
 delete generatedPackage.dependencies;
 delete generatedPackage.devDependencies;
