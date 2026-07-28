@@ -1,5 +1,4 @@
 import { mkdtemp, rename, rm } from "node:fs/promises";
-import os from "node:os";
 import path from "node:path";
 import {
   appendJournal,
@@ -87,7 +86,9 @@ export async function applySkillUpdatePlan(plan, options = {}) {
   const skipped = plan.skillUpdate.skills.filter((skill) => !eligible.includes(skill));
   if (!partial && skipped.length > 0) throw new Error(`Atomic skill update blocked by: ${skipped.map((skill) => skill.name).join(", ")}`);
 
-  const temp = await mkdtemp(path.join(os.tmpdir(), "caw-skill-update-"));
+  const stagingParent = path.join(plan.root, ".agentic");
+  await ensureDirectory(stagingParent);
+  const temp = await mkdtemp(path.join(stagingParent, ".caw-skill-update-"));
   const stagedCanonical = path.join(temp, "skills");
   const stagedBaselines = path.join(temp, "baselines");
   const canonicalDestination = path.join(plan.root, ".agentic", "skills");

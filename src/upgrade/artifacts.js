@@ -71,9 +71,21 @@ function rootCommands(workspace, project, packageManager) {
 }
 
 async function managedWorkspaceArtifacts(snapshot, config, discoveredWorkspace) {
-  const effectiveWorkspace = await readJsonIfExists(path.join(snapshot.root, ".agentic", "workspace.json"))
-    ?? discoveredWorkspace;
+  const effectiveWorkspace = structuredClone(
+    await readJsonIfExists(path.join(snapshot.root, ".agentic", "workspace.json"))
+      ?? discoveredWorkspace,
+  );
   if (!effectiveWorkspace?.modules?.length) return [];
+  for (const module of effectiveWorkspace.modules) {
+    const commands = await readJsonIfExists(path.join(
+      snapshot.root,
+      ".agentic",
+      "modules",
+      module.id,
+      "commands.json",
+    ));
+    if (commands) module.commands = { ...(module.commands ?? {}), ...commands };
+  }
   const context = {
     projectName: path.basename(snapshot.root),
     project: config.project,

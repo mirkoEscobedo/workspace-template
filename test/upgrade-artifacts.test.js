@@ -86,6 +86,39 @@ describe("upgrade artifact reconciliation", () => {
     assert.match(drifted.conflicts.join("\n"), /scout\.toml/);
   });
 
+  it("preserves separately managed module commands when the workspace snapshot omits them", async () => {
+    const root = await fixture();
+    const workspacePath = path.join(root, ".agentic", "workspace.json");
+    const manifestPath = path.join(root, ".agentic", "managed-files.json");
+    const workspace = JSON.parse(await readFile(workspacePath, "utf8"));
+    const module = workspace.modules[0];
+    delete module.commands;
+    const workspaceText = `${JSON.stringify(workspace, null, 2)}\n`;
+    await writeFile(workspacePath, workspaceText);
+
+    const commands = {
+      fullSteps: [{ command: "node", args: ["--test", "custom-module.test.js"] }],
+      full: "node --test custom-module.test.js",
+    };
+    const relativeCommandsPath = `.agentic/modules/${module.id}/commands.json`;
+    const commandsPath = path.join(root, ...relativeCommandsPath.split("/"));
+    const commandsText = `${JSON.stringify(commands, null, 2)}\n`;
+    await writeFile(commandsPath, commandsText);
+
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+    manifest.files[".agentic/workspace.json"].hash = hashBuffer(Buffer.from(workspaceText));
+    manifest.files[relativeCommandsPath].hash = hashBuffer(Buffer.from(commandsText));
+    await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+    assert.equal(plan.canApply, true, plan.conflicts.join("\n"));
+    await applyWithVerifier(plan, async () => ({ ok: true }));
+
+    assert.deepEqual(JSON.parse(await readFile(commandsPath, "utf8")), commands);
+    const upgradedWorkspace = JSON.parse(await readFile(workspacePath, "utf8"));
+    assert.deepEqual(upgradedWorkspace.modules.find((item) => item.id === module.id).commands, commands);
+  });
+
   it("updates only the managed AGENTS block and preserves adopted ownership", async () => {
     const root = await fixture();
     const agentsPath = path.join(root, "AGENTS.md");

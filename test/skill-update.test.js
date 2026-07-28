@@ -141,4 +141,29 @@ describe("project-owned skill upgrades", () => {
     await assert.rejects(applySkillUpdatePlan(plan), /catalog changed after planning/);
   });
 
+  it("stages atomic directory swaps beside the repository instead of using system temp", async () => {
+    const root = await generatedProject();
+    const incoming = await incomingCatalog();
+    const incomingFile = path.join(incoming, "wayfinder", "SKILL.md");
+    await writeFile(incomingFile, `${await readFile(incomingFile, "utf8")}\n<!-- same-volume staging -->\n`);
+    const plan = await planSkillUpdate(root, { incomingRoot: incoming, skills: ["wayfinder"] });
+    const keys = ["TMPDIR", "TMP", "TEMP"];
+    const previous = Object.fromEntries(keys.map((key) => [key, process.env[key]]));
+    const unavailableSystemTemp = path.join(root, "missing-system-temp");
+    for (const key of keys) process.env[key] = unavailableSystemTemp;
+    try {
+      const report = await applySkillUpdatePlan(plan);
+      assert.equal(report.ok, true);
+      assert.match(
+        await readFile(path.join(root, ".agentic", "skills", "wayfinder", "SKILL.md"), "utf8"),
+        /same-volume staging/,
+      );
+    } finally {
+      for (const key of keys) {
+        if (previous[key] === undefined) delete process.env[key];
+        else process.env[key] = previous[key];
+      }
+    }
+  });
+
 });
