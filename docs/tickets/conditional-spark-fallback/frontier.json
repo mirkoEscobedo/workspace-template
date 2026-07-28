@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "generated_by": "frontier-loop/validate-ticket-pack",
+  "track": "conditional-spark-fallback",
+  "ready": [],
+  "aggregate_ready": [],
+  "active": [],
+  "blocked": [],
+  "planned": [],
+  "complete": [
+    "FBK-001",
+    "FBK-002",
+    "FBK-003",
+    "FBK-004",
+    "FBK-005",
+    "FBK-006"
+  ],
+  "parent_children": {},
+  "errors": [],
+  "warnings": []
+}

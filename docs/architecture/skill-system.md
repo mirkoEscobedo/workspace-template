@@ -121,13 +121,13 @@ The earlier sequential executor → reviewer → repair → reviewer loop remain
 |---|---|---|
 | coordinator/orchestrator | GPT-5.6 Sol, high | coordinates and decides; repository access follows harness session |
 | Wayfinder/planner | GPT-5.6 Sol, high | read-only |
-| scout | GPT-5.3-Codex, high | read-only |
-| implementer | GPT-5.3-Codex, high | workspace write |
-| specification/authority reviewer | GPT-5.3-Codex, high | read-only |
-| code/test reviewer | GPT-5.3-Codex, high | read-only |
-| operations/security reviewer | GPT-5.3-Codex, high | read-only |
-| repairer | GPT-5.3-Codex, high | workspace write |
-| integrator | GPT-5.3-Codex, high | constrained workspace write |
+| scout | GPT-5.3 Codex, high | read-only |
+| implementer | GPT-5.3 Codex, high | workspace write |
+| specification/authority reviewer | GPT-5.3 Codex, high | read-only |
+| code/test reviewer | GPT-5.3 Codex, high | read-only |
+| operations/security reviewer | GPT-5.3 Codex, high | read-only |
+| repairer | GPT-5.3 Codex, high | workspace write |
+| integrator | GPT-5.3 Codex, high | constrained workspace write |
 
 The default child-agent cap is three. A second writer is not the default; it requires disjoint write sets and conflict keys, non-authority-critical scope, and isolated worktrees/checkpoints.
 

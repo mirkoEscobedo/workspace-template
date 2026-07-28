@@ -175,11 +175,15 @@ function filterMemoryArtifacts(artifacts, options) {
 
 function managedFilesFor(artifacts) {
   return {
-    version: 2,
+    version: 3,
     generator: "workspace-template",
     generatorVersion: PACKAGE_VERSION,
+    settings: {},
     files: Object.fromEntries(
       artifacts
+        .filter((artifact) => !artifact.path.startsWith("docs/agent/")
+          && !artifact.path.startsWith("docs/tickets/")
+          && !artifact.path.startsWith(".agentic/presets/local/"))
         .map((artifact) => {
           const content = Buffer.isBuffer(artifact.content) ? artifact.content : Buffer.from(String(artifact.content));
           return [artifact.path, { mode: "managed", hash: hashBuffer(content) }];

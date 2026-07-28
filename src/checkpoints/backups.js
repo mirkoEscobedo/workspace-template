@@ -16,11 +16,16 @@ import {
 export async function createFileBackup(root, relativePaths, options = {}) {
   const resolvedRoot = path.resolve(root);
   const directory = await mkdtemp(path.join(options.baseDirectory ?? os.tmpdir(), "workspace-template-backup-"));
-  const manifest = { version: 1, root: resolvedRoot, files: {} };
+  const manifest = { version: 1, root: resolvedRoot, files: {}, absentAncestors: [] };
   for (const raw of [...new Set(relativePaths.map(toPosixPath))].sort()) {
     const source = assertPathInside(resolvedRoot, path.resolve(resolvedRoot, fromPosixPath(raw)), "backup path");
     if (!(await exists(source))) {
       manifest.files[raw] = { state: "absent" };
+      let ancestor = path.dirname(source);
+      while (ancestor !== resolvedRoot && !(await exists(ancestor))) {
+        manifest.absentAncestors.push(toPosixPath(path.relative(resolvedRoot, ancestor)));
+        ancestor = path.dirname(ancestor);
+      }
       continue;
     }
     const destination = path.join(directory, "files", fromPosixPath(raw));
@@ -56,6 +61,10 @@ export async function restoreFileBackup(backup) {
     if (record.state === "directory") await copyDirectory(source, destination, { dereference: false });
     else if (record.state === "symlink") await symlink(record.target, destination);
     else await writeFile(destination, await readFile(source));
+  }
+  for (const relative of [...new Set(backup.manifest.absentAncestors ?? [])].sort((a, b) => a.length - b.length)) {
+    if (!relative || relative === ".") throw new Error("Backup ancestor must be a strict repository descendant");
+    await rm(assertPathInside(root, path.resolve(root, fromPosixPath(relative)), "backup ancestor"), { recursive: true, force: true });
   }
 }
 

@@ -33,6 +33,7 @@ adopt|retrofit [directory]
 sync [directory]
 doctor [directory]
 verify [directory]
+upgrade [directory] [--dry-run | --plan-out [path] | --apply-plan path]
 
 tooling plan|install [directory]
 skills update [directory]
@@ -115,6 +116,7 @@ The design keeps read-only evidence, pure-ish plan construction, and side-effect
 |---|---|---|
 | `create` | selected starter, profile, skills, projections, optional Git/install results | external/remote systems |
 | `adopt` | `.agentic/**`, `docs/agent/**`, approved instruction blocks/proposals, canonical skills, conflict-free projections, ticket metadata | source/tests, manifests/lockfiles, `README.md`, CI/deployment, dependencies |
+| `upgrade` | exact sealed package-owned substrate, managed instruction blocks, skill baselines/projections, transaction memory | product code, manifests/lockfiles, durable planning memory, local presets, unowned/drifted content |
 | `tooling install` | exact reviewed manifest/lock/script/config paths and transaction reports | unrelated dependencies/config/source |
 | `skills update` | selected canonical skills, baselines, lock, selected projections and reports | unrelated/local-conflicted skills |
 | `restructure apply` | planned moves and reference/config rewrites caused by the move | behavior, dependency set, domain rules, package ownership |
@@ -122,6 +124,28 @@ The design keeps read-only evidence, pure-ish plan construction, and side-effect
 | `verify` / `doctor` | optional report state only | project content |
 
 No command inherits another command’s write authority because they appear in one user request.
+
+## Installed workspace upgrades
+
+`upgrade` is the single path for both generated and adopted repositories.
+Planning reads the installed workspace identity and ownership manifests, then
+renders the incoming substrate from the currently running package. It performs
+three-way skill merges and preserves managed-section ownership instead of
+claiming whole adopted instruction files.
+
+- No flag seals and immediately applies the exact plan.
+- `--dry-run` emits that same plan without writing; `--json` is the agent seam.
+- `--plan-out [path]` persists without applying. With no path, the deterministic
+  name is `.agentic/plans/upgrades/upgrade-<from>-to-<to>-<plan-id>.json`.
+- `--apply-plan <path>` applies only the saved, integrity-checked operations.
+
+Apply revalidates repository, file, catalog, command, lease, transaction, and
+symlink preconditions; runs pre-verification; validates a staged proposed tree;
+creates a durable write-set backup; writes identity/manifest files last; then
+runs post-doctor and the same sealed verification authority. Verification is
+audited for filesystem side effects. Any failure restores the backup and
+records a terminal journal event. Direct upgrades retain the sealed plan and
+report under `.agentic/transactions/<plan-id>/`.
 
 ## Repository and workspace inspection
 

@@ -1,0 +1,31 @@
+schema_version: 1
+file_defaults:
+  test_warn_loc: 500
+  test_split_plan_loc: 1000
+  test_block_growth_loc: 1500
+  new_test_file_hard_limit_loc: 2000
+  production_warn_loc: 800
+  production_split_plan_loc: 1500
+patch_defaults:
+  added_test_loc_to_locked_file: 0
+  require_new_test_module_added_loc: 250
+locked_files:
+  src/process-utils.js:
+    baseline_loc: 718
+    allowed_growth: 0
+    reason: runtime orchestration moved to Ultima; do not grow the local process utility
+  test/adopt.test.js:
+    baseline_loc: 380
+    allowed_growth: 0
+    reason: preserve the landed FBK-001 assertion without growing the legacy test
+  test/presets.test.js:
+    baseline_loc: 139
+    allowed_growth: 0
+    reason: preserve the landed FBK-001 assertion without growing the legacy test
+  test/skills-update.test.js:
+    baseline_loc: 123
+    allowed_growth: 0
+    reason: runtime integration requires a separately approved behavior module
+budgets:
+  max_new_production_file_loc: 600
+  max_new_test_file_loc: 700

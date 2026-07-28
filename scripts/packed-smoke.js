@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtemp, mkdir, readFile, unlink, writeFile } from "node:fs/promises";
-import { fileURLToPath } from "node:url";
+import { createHash } from "node:crypto";
+import { mkdtemp, mkdir, readFile, readdir, rm, unlink, writeFile } from "node:fs/promises";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import os from "node:os";
 import path from "node:path";
 
@@ -45,6 +46,24 @@ async function readable(file) {
   }
 }
 
+async function treeDigest(root) {
+  const hash = createHash("sha256");
+  async function walk(directory, prefix = "") {
+    for (const entry of await readdir(directory, { withFileTypes: true })) {
+      const relative = path.posix.join(prefix, entry.name);
+      if (entry.isDirectory()) await walk(path.join(directory, entry.name), relative);
+      else {
+        hash.update(relative);
+        hash.update("\0");
+        hash.update(await readFile(path.join(directory, entry.name)));
+        hash.update("\0");
+      }
+    }
+  }
+  await walk(root);
+  return hash.digest("hex");
+}
+
 const npmCli = process.env.npm_execpath
   ?? (process.platform === "win32"
     ? path.join(path.dirname(process.execPath), "node_modules", "npm", "bin", "npm-cli.js")
@@ -53,16 +72,16 @@ const runNpm = (args, options = {}) => run(npmCli ? process.execPath : "npm", np
 const runNpmJson = (args, options = {}) => runJson(npmCli ? process.execPath : "npm", npmCli ? [npmCli, ...args] : args, options);
 
 let argument = process.argv[2];
-let generatedTarball = false;
+let sandbox;
+try {
+sandbox = await mkdtemp(path.join(os.tmpdir(), "caw-packed-smoke-"));
 if (!argument) {
   const sourceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-  const result = runNpmJson(["pack", "--json"], { cwd: sourceRoot });
-  argument = path.join(sourceRoot, result[0].filename);
-  generatedTarball = true;
+  const result = runNpmJson(["pack", "--json", "--pack-destination", sandbox], { cwd: sourceRoot });
+  argument = path.join(sandbox, result[0].filename);
 }
 
 const tarball = path.resolve(argument);
-const sandbox = await mkdtemp(path.join(os.tmpdir(), "caw-packed-smoke-"));
 const consumer = path.join(sandbox, "consumer");
 await mkdir(consumer, { recursive: true });
 await writeJson(path.join(consumer, "package.json"), { name: "packed-smoke-consumer", private: true });
@@ -86,6 +105,7 @@ for (const relative of [
   "src/tooling/apply.js",
   "src/restructure/apply.js",
   "src/align/orchestrate.js",
+  "src/upgrade/index.js",
   "assets/skills/wayfinder/SKILL.md",
   "assets/skills/execute-frontier/SKILL.md",
   "assets/scripts/managed_command.py",
@@ -119,6 +139,71 @@ const generatedPresetApply = invokeJson([
 ]);
 assert.equal(generatedPresetApply.ok, true);
 assert.equal(invokeJson(["preset", "status", generated, "--json"]).activeId, "sol-codex");
+const splitCodexConfig = await readFile(path.join(generated, ".codex", "config.toml"), "utf8");
+assert.match(splitCodexConfig, /default_subagent_model\s*=\s*"gpt-5\.3-codex-spark"/);
+assert.match(splitCodexConfig, /default_subagent_reasoning_effort\s*=\s*"xhigh"/);
+const splitImplementer = await readFile(path.join(generated, ".codex", "agents", "implementer.toml"), "utf8");
+assert.match(splitImplementer, /model\s*=\s*"gpt-5\.3-codex-spark"/);
+assert.match(splitImplementer, /model_reasoning_effort\s*=\s*"xhigh"/);
+const splitOpenCode = JSON.parse(await readFile(path.join(generated, "opencode.json"), "utf8"));
+assert.equal(splitOpenCode.agent["ticket-implementer"].model, "openai/gpt-5.3-codex-spark");
+assert.equal(splitOpenCode.agent["ticket-implementer"].reasoningEffort, "xhigh");
+
+const generatedPackagePath = path.join(generated, "package.json");
+const generatedPackage = JSON.parse(await readFile(generatedPackagePath, "utf8"));
+const dependencyBlockedResult = spawnSync(process.execPath, [
+  cli, "upgrade", generated, "--dry-run", "--allow-network", "--json",
+], {
+  encoding: "utf8",
+  shell: false,
+  stdio: "pipe",
+  timeout: 180_000,
+});
+assert.equal(dependencyBlockedResult.status, 1);
+const dependencyBlockedPlan = JSON.parse(dependencyBlockedResult.stdout);
+assert.match(dependencyBlockedPlan.conflicts.join("\n"), /dependency-backed verification is unsupported by the isolated checkpoint/i);
+generatedPackage.scripts.check = "node -e \"process.exit(0)\"";
+delete generatedPackage.dependencies;
+delete generatedPackage.devDependencies;
+delete generatedPackage.optionalDependencies;
+delete generatedPackage.peerDependencies;
+await writeJson(generatedPackagePath, generatedPackage);
+const upgradePreview = invokeJson(["upgrade", generated, "--dry-run", "--allow-network", "--json"]);
+assert.equal(upgradePreview.command, "upgrade");
+assert.equal(upgradePreview.metadata.upgrade.mode, "generated");
+const savedUpgrade = invokeJson(["upgrade", generated, "--plan-out", "--allow-network", "--json"]);
+assert.equal(savedUpgrade.status, "planned");
+assert.match(savedUpgrade.planPath, /[\\/]\.agentic[\\/]plans[\\/]upgrades[\\/]upgrade-0\.6\.0-to-0\.6\.0-[a-f0-9]{12}\.json$/);
+const generatedUpgradePlanPath = savedUpgrade.planPath;
+const tamperedUpgradePlanPath = path.join(sandbox, "tampered-upgrade.json");
+const tamperedUpgradePlan = JSON.parse(await readFile(generatedUpgradePlanPath, "utf8"));
+tamperedUpgradePlan.metadata.upgrade.mode = "adopted";
+await writeJson(tamperedUpgradePlanPath, tamperedUpgradePlan);
+assert.throws(
+  () => invoke(["upgrade", generated, "--apply-plan", tamperedUpgradePlanPath, "--json"]),
+  /failed/,
+);
+const generatedUpgrade = invokeJson(["upgrade", generated, "--apply-plan", generatedUpgradePlanPath, "--json"]);
+assert.equal(generatedUpgrade.ok, true);
+const secondUpgrade = invokeJson(["upgrade", generated, "--dry-run", "--allow-network", "--json"]);
+assert.equal(secondUpgrade.metadata.upgrade.status, "current");
+const rollbackTarget = path.join(generated, ".agentic", "README.md");
+await unlink(rollbackTarget);
+const rollbackPlan = invokeJson(["upgrade", generated, "--dry-run", "--allow-network", "--json"]);
+let verificationCalls = 0;
+const packedUpgradeInternals = await import(pathToFileURL(path.join(packageRoot, "src", "upgrade", "apply.js")).href);
+const packedUpgradeHarness = packedUpgradeInternals.createUpgradeApplyTestHarness({
+  verifier: async () => {
+    verificationCalls += 1;
+    if (verificationCalls > 1) throw new Error("packed rollback injection");
+    return { ok: true };
+  },
+});
+await assert.rejects(
+  () => packedUpgradeHarness.apply(rollbackPlan),
+  /packed rollback injection/,
+);
+assert.equal(await readable(rollbackTarget), false, "rollback must restore the pre-upgrade missing-file state");
 
 // Existing-repository adoption round-trip from a persisted immutable plan.
 const existing = path.join(sandbox, "existing");
@@ -143,6 +228,28 @@ assert.equal(adoptionResult.ok, true, JSON.stringify(adoptionResult.doctor?.erro
 assert.equal(await readFile(path.join(existing, "src", "index.js"), "utf8"), sourceBefore);
 assert.equal(await readFile(path.join(existing, "AGENTS.md"), "utf8"), agentsBefore);
 assert.equal(await readable(path.join(existing, ".agentic", "proposals", "AGENTS.md")), true);
+const adoptedSourceBeforeUpgrade = await readFile(path.join(existing, "src", "index.js"), "utf8");
+const adoptedProductHash = await treeDigest(path.join(existing, "src"));
+const adoptedMemoryHash = await treeDigest(path.join(existing, "docs", "agent"));
+const adoptedPackageBefore = await readFile(path.join(existing, "package.json"));
+const adoptedUpgradePlanPath = path.join(sandbox, "adopted-upgrade.json");
+invokeJson(["upgrade", existing, "--plan-out", adoptedUpgradePlanPath, "--allow-network", "--json"]);
+const adoptedConfigPath = path.join(existing, ".agentic", "config.json");
+const adoptedConfigBefore = await readFile(adoptedConfigPath, "utf8");
+await writeFile(adoptedConfigPath, `${adoptedConfigBefore}\n`, "utf8");
+assert.throws(
+  () => invoke(["upgrade", existing, "--apply-plan", adoptedUpgradePlanPath, "--json"]),
+  /failed/,
+);
+await writeFile(adoptedConfigPath, adoptedConfigBefore, "utf8");
+const adoptedUpgrade = invokeJson(["upgrade", existing, "--apply-plan", adoptedUpgradePlanPath, "--json"]);
+assert.equal(adoptedUpgrade.ok, true);
+assert.equal(await readFile(path.join(existing, "src", "index.js"), "utf8"), adoptedSourceBeforeUpgrade);
+assert.equal(invokeJson(["upgrade", existing, "--allow-network", "--json"]).status, "current");
+assert.equal(await treeDigest(path.join(existing, "src")), adoptedProductHash);
+assert.equal(await treeDigest(path.join(existing, "docs", "agent")), adoptedMemoryHash);
+assert.deepEqual(await readFile(path.join(existing, "package.json")), adoptedPackageBefore);
+assert.equal(await readFile(path.join(existing, "AGENTS.md"), "utf8"), agentsBefore);
 assert.equal(invokeJson(["doctor", existing, "--json"]).ok, true);
 const skillCheck = invokeJson(["skills", "update", existing, "--check", "--json"]);
 assert.equal(Array.isArray(skillCheck.skills), true);
@@ -177,6 +284,20 @@ assert.equal(inspected.workspace.modules.length, 2);
 assert.equal(inspected.workspace.modules.find((item) => item.name === "@packed/app").dependencies.length, 1);
 const verified = invokeJson(["verify", workspace, "--workspace", "all", "--scope", "all", "--json"]);
 assert.equal(verified.ok, true, JSON.stringify(verified.results));
+const workspaceAdoptionPlan = path.join(sandbox, "workspace-adoption.json");
+invokeJson(["adopt", workspace, "--dry-run", "--json", "--no-tickets", "--plan-out", workspaceAdoptionPlan]);
+assert.equal(invokeJson(["adopt", workspace, "--apply-plan", workspaceAdoptionPlan, "--json"]).ok, true);
+const workspacePackageBefore = await readFile(path.join(workspace, "package.json"));
+const workspaceAppPackagePath = path.join(workspace, "packages", "app", "package.json");
+const dependencyFreeWorkspaceApp = JSON.parse(await readFile(workspaceAppPackagePath, "utf8"));
+delete dependencyFreeWorkspaceApp.dependencies;
+await writeJson(workspaceAppPackagePath, dependencyFreeWorkspaceApp);
+const workspaceProductHash = await treeDigest(path.join(workspace, "packages"));
+assert.equal(invokeJson(["upgrade", workspace, "--allow-network", "--json"]).ok, true);
+assert.equal(invokeJson(["doctor", workspace, "--json"]).ok, true);
+assert.equal(invokeJson(["upgrade", workspace, "--dry-run", "--allow-network", "--json"]).metadata.upgrade.status, "current");
+assert.equal(await treeDigest(path.join(workspace, "packages")), workspaceProductHash);
+assert.deepEqual(await readFile(path.join(workspace, "package.json")), workspacePackageBefore);
 
 // Controlled local dependency installation from an immutable plan. This uses
 // only a file: package and therefore proves the packed path without network.
@@ -285,13 +406,19 @@ console.log(JSON.stringify({
   checks: [
     "version-and-packed-payload",
     "create-and-doctor",
+    "generated-upgrade-preview-auto-plan-tamper-apply-noop",
+    "packed-upgrade-injected-rollback",
     "persisted-adoption-round-trip",
-    "source-and-custom-instruction-preservation",
+    "adopted-upgrade-stale-apply-direct-noop",
+    "source-durable-memory-package-and-custom-instruction-preservation",
     "project-owned-skill-update-check",
     "workspace-discovery-and-verification",
+    "adopted-monorepo-upgrade-doctor-protected-hash-noop",
     "offline-native-tooling-transaction",
     "mechanical-restructure-transaction",
     "manual-alignment-plan-and-stop-gate",
   ],
 }, null, 2));
-if (generatedTarball) await unlink(tarball);
+} finally {
+  if (sandbox) await rm(sandbox, { recursive: true, force: true });
+}

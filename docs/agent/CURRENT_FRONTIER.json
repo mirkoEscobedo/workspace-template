@@ -1,5 +1,74 @@
 {
   "schema_version": 1,
   "generated_at": null,
-  "tracks": []
+  "tracks": [
+    {
+      "id": "workspace-upgrade",
+      "path": "docs/tickets/workspace-upgrade",
+      "active": [],
+      "blocked": [],
+      "complete": [
+        "UPG-001",
+        "UPG-002",
+        "UPG-003",
+        "UPG-004",
+        "UPG-005",
+        "UPG-006"
+      ],
+      "amendment": "baseline-repair-d-2026-07-26",
+      "pending": [],
+      "landing": {
+        "status": "passed",
+        "fullTestCount": 156,
+        "packedSmoke": "passed",
+        "reviewLenses": [
+          "spec-authority",
+          "code-test",
+          "operations-security"
+        ]
+      },
+      "historical_amendments": [
+        "baseline-repair-c-2026-07-26"
+      ]
+    },
+    {
+      "id": "conditional-spark-fallback",
+      "path": "docs/tickets/conditional-spark-fallback",
+      "active": [],
+      "blocked": [],
+      "complete": [
+        "FBK-001"
+      ],
+      "superseded": [
+        "FBK-002",
+        "FBK-003",
+        "FBK-004",
+        "FBK-005",
+        "FBK-006"
+      ],
+      "pending": [],
+      "baseline": {
+        "commit": "fe7e325958ff56eefa3bd97a54fabed58c845de6",
+        "preset": "sol-only",
+        "fingerprint": "793606dafbcd5571feb039beaad992c501952fe7a8d33a913a035653a10420b6"
+      },
+      "human_gates": [],
+      "ownership": {
+        "declarative": "workspace-template",
+        "runtime": "ultima-ai"
+      },
+      "landing": {
+        "status": "closed-by-supersession",
+        "policy": "serial",
+        "writer_limit": 1,
+        "retained_commit": "86b716a4a56de448b9bd9265dc47c9b3f201539b",
+        "supersession_base": "f86efd3f143b40631d4a278e143949ca7ae28907",
+        "review_lenses": [
+          "spec-authority",
+          "code-test",
+          "operations-security"
+        ]
+      }
+    }
+  ]
 }

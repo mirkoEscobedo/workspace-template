@@ -365,6 +365,9 @@ async function validateProfileAndConfig(root, report) {
   if (!["generated", "adopted", undefined].includes(config.mode)) report.errors.push(`invalid config mode '${config.mode}'`);
   if (![1, 2].includes(profile.version)) report.errors.push(`unsupported profile version ${profile.version}`);
   if (profile.version === 2 && !["generated", "adopted"].includes(profile.mode)) report.errors.push(`invalid profile mode '${profile.mode}'`);
+  if (config.mode !== undefined && profile.mode !== undefined && config.mode !== profile.mode) {
+    report.errors.push(`config/profile mode mismatch: ${config.mode} != ${profile.mode}`);
+  }
 
   for (const key of ["project", "style", "tdd"]) {
     if (config[key] !== undefined && profile[key] !== undefined && config[key] !== profile[key]) {

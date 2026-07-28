@@ -21,6 +21,22 @@ export const CODEX_ROLE_FILES = Object.freeze({
   integrator: "integrator.toml",
 });
 
+export const PREFERRED_BROKER_ROLE_ID = "opencode_spark_broker";
+const BROKER_FILE = "opencode-spark-broker.toml";
+const BROKER_ROLE_ID_PATTERN = /^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/;
+
+export function isSafeBrokerRoleId(roleId) {
+  return typeof roleId === "string" && BROKER_ROLE_ID_PATTERN.test(roleId);
+}
+
+export function codexBrokerArtifactPath(roleId) {
+  if (!isSafeBrokerRoleId(roleId)) {
+    throw new Error(`Invalid preset broker role ID: ${roleId}`);
+  }
+  const destinationName = roleId === PREFERRED_BROKER_ROLE_ID ? BROKER_FILE : `${roleId}.toml`;
+  return `.codex/agents/${destinationName}`;
+}
+
 export const PREFERRED_ROLE_IDS = Object.freeze({
   codex: Object.freeze({
     coordinator: "frontier_orchestrator",
@@ -73,7 +89,27 @@ function nextRoleId(preferred, occupied, target) {
   }
 }
 
-export async function resolveRoleIds(rootDirectory, agentTargets, existingPreset = undefined) {
+function brokerRoleIdForDestination(fileName) {
+  const normalized = fileName.toLowerCase();
+  if (normalized === BROKER_FILE) return PREFERRED_BROKER_ROLE_ID;
+  return path.extname(normalized) === ".toml" ? path.basename(normalized, ".toml") : null;
+}
+
+export function overrideBlocksCodexFallback(override) {
+  if (override.target !== "codex") return false;
+  if (override.pointer === "/agents/enabled") return override.current !== true;
+  if (override.pointer === "/agents/max_concurrent_threads_per_session") {
+    return !Number.isInteger(override.current) || override.current < 1;
+  }
+  return false;
+}
+
+export function overrideBlocksFallback(override, fallback) {
+  return overrideBlocksCodexFallback(override)
+    || (fallback && override.target === fallback.delegateTarget);
+}
+
+export async function resolveRoleIds(rootDirectory, agentTargets, existingPreset = undefined, resolvedPreset = undefined) {
   const root = path.resolve(rootDirectory);
   const records = await managedFileRecords(root);
   const roleIds = {};
@@ -81,11 +117,15 @@ export async function resolveRoleIds(rootDirectory, agentTargets, existingPreset
   if (agentTargets.includes("codex")) {
     const occupied = new Set();
     const blockedPreferredRoles = new Set();
+    let brokerPathBlocked = false;
     const agentsRoot = path.join(root, ".codex", "agents");
     for (const file of await listFiles(agentsRoot)) {
       if (path.extname(file).toLowerCase() !== ".toml") continue;
       const relative = toPosixPath(path.relative(root, file));
       if (await isManagedCurrent(root, relative, records)) continue;
+      if (path.basename(file).toLowerCase() === BROKER_FILE) brokerPathBlocked = true;
+      const brokerDestinationRoleId = brokerRoleIdForDestination(path.basename(file));
+      if (brokerDestinationRoleId) occupied.add(brokerDestinationRoleId);
       const name = parseTomlName(await readFile(file, "utf8"));
       if (name) occupied.add(name);
       for (const [role, fileName] of Object.entries(CODEX_ROLE_FILES)) {
@@ -103,6 +143,15 @@ export async function resolveRoleIds(rootDirectory, agentTargets, existingPreset
             "codex",
           );
       occupied.add(roleIds.codex[role]);
+    }
+    if (resolvedPreset?.fallbacks?.codexChildModelRefusal && agentTargets.includes("opencode")) {
+      if (brokerPathBlocked) occupied.add(PREFERRED_BROKER_ROLE_ID);
+      const recorded = existingPreset?.fallbacks?.codexChildModelRefusal?.brokerRoleId;
+      const brokerRoleId = isSafeBrokerRoleId(recorded) && !occupied.has(recorded)
+        ? recorded
+        : nextRoleId(PREFERRED_BROKER_ROLE_ID, occupied, "codex");
+      roleIds.broker = { codexChildModelRefusal: brokerRoleId };
+      occupied.add(brokerRoleId);
     }
   }
 
@@ -157,6 +206,15 @@ export async function renderCodexArtifacts(resolved, roleIds) {
       : `${roleIds.codex[role]}.toml`;
     artifacts.push({ path: `.codex/agents/${destinationName}`, content: Buffer.from(content) });
   }
+  if (resolved.fallbacks?.codexChildModelRefusal && roleIds.opencode) {
+    const fallback = resolved.fallbacks.codexChildModelRefusal;
+    const brokerRoleId = roleIds.broker?.codexChildModelRefusal ?? PREFERRED_BROKER_ROLE_ID;
+    let content = await readFile(path.join(assetsRoot, "configs", "codex", "agents", BROKER_FILE), "utf8");
+    content = replaceTomlScalar(content, "name", brokerRoleId);
+    content = replaceTomlScalar(content, "model", fallback.brokerModel.model);
+    content = replaceTomlScalar(content, "model_reasoning_effort", fallback.brokerModel.reasoningEffort);
+    artifacts.push({ path: codexBrokerArtifactPath(brokerRoleId), content: Buffer.from(content) });
+  }
   return artifacts;
 }
 
@@ -204,16 +262,65 @@ export async function renderOpenCodeArtifacts(resolved, roleIds) {
 }
 
 export function activePresetState(resolved, roleIds, overrides = []) {
-  return {
+  const activeRoleIds = structuredClone(roleIds);
+  const activeOverrides = structuredClone(overrides);
+  const value = {
     id: resolved.id,
     source: resolved.source,
     fingerprint: resolved.fingerprint,
     stability: resolved.stability,
-    status: overrides.length > 0 ? "partial" : "active",
-    roleIds,
-    overrides,
+    status: "active",
+    roleIds: activeRoleIds,
+    overrides: activeOverrides,
     roles: resolved.roles,
   };
+  const fallback = resolved.fallbacks?.codexChildModelRefusal;
+  if (fallback) {
+    const blockedByPreservedDelegateState = activeOverrides.some(
+      (override) => override.target === fallback.delegateTarget,
+    );
+    const blockedByPreservedCodexState = activeOverrides.some(overrideBlocksCodexFallback);
+    if (
+      activeRoleIds.codex
+      && activeRoleIds.opencode
+      && !blockedByPreservedDelegateState
+      && !blockedByPreservedCodexState
+    ) {
+      const brokerRoleId = activeRoleIds.broker?.codexChildModelRefusal ?? PREFERRED_BROKER_ROLE_ID;
+      activeRoleIds.broker ??= {};
+      activeRoleIds.broker.codexChildModelRefusal = brokerRoleId;
+      value.fallbacks = {
+        codexChildModelRefusal: {
+          brokerRoleId,
+          brokerModel: structuredClone(fallback.brokerModel),
+          roles: [...fallback.roles],
+          delegateTarget: fallback.delegateTarget,
+          delegateRoles: Object.fromEntries(fallback.roles.map((role) => [
+            role,
+            {
+              roleId: activeRoleIds.opencode[role],
+              model: resolved.roles[role].targets.opencode,
+              variant: resolved.roles[role].reasoningEffort,
+            },
+          ])),
+        },
+      };
+    } else {
+      delete activeRoleIds.broker;
+      if (!blockedByPreservedDelegateState && !blockedByPreservedCodexState) {
+        activeOverrides.push({
+          target: "fallback",
+          path: ".agentic/config.json",
+          pointer: "/execution/preset/fallbacks/codexChildModelRefusal",
+          current: null,
+          requested: "codex-to-opencode",
+          reason: "fallback requires both codex and opencode agent targets",
+        });
+      }
+    }
+  }
+  value.status = activeOverrides.length > 0 ? "partial" : "active";
+  return value;
 }
 
 export function modelRoutingYaml(resolved, state) {
@@ -232,6 +339,27 @@ export function modelRoutingYaml(resolved, state) {
     lines.push(`    reasoning_effort: ${route.reasoningEffort}`);
     lines.push("    targets:");
     for (const [target, model] of Object.entries(route.targets)) lines.push(`      ${target}: ${model}`);
+  }
+  const fallback = state.fallbacks?.codexChildModelRefusal;
+  if (fallback) {
+    lines.push("fallbacks:");
+    lines.push("  codex_child_model_refusal:");
+    lines.push(`    broker_role_id: ${fallback.brokerRoleId}`);
+    lines.push("    broker_model:");
+    lines.push(`      alias: ${fallback.brokerModel.alias}`);
+    lines.push(`      target: ${fallback.brokerModel.target}`);
+    lines.push(`      model: ${fallback.brokerModel.model}`);
+    lines.push(`      reasoning_effort: ${fallback.brokerModel.reasoningEffort}`);
+    lines.push(`    eligible_roles: [${fallback.roles.join(", ")}]`);
+    lines.push(`    delegate_target: ${fallback.delegateTarget}`);
+    lines.push("    delegate_roles:");
+    for (const role of fallback.roles) {
+      const delegate = fallback.delegateRoles[role];
+      lines.push(`      ${role}:`);
+      lines.push(`        role_id: ${delegate.roleId}`);
+      lines.push(`        model: ${delegate.model}`);
+      lines.push(`        variant: ${delegate.variant}`);
+    }
   }
   lines.push("concurrency:");
   lines.push("  max_subagents: 3");

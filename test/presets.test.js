@@ -71,7 +71,7 @@ describe("agent preset catalog and switching", () => {
     const root = await workspace("sol-codex");
     const config = await readJson(path.join(root, ".agentic", "config.json"));
     assert.equal(config.execution.preset.id, "sol-codex");
-    assert.equal(config.execution.workers.model, "gpt-5.3-codex");
+    assert.equal(config.execution.workers.model, "gpt-5.3-codex-spark");
     assert.equal(await exists(path.join(root, ".agentic", "presets", "builtin", "sol-only.json")), true);
   });
 

@@ -1,0 +1,77 @@
+schema_version: 1
+id: UPG-003
+title: Skill and projection upgrade
+legacy_ids: []
+status: closed
+parent: null
+public_outcome: Upgrade planning atomically includes exact three-way skill merges, gates, locks, and projections.
+behaviors:
+  - plan baseline recovery without writing
+  - merge baseline local and incoming skill trees
+  - gate risky additions and removals
+  - preflight projections against staged merged skills
+invariants:
+  - incoming baselines remain exact
+  - no conflicted skill advances
+  - plan-time approvals cannot be broadened at apply
+out_of_scope:
+  - partial upgrades
+  - external skill download
+blocked_by:
+  - UPG-002
+risk_lane: 3
+preflight_required: true
+read_set:
+  - src/skills/**
+  - src/sync.js
+  - src/upgrade/**
+write_set:
+  - src/upgrade/**
+  - src/skills/baseline.js
+  - src/skills/update-plan.js
+  - src/sync.js
+  - test/upgrade-skills.test.js
+conflict_keys:
+  - canonical-skill-catalog
+  - skill-baseline-provenance
+  - managed-projections
+  - upgrade-plan-shape
+skills:
+  - tdd
+  - test-topology
+  - implementation-style
+  - process-lifecycle
+  - verify
+human_gates: []
+stop_conditions:
+  - baseline provenance cannot be proven
+  - a new permission class lacks recorded authority
+commit_policy: coordinator
+review_lenses:
+  - spec-authority
+  - code-test
+  - operations-security
+verification:
+  red:
+    - npm run test -- test/upgrade-skills.test.js
+  repair_levels:
+    - L0
+    - L1
+    - L2
+  landing_levels:
+    - L0
+    - L1
+    - L2
+    - L3
+    - L4
+  commands:
+    - npm run test -- test/upgrade-plan.test.js test/upgrade-artifacts.test.js test/upgrade-skills.test.js
+    - npm run check
+  native_checks: []
+budgets:
+  locked_files:
+    - test/skills-update.test.js
+    - test/skill-update.test.js
+  max_new_test_file_loc: 700
+  max_new_production_file_loc: 600
+  zero_owned_processes_after_run: true

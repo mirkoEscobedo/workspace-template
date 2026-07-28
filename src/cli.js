@@ -34,6 +34,38 @@ import {
   listPresets,
   presetStatus,
 } from "./presets/index.js";
+import {
+  applyUpgradePlan,
+  buildUpgradePlan,
+  defaultUpgradePlanPath,
+  persistUpgradePlan,
+} from "./upgrade/index.js";
+
+async function applyUpgradeWithSignalBridge(plan, options = {}) {
+  const controller = new AbortController();
+  let interruptedBy;
+  const interrupt = (signal) => {
+    interruptedBy ??= signal;
+    controller.abort(new Error(`Upgrade interrupted by ${signal}`));
+  };
+  const onSigint = () => interrupt("SIGINT");
+  const onSigterm = () => interrupt("SIGTERM");
+  process.once("SIGINT", onSigint);
+  process.once("SIGTERM", onSigterm);
+  try {
+    const report = await applyUpgradePlan(plan, { ...options, signal: controller.signal });
+    if (interruptedBy) throw new Error(`Upgrade interrupted by ${interruptedBy} after process cleanup`);
+    return report;
+  } catch (error) {
+    if (interruptedBy) {
+      throw new Error(`Upgrade interrupted by ${interruptedBy} after process cleanup: ${error.message}`, { cause: error });
+    }
+    throw error;
+  } finally {
+    process.removeListener("SIGINT", onSigint);
+    process.removeListener("SIGTERM", onSigterm);
+  }
+}
 
 function helpText() {
   return `workspace-template ${PACKAGE_VERSION}
@@ -47,6 +79,7 @@ Core commands:
   create [directory] --project <type>
   inspect [directory]
   adopt|retrofit [directory]
+  upgrade [directory] [--allow-network] [--dry-run | --plan-out [file] | --apply-plan <file>]
   sync [directory]
   doctor [directory]
   verify [directory] [--scope all|module|affected|root]
@@ -100,6 +133,11 @@ Tooling authority:
   --allow-runtime
   --lifecycle-scripts deny|allow
   --scripts propose|managed-block|fail|preserve
+
+Upgrade verification authority:
+  --allow-network records sealed approval because portable isolation cannot deny external filesystem or network reach
+  Dependency-backed JS/TS verification is unavailable in the isolated checkpoint
+  POSIX detached-session containment requires an external Ultima-owned orchestration capability
 
 Skill update authority:
   --skill <name> --incoming-root <directory> --allow-risky-tool-changes
@@ -209,6 +247,15 @@ async function loadApplyPlan(options, expected) {
   return loadPlan(options.applyPlan, expected);
 }
 
+function quoteArgument(value) {
+  return `"${String(value).replaceAll('"', '\\"')}"`;
+}
+
+function printUpgradeResult(value) {
+  console.log(`\nWorkspace ${value.status === "current" ? "is already current" : "upgrade completed"} at ${value.root}`);
+  console.log(`Transaction plan: ${value.transactionPlan}`);
+}
+
 export async function main(argv) {
   const { command, subcommand, options } = parseArgs(argv);
   if (options.version) return console.log(PACKAGE_VERSION);
@@ -232,6 +279,38 @@ export async function main(argv) {
     if (!execution.dryRun && !execution.result.ok) process.exitCode = 1;
     if (execution.dryRun && !execution.plan.canApply) process.exitCode = 1;
     return;
+  }
+
+  if (command === "upgrade") {
+    if (options.applyPlan) {
+      const planPath = path.resolve(options.applyPlan);
+      const plan = await loadPlan(planPath, { command: "upgrade" });
+      if (options.target && path.resolve(options.target) !== path.resolve(plan.root)) {
+        throw new Error(`Upgrade target does not match the sealed plan root: ${plan.root}`);
+      }
+      const relative = path.relative(plan.root, planPath).replaceAll("\\", "/");
+      const allowedDirtyPaths = !relative.startsWith("../") && relative !== ".." ? [relative] : [];
+      const report = await applyUpgradeWithSignalBridge(plan, { ...options, allowedDirtyPaths });
+      return emit(report, options, printUpgradeResult);
+    }
+    const plan = await buildUpgradePlan(root, options);
+    if (options.dryRun) {
+      await emit(plan, options, printPlan);
+      if (!plan.canApply) process.exitCode = 1;
+      return;
+    }
+    if (options.planOut !== undefined) {
+      const planPath = path.resolve(plan.root, options.planOut === true ? defaultUpgradePlanPath(plan) : options.planOut);
+      await persistUpgradePlan(planPath, plan);
+      if (options.json) {
+        return emit({ status: "planned", planPath, applyCommand: `workspace-template upgrade . --apply-plan ${quoteArgument(planPath)}`, plan }, options);
+      }
+      printPlan(plan);
+      console.log(`\nUpgrade plan saved:\n${planPath}\n\nApply with:\nworkspace-template upgrade . --apply-plan ${quoteArgument(planPath)}`);
+      return;
+    }
+    const report = await applyUpgradeWithSignalBridge(plan, { ...options, allowCurrentReplay: true });
+    return emit(report, options, printUpgradeResult);
   }
 
   if (command === "sync") {

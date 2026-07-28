@@ -1,0 +1,42 @@
+schema_version: 1
+id: FBK-004
+title: Coordinator refusal transition
+legacy_ids: []
+status: superseded
+superseded_by: D007
+supersession_reason: Runtime refusal and route-transition ownership moved to Ultima before this ticket started.
+parent: null
+public_outcome: No workspace-template refusal circuit is implemented; Ultima owns runtime route transitions.
+behaviors:
+  - retain this stable ticket ID only as a supersession record
+invariants:
+  - FBK-001 declarative requirements remain retained
+  - no local refusal circuit is authorized
+out_of_scope:
+  - coordinator refusal handling
+  - runtime route state
+blocked_by:
+  - FBK-003
+risk_lane: 0
+preflight_required: true
+read_set:
+  - docs/agent/wayfinding/conditional-spark-fallback/decisions/D007-ultima-runtime-ownership.md
+write_set: []
+conflict_keys:
+  - fallback-runtime-owner
+skills:
+  - verify
+human_gates: []
+stop_conditions:
+  - any local refusal transition is proposed without a new authority decision
+commit_policy: coordinator
+review_lenses: []
+verification:
+  red: []
+  repair_levels: []
+  landing_levels: []
+  commands:
+    - python -B assets/scripts/validate_ticket_pack.py docs/tickets/conditional-spark-fallback --json
+  native_checks: []
+budgets:
+  zero_owned_processes_after_run: true

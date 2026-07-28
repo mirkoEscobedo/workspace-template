@@ -13,3 +13,4 @@ export * from "./skills/index.js";
 export * from "./restructure/index.js";
 export * from "./align/index.js";
 export * from "./presets/index.js";
+export * from "./upgrade/index.js";
