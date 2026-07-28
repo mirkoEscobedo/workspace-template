@@ -21,6 +21,7 @@ import {
 import { createProfile, profileSchema } from "../profile.js";
 import { planSkillUpgrade } from "./skills.js";
 import { commandsFor, generateAgentsMd, generateManagedAgentsBlock } from "../agents-md.js";
+import { isHostBundlePath } from "../host-bundles.js";
 import { inspectManagedBlock, upsertManagedBlock } from "../managed-sections.js";
 import { loadEffectiveUpgradeWorkspace } from "./workspace.js";
 
@@ -110,6 +111,7 @@ async function managedWorkspaceArtifacts(snapshot, config, discoveredWorkspace) 
 }
 
 export async function planUpgradeArtifacts(snapshot, options = {}) {
+  const preserveHostBundles = snapshot.config.hostBundles === "preserve";
   const catalog = await loadPresetCatalog(snapshot.root, { preferPackageBuiltIns: true });
   const legacySplit = snapshot.config.execution?.coordinator?.model === "gpt-5.6-sol"
     && snapshot.config.execution?.planner?.model === "gpt-5.6-sol"
@@ -143,9 +145,11 @@ export async function planUpgradeArtifacts(snapshot, options = {}) {
       docs: snapshot.config.features?.durableAgentDocs ?? true,
       tickets: snapshot.config.features?.ticketContracts ?? true,
       presetState,
+      hostBundles: snapshot.config.hostBundles ?? "managed",
     }),
     ...presetConfig,
   };
+  config.hostBundles = preserveHostBundles ? "preserve" : "managed";
   config.version = 3;
   config.generatorVersion = PACKAGE_VERSION;
   config.mode = snapshot.mode;
@@ -181,7 +185,10 @@ export async function planUpgradeArtifacts(snapshot, options = {}) {
     } : presetState, presetState)).filter((item) => item.path !== ".agentic/policies/model-routing.yaml"),
   ];
   const operations = [];
-  for (const item of presetPlan.operations.filter((entry) => entry.path !== ".agentic/managed-files.json")) {
+  for (const item of presetPlan.operations.filter((entry) => (
+    entry.path !== ".agentic/managed-files.json"
+      && (!preserveHostBundles || !isHostBundlePath(entry.path))
+  ))) {
     const normalizedItem = item.content
       ? {
           ...item,
@@ -217,13 +224,14 @@ export async function planUpgradeArtifacts(snapshot, options = {}) {
     operations.push(operation(artifact.path, artifact.content, existing));
   }
   for (const [relative, ownership] of Object.entries(snapshot.managed.files ?? {})) {
+    if (preserveHostBundles && isHostBundlePath(relative)) continue;
     if (!relative.startsWith(".codex/agents/") && !relative.startsWith(".opencode/prompts/")) continue;
     const existing = await current(snapshot.root, relative);
     if (existing && ownership.hash && hashBuffer(existing) !== ownership.hash) {
       operations.push({ kind: "blocked-drift", path: relative, currentHash: hashBuffer(existing), proposedHash: ownership.hash });
     }
   }
-  const skills = await planSkillUpgrade(snapshot, options);
+  const skills = await planSkillUpgrade(snapshot, { ...options, preserveHostBundles });
   operations.push(...skills.operations);
   const workspaceArtifacts = await managedWorkspaceArtifacts(snapshot, config, options.workspace);
   const ownershipModes = new Map();
@@ -271,6 +279,7 @@ export async function planUpgradeArtifacts(snapshot, options = {}) {
     ".agentic/modules/",
   ];
   for (const [relative, ownership] of Object.entries(snapshot.managed.files ?? {})) {
+    if (preserveHostBundles && isHostBundlePath(relative)) continue;
     if (!obsoletePrefixes.some((prefix) => relative.startsWith(prefix)) || desiredOwnedPaths.has(relative)) continue;
     const existing = await current(snapshot.root, relative);
     if (!existing) continue;
@@ -289,8 +298,14 @@ export async function planUpgradeArtifacts(snapshot, options = {}) {
   managed.generatorVersion = PACKAGE_VERSION;
   managed.files ??= {};
   for (const relative of Object.keys(managed.files)) {
-    if (relative.startsWith("docs/agent/") || relative.startsWith("docs/tickets/") || relative.startsWith(".agentic/presets/local/")) {
+    if (relative.startsWith("docs/agent/") || relative.startsWith("docs/tickets/") || relative.startsWith(".agentic/presets/local/")
+      || (preserveHostBundles && isHostBundlePath(relative))) {
       delete managed.files[relative];
+    }
+  }
+  if (preserveHostBundles && managed.settings) {
+    for (const relative of Object.keys(managed.settings)) {
+      if (isHostBundlePath(relative)) delete managed.settings[relative];
     }
   }
   for (const item of beforeManifest) {

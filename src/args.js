@@ -145,6 +145,7 @@ function defaultsFor(command, subcommand) {
       trustCurrentDependencies: false,
       workspace: "auto",
       nestedInstructions: "auto",
+      hostBundles: "managed",
     };
   }
   return {
@@ -191,6 +192,7 @@ function validateAdopt(options) {
   if (!CURRENT_TICKET_STATUSES.includes(options.currentStatus)) throw new Error(`Unknown current-ticket status '${options.currentStatus}'. Choose from ${CURRENT_TICKET_STATUSES.join(", ")}.`);
   if (!["auto", "single", "all"].includes(options.workspace)) throw new Error("--workspace must be auto, single, or all");
   if (!["auto", "always", "never"].includes(options.nestedInstructions)) throw new Error("--nested-instructions must be auto, always, or never");
+  if (!["managed", "preserve"].includes(options.hostBundles)) throw new Error("--host-bundles must be managed or preserve");
 }
 
 function validateAdvanced(command, options) {
@@ -298,6 +300,7 @@ export function parseArgs(argv) {
       case "--apply-plan": options.applyPlan = valueFor(); break;
       case "--workspace": options.workspace = valueFor().toLowerCase(); break;
       case "--nested-instructions": options.nestedInstructions = valueFor().toLowerCase(); break;
+      case "--host-bundles": options.hostBundles = valueFor().toLowerCase(); break;
       case "--module": push(options, "modules", valueFor()); break;
       case "--scope": options.scope = valueFor().toLowerCase(); break;
       case "--concurrency": options.concurrency = integer(valueFor(), option); break;

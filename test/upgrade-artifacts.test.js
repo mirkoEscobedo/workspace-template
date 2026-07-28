@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { describe, it } from "node:test";
 import { createProject } from "../src/index.js";
-import { hashBuffer } from "../src/fs-utils.js";
+import { hashBuffer, hashFile } from "../src/fs-utils.js";
 import { inspectManagedBlock } from "../src/managed-sections.js";
 import { applyWithVerifier, buildSupportedUpgradePlan } from "./upgrade-internal-harness.js";
 
@@ -24,6 +24,47 @@ async function fixture() {
 }
 
 describe("upgrade artifact reconciliation", () => {
+  it("preserves product-owned host bundles through plan and apply", async () => {
+    const root = await fixture();
+    const configPath = path.join(root, ".agentic", "config.json");
+    const config = JSON.parse(await readFile(configPath, "utf8"));
+    config.hostBundles = "preserve";
+    await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`);
+    const hostFiles = {
+      ".agents/skills/tdd/SKILL.md": "---\nname: tdd\ndescription: product owned\n---\n# Product TDD\n",
+      ".codex/config.toml": "model = \"product-model\"\n",
+      ".opencode/skills/tdd/SKILL.md": "---\nname: tdd\ndescription: product owned\n---\n# Product TDD\n",
+      "opencode.json": `${JSON.stringify({ productOwned: true }, null, 2)}\n`,
+    };
+    for (const [relative, content] of Object.entries(hostFiles)) {
+      await writeFile(path.join(root, ...relative.split("/")), content);
+    }
+    const before = Object.fromEntries(
+      await Promise.all(Object.keys(hostFiles).map(async (relative) => [
+        relative,
+        await hashFile(path.join(root, ...relative.split("/"))),
+      ])),
+    );
+
+    const plan = await buildSupportedUpgradePlan(root, { allowDirty: true, allowNetwork: true });
+    assert.equal(plan.canApply, true, plan.conflicts.join("\n"));
+    assert.equal(
+      plan.operations.some((item) => /^(?:\.agents|\.codex|\.opencode)(?:\/|$)|^opencode\.json$/i.test(item.path)),
+      false,
+    );
+    assert.equal(
+      plan.conflicts.some((conflict) => /(?:\.agents|\.codex|\.opencode|opencode\.json)/i.test(conflict)),
+      false,
+    );
+    await applyWithVerifier(plan, async () => ({ ok: true }));
+
+    const upgraded = JSON.parse(await readFile(configPath, "utf8"));
+    assert.equal(upgraded.hostBundles, "preserve");
+    for (const [relative, hash] of Object.entries(before)) {
+      assert.equal(await hashFile(path.join(root, ...relative.split("/"))), hash, `${relative} changed`);
+    }
+  });
+
   it("preserves adopted identity, provenance, product files, and local presets", async () => {
     const root = await fixture();
     const configPath = path.join(root, ".agentic", "config.json");

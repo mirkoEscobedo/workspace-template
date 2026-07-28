@@ -14,6 +14,7 @@ import { assetsSkills, PROJECTION_ROOTS } from "../workspace-artifacts.js";
 import { threeWayMergeText } from "../skills/merge.js";
 import { PACKAGE_VERSION } from "../constants.js";
 import { inspectSkillCatalog, skillRiskDiff } from "../skills/catalog.js";
+import { preservesHostBundleProjection } from "../host-bundles.js";
 
 function record(content) {
   const buffer = Buffer.isBuffer(content) ? content : Buffer.from(content);
@@ -199,7 +200,8 @@ export async function planSkillUpgrade(snapshot, options = {}) {
     const previous = snapshot.skillsLock.skills?.[name];
     return previous && value.installedHash !== previous.installedHash;
   });
-  const targets = snapshot.config.agentTargets ?? snapshot.profile.agentTargets ?? [];
+  const targets = (snapshot.config.agentTargets ?? snapshot.profile.agentTargets ?? [])
+    .filter((agent) => !options.preserveHostBundles || !preservesHostBundleProjection(agent));
   const projectionManifest = await readJsonIfExists(path.join(snapshot.root, ".agentic", "managed-projections.json"));
   if (!catalogChanged && !localChanged && conflicts.length === 0) {
     for (const agent of targets) {

@@ -295,13 +295,18 @@ function managed(manifest, relative) {
 
 async function validateHarnessConfiguration(root, config, managedFiles, report) {
   const targets = new Set(config?.agentTargets ?? []);
+  const preserveHostBundles = config?.hostBundles === "preserve";
   const preset = config?.execution?.preset;
   const routes = preset?.roles ?? config?.execution?.routing;
   const overridden = (target) => new Set((preset?.overrides ?? []).filter((item) => item.target === target).map((item) => item.pointer));
   if (targets.has("codex")) {
     const relative = ".codex/config.toml";
     const file = path.join(root, relative);
-    if (!(await exists(file))) {
+    if (preserveHostBundles) {
+      report.warnings.push((await exists(file))
+        ? "Codex host bundle is product-owned and preserved; managed projection validation is not required"
+        : "Codex host bundle is product-owned and preserved; managed .codex/config.toml is not required");
+    } else if (!(await exists(file))) {
       report.errors.push(`Codex is selected but ${relative} is missing`);
     } else if (managed(managedFiles, relative) || managedFiles?.settings?.[relative]) {
       const content = await readFile(file, "utf8");
@@ -331,7 +336,11 @@ async function validateHarnessConfiguration(root, config, managedFiles, report) 
   if (targets.has("opencode")) {
     const relative = "opencode.json";
     const file = path.join(root, relative);
-    if (!(await exists(file))) {
+    if (preserveHostBundles) {
+      report.warnings.push((await exists(file))
+        ? "OpenCode host bundle is product-owned and preserved; managed projection validation is not required"
+        : "OpenCode host bundle is product-owned and preserved; managed opencode.json is not required");
+    } else if (!(await exists(file))) {
       report.errors.push("OpenCode is selected but opencode.json is missing");
     } else if (managed(managedFiles, relative) || managedFiles?.settings?.[relative]) {
       const value = await readJsonForDoctor(file, report, "OpenCode configuration");
@@ -363,6 +372,7 @@ async function validateProfileAndConfig(root, report) {
   if (![1, 2, 3].includes(config.version)) report.errors.push(`unsupported config version ${config.version}`);
   if (config.generator !== "workspace-template") report.errors.push("config generator identity is invalid");
   if (!["generated", "adopted", undefined].includes(config.mode)) report.errors.push(`invalid config mode '${config.mode}'`);
+  if (!["managed", "preserve", undefined].includes(config.hostBundles)) report.errors.push(`invalid hostBundles mode '${config.hostBundles}'`);
   if (![1, 2].includes(profile.version)) report.errors.push(`unsupported profile version ${profile.version}`);
   if (profile.version === 2 && !["generated", "adopted"].includes(profile.mode)) report.errors.push(`invalid profile mode '${profile.mode}'`);
   if (config.mode !== undefined && profile.mode !== undefined && config.mode !== profile.mode) {
@@ -396,6 +406,7 @@ async function validateProfileAndConfig(root, report) {
   report.checks.style = config.style;
   report.checks.tdd = config.tdd;
   report.checks.mode = config.mode ?? profile.mode ?? "generated";
+  report.checks.hostBundles = config.hostBundles ?? "managed";
   return { config, profile };
 }
 

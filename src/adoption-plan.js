@@ -11,6 +11,7 @@ import {
   toPosixPath,
 } from "./fs-utils.js";
 import { inspectManagedBlock, upsertManagedBlock } from "./managed-sections.js";
+import { isHostBundlePath } from "./host-bundles.js";
 import { createPlanEnvelope, refreshPlanId } from "./plans/schema.js";
 import { repositoryPreconditions } from "./plans/fingerprint.js";
 import { createProfile, profileSchema } from "./profile.js";
@@ -46,6 +47,7 @@ const STRICT_PREFIXES = [
 ];
 const PRESERVE_PREFIXES = ["docs/agent/", "docs/tickets/", ".agent/"];
 const HARNESS_PREFIXES = [".codex/", ".opencode/prompts/", "opencode.json"];
+export { isHostBundlePath } from "./host-bundles.js";
 
 function jsonBuffer(value) {
   return Buffer.from(`${JSON.stringify(value, null, 2)}\n`, "utf8");
@@ -339,6 +341,7 @@ async function desiredArtifacts(snapshot, options, context, selection, roleIds, 
     // Deterministic plan; the apply report carries the real timestamp.
     originalTimestamp: null,
     presetState,
+    hostBundles: options.hostBundles ?? "managed",
   });
   const profile = createProfile({ project: context.project, style: context.style, tdd: context.tdd, agents: context.agents, mode, presetState });
   const artifacts = [
@@ -361,7 +364,9 @@ async function desiredArtifacts(snapshot, options, context, selection, roleIds, 
   ];
 
   artifacts.push({ path: ".agentic/skills.lock.json", content: jsonBuffer(await skillLock()) });
-  return artifacts.sort((left, right) => left.path.localeCompare(right.path));
+  return artifacts
+    .filter((artifact) => options.hostBundles !== "preserve" || !isHostBundlePath(artifact.path))
+    .sort((left, right) => left.path.localeCompare(right.path));
 }
 
 function buildManagedManifest(operations) {
@@ -444,6 +449,7 @@ export async function buildAdoptionPlan(snapshot, options) {
     docs: options.docs !== false,
     tickets: options.tickets !== false,
     conflict: options.conflict,
+    hostBundles: options.hostBundles ?? "managed",
     preset: presetId,
   };
   const preconditions = await repositoryPreconditions(

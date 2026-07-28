@@ -115,6 +115,7 @@ Adopt defaults:
   --conflict ${CONFLICT_MODES.join("|")} (default propose)
   --workspace auto|single|all
   --nested-instructions auto|always|never
+  --host-bundles managed|preserve (default managed)
   --plan-out <file> / --apply-plan <file>
 
 Shared advanced options:

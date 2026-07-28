@@ -84,6 +84,18 @@ describe("parseArgs", () => {
     assert.equal(adopted.options.style, "preserve");
   });
 
+  it("parses and validates the adoption host-bundle boundary", () => {
+    assert.equal(parseArgs(["adopt", "."]).options.hostBundles, "managed");
+    assert.equal(
+      parseArgs(["adopt", ".", "--host-bundles", "preserve"]).options.hostBundles,
+      "preserve",
+    );
+    assert.throws(
+      () => parseArgs(["adopt", ".", "--host-bundles", "replace"]),
+      /--host-bundles must be managed or preserve/,
+    );
+  });
+
   it("rejects unknown create choices", () => {
     assert.throws(
       () => parseArgs(["demo", "--project", "cobol"]),

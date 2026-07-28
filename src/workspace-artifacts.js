@@ -102,6 +102,7 @@ export function createAgenticConfig({
   docs = true,
   tickets = true,
   presetState,
+  hostBundles = "managed",
 }) {
   const summary = (role) => ({
     model: role.targets?.codex ?? role.targets?.opencode,
@@ -121,6 +122,7 @@ export function createAgenticConfig({
     canonicalSkills: ".agentic/skills",
     skillLock: ".agentic/skills.lock.json",
     managedFiles: ".agentic/managed-files.json",
+    hostBundles,
     execution: {
       method: "frontier",
       preset: presetState,

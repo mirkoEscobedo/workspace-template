@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { PACKAGE_VERSION } from "./constants.js";
 import { assetsRoot } from "./workspace-artifacts.js";
-import { buildAdoptionPlan } from "./adoption-plan.js";
+import { buildAdoptionPlan, isHostBundlePath } from "./adoption-plan.js";
 import { doctorProject } from "./doctor.js";
 import {
   exists,
@@ -73,12 +73,31 @@ async function revalidateOperation(root, operation) {
   throw new Error(`Unsupported adoption operation: ${kind}`);
 }
 
+function canonicalOperationPath(root, operation) {
+  const supplied = toPosixPath(operation.path);
+  const destination = path.resolve(root, operation.path);
+  if (!isPathInside(root, destination)) throw new Error(`Operation escapes repository root: ${operation.path}`);
+  const relative = toPosixPath(path.relative(root, destination));
+  if (supplied !== relative) throw new Error(`Non-canonical operation path in sealed plan: ${operation.path}`);
+  return relative;
+}
+
 async function revalidatePlan(plan, runtime = {}) {
   assertValidPlan(plan, { command: "adopt" });
   if (plan.package.version !== PACKAGE_VERSION) throw new Error(`Plan version ${plan.package.version} does not match ${PACKAGE_VERSION}`);
   const root = path.resolve(plan.root);
   if (!(await exists(root))) throw new Error(`Plan root no longer exists: ${root}`);
   if (!plan.canApply) throw new Error(`Plan contains blocking conflicts: ${(plan.conflicts ?? []).join("; ")}`);
+  const hostBundles = plan.selected?.hostBundles ?? "managed";
+  if (!["managed", "preserve"].includes(hostBundles)) throw new Error(`Unsupported sealed host-bundle mode: ${hostBundles}`);
+  if (hostBundles === "preserve") {
+    for (const operation of plan.operations) {
+      const relativePath = canonicalOperationPath(root, operation);
+      if (isHostBundlePath(relativePath)) {
+        throw new Error(`Preserve-host-bundles plan contains forbidden host operation: ${operation.path}`);
+      }
+    }
+  }
   const allowedDirtyPaths = [];
   if (runtime.planPath && isPathInside(root, runtime.planPath)) allowedDirtyPaths.push(toPosixPath(path.relative(root, runtime.planPath)));
   const errors = await verifyPreconditions(plan, { allowedDirtyPaths });

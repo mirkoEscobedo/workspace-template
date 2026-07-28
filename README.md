@@ -71,6 +71,8 @@ npx workspace-template adopt . \
 
 Adoption preserves application source, tests, dependency manifests, lockfiles, `README.md`, CI, deployment files, and custom instructions. It adds the agentic substrate, durable planning state, skills, harness configuration, and optional ticket/document retrofits. Existing unmanaged collisions block or become proposals according to the selected policy; they are not silently overwritten.
 
+Use `--host-bundles preserve` when the repository already owns its Codex/OpenCode host assets. The sealed adoption plan then contains no operations or collision checks under `.agents/`, `.codex/`, `.opencode/`, or product-owned `opencode.json`; the default `--host-bundles managed` behavior is unchanged.
+
 ## Frontier Loop
 
 The generated workflow is:
