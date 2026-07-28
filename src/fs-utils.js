@@ -130,6 +130,14 @@ export function hashText(text) {
   return hashBuffer(Buffer.from(text, "utf8"));
 }
 
+export function normalizeTextLineEndings(content) {
+  const buffer = Buffer.isBuffer(content) ? content : Buffer.from(content);
+  if (buffer.includes(0)) return buffer;
+  const text = buffer.toString("utf8");
+  if (!text.includes("\r\n")) return buffer;
+  return Buffer.from(text.replaceAll("\r\n", "\n"), "utf8");
+}
+
 export async function hashFile(filePath) {
   return hashBuffer(await readFile(filePath));
 }

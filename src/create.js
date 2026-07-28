@@ -7,6 +7,7 @@ import {
   exists,
   hashBuffer,
   isDirectoryEmpty,
+  normalizeTextLineEndings,
   removePath,
   writeBytesAtomic,
   writeJson,
@@ -234,7 +235,12 @@ async function generatedArtifacts(context, options) {
     ...memory,
     ...(await harnessArtifacts(context.agents, selection.resolved, roleIds)),
     ...(await workspaceStateArtifacts(generatedWorkspace(context), context, { nestedInstructions: "never" })),
-  ].sort((left, right) => left.path.localeCompare(right.path));
+  ].map((artifact) => ({
+    ...artifact,
+    content: normalizeTextLineEndings(
+      Buffer.isBuffer(artifact.content) ? artifact.content : Buffer.from(String(artifact.content)),
+    ),
+  })).sort((left, right) => left.path.localeCompare(right.path));
 
   artifacts.push({ path: ".agentic/skills.lock.json", content: jsonBuffer(await skillLock()) });
   const managed = managedFilesFor(artifacts);

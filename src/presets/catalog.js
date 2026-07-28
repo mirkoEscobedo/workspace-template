@@ -6,6 +6,7 @@ import {
   exists,
   hashText,
   listFiles,
+  normalizeTextLineEndings,
   readJson,
   toPosixPath,
 } from "../fs-utils.js";
@@ -158,12 +159,12 @@ export async function selectPreset(root, id, agentTargets, options = {}) {
 export async function presetCatalogArtifacts() {
   const artifacts = [{
     path: ".agentic/presets/preset.schema.json",
-    content: await readFile(path.join(presetAssetsRoot, "preset.schema.json")),
+    content: normalizeTextLineEndings(await readFile(path.join(presetAssetsRoot, "preset.schema.json"))),
   }];
   for (const file of await listFiles(builtInPresetAssetsRoot)) {
     artifacts.push({
       path: toPosixPath(path.posix.join(".agentic/presets/builtin", path.relative(builtInPresetAssetsRoot, file))),
-      content: await readFile(file),
+      content: normalizeTextLineEndings(await readFile(file)),
     });
   }
   artifacts.push({

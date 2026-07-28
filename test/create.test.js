@@ -52,6 +52,26 @@ describe("createProject", () => {
     }
   });
 
+  it("materializes packaged text with Git-portable LF line endings", async () => {
+    const temp = await mkdtemp(path.join(os.tmpdir(), "workspace-template-line-endings-"));
+    const target = path.join(temp, "demo");
+    await createProject(options(target, "typescript", "functional-core", ["codex"]));
+
+    const managedText = [
+      ".agentic/skills/verify/SKILL.md",
+      ".agentic/skill-baselines/verify/SKILL.md",
+      ".agentic/policies/verification.yaml",
+      ".codex/agents/implementer.toml",
+    ];
+    for (const relative of managedText) {
+      assert.equal(
+        (await readFile(path.join(target, ...relative.split("/")), "utf8")).includes("\r\n"),
+        false,
+        relative,
+      );
+    }
+  });
+
   it("projects canonical skills and repairs drift", async () => {
     const temp = await mkdtemp(path.join(os.tmpdir(), "workspace-template-sync-"));
     const target = path.join(temp, "demo");

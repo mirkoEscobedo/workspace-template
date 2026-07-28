@@ -4,6 +4,7 @@ import {
   exists,
   hashBuffer,
   hashFile,
+  normalizeTextLineEndings,
 } from "../fs-utils.js";
 import { PACKAGE_VERSION } from "../constants.js";
 import { loadPresetCatalog } from "../presets/catalog.js";
@@ -33,7 +34,7 @@ async function current(root, relative) {
 }
 
 function operation(relative, content, existing) {
-  const buffer = Buffer.isBuffer(content) ? content : Buffer.from(content);
+  const buffer = normalizeTextLineEndings(Buffer.isBuffer(content) ? content : Buffer.from(content));
   const proposedHash = hashBuffer(buffer);
   const currentHash = existing ? hashBuffer(existing) : null;
   if (currentHash === proposedHash) return { kind: "noop", path: relative, currentHash, proposedHash };
@@ -181,13 +182,22 @@ export async function planUpgradeArtifacts(snapshot, options = {}) {
   ];
   const operations = [];
   for (const item of presetPlan.operations.filter((entry) => entry.path !== ".agentic/managed-files.json")) {
-    const record = snapshot.managed.files?.[item.path];
-    const structured = snapshot.managed.settings?.[item.path];
-    const identityFile = [".agentic/config.json", ".agentic/profile.json"].includes(item.path);
-    if (!identityFile && !structured && item.currentHash && (!record?.hash || record.hash !== item.currentHash)) {
-      operations.push({ ...item, kind: "blocked-drift", content: undefined, contentEncoding: undefined });
+    const normalizedItem = item.content
+      ? {
+          ...item,
+          content: normalizeTextLineEndings(Buffer.from(item.content, item.contentEncoding ?? "base64")).toString("base64"),
+        }
+      : item;
+    if (normalizedItem.content) {
+      normalizedItem.proposedHash = hashBuffer(Buffer.from(normalizedItem.content, normalizedItem.contentEncoding ?? "base64"));
+    }
+    const record = snapshot.managed.files?.[normalizedItem.path];
+    const structured = snapshot.managed.settings?.[normalizedItem.path];
+    const identityFile = [".agentic/config.json", ".agentic/profile.json"].includes(normalizedItem.path);
+    if (!identityFile && !structured && normalizedItem.currentHash && (!record?.hash || record.hash !== normalizedItem.currentHash)) {
+      operations.push({ ...normalizedItem, kind: "blocked-drift", content: undefined, contentEncoding: undefined });
     } else {
-      operations.push(item);
+      operations.push(normalizedItem);
     }
   }
   operations.push(operation(".agentic/config.json", jsonBuffer(config), await current(snapshot.root, ".agentic/config.json")));

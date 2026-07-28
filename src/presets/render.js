@@ -4,6 +4,7 @@ import {
   exists,
   hashFile,
   listFiles,
+  normalizeTextLineEndings,
   readJsonIfExists,
   toPosixPath,
 } from "../fs-utils.js";
@@ -138,17 +139,22 @@ function replaceTomlScalar(text, key, value) {
 
 export async function renderCodexArtifacts(resolved, roleIds) {
   const configSource = path.join(assetsRoot, "configs", "codex", "config.toml");
-  let config = await readFile(configSource, "utf8");
+  let config = normalizeTextLineEndings(await readFile(configSource)).toString("utf8");
   config = replaceTomlScalar(config, "model", resolved.roles.coordinator.targets.codex);
   config = replaceTomlScalar(config, "model_reasoning_effort", resolved.roles.coordinator.reasoningEffort);
   config = replaceTomlScalar(config, "default_subagent_model", resolved.roles.implementer.targets.codex);
   config = replaceTomlScalar(config, "default_subagent_reasoning_effort", resolved.roles.implementer.reasoningEffort);
   const artifacts = [
     { path: ".codex/config.toml", content: Buffer.from(config) },
-    { path: ".codex/hooks.json", content: await readFile(path.join(assetsRoot, "configs", "codex", "hooks.json")) },
+    {
+      path: ".codex/hooks.json",
+      content: normalizeTextLineEndings(await readFile(path.join(assetsRoot, "configs", "codex", "hooks.json"))),
+    },
   ];
   for (const [role, fileName] of Object.entries(CODEX_ROLE_FILES)) {
-    let content = await readFile(path.join(assetsRoot, "configs", "codex", "agents", fileName), "utf8");
+    let content = normalizeTextLineEndings(
+      await readFile(path.join(assetsRoot, "configs", "codex", "agents", fileName)),
+    ).toString("utf8");
     content = replaceTomlScalar(content, "name", roleIds.codex[role]);
     content = replaceTomlScalar(content, "model", resolved.roles[role].targets.codex);
     content = replaceTomlScalar(content, "model_reasoning_effort", resolved.roles[role].reasoningEffort);
@@ -197,7 +203,7 @@ export async function renderOpenCodeArtifacts(resolved, roleIds) {
   for (const file of await listFiles(promptsRoot)) {
     artifacts.push({
       path: toPosixPath(path.posix.join(".opencode/prompts/frontier-loop", path.relative(promptsRoot, file))),
-      content: await readFile(file),
+      content: normalizeTextLineEndings(await readFile(file)),
     });
   }
   return artifacts;

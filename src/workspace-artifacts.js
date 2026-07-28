@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { DEPENDENCY_SNAPSHOT, PACKAGE_VERSION } from "./constants.js";
-import { hashBuffer, listFiles, toPosixPath } from "./fs-utils.js";
+import { hashBuffer, listFiles, normalizeTextLineEndings, toPosixPath } from "./fs-utils.js";
 export { assetsRoot, assetsSkills } from "./asset-paths.js";
 import { assetsRoot, assetsSkills } from "./asset-paths.js";
 import { presetCatalogArtifacts } from "./presets/catalog.js";
@@ -148,7 +148,7 @@ export async function readTree(sourceRoot, destinationPrefix) {
     const relative = toPosixPath(path.relative(sourceRoot, source));
     artifacts.push({
       path: toPosixPath(path.posix.join(destinationPrefix, relative)),
-      content: await readFile(source),
+      content: normalizeTextLineEndings(await readFile(source)),
       source,
     });
   }
@@ -193,7 +193,7 @@ export async function policyArtifacts(resolvedPreset, presetState = activePreset
   for (const [sourceName, targetName] of names) {
     artifacts.push({
       path: `.agentic/policies/${targetName}`,
-      content: await readFile(path.join(compileAssets, sourceName)),
+      content: normalizeTextLineEndings(await readFile(path.join(compileAssets, sourceName))),
     });
   }
   artifacts.push({ path: ".agentic/policies/model-routing.yaml", content: Buffer.from(renderModelRoutingYaml(resolvedPreset, presetState)) });
@@ -255,7 +255,9 @@ export async function projectionArtifacts(agents) {
 }
 
 export function normalizeArtifact(artifact) {
-  const content = Buffer.isBuffer(artifact.content) ? artifact.content : Buffer.from(String(artifact.content), "utf8");
+  const content = normalizeTextLineEndings(
+    Buffer.isBuffer(artifact.content) ? artifact.content : Buffer.from(String(artifact.content), "utf8"),
+  );
   return { ...artifact, content, hash: hashBuffer(content) };
 }
 

@@ -6,6 +6,7 @@ import {
   hashDirectory,
   listDirectories,
   listFiles,
+  normalizeTextLineEndings,
   readJsonIfExists,
   toPosixPath,
 } from "../fs-utils.js";
@@ -19,10 +20,14 @@ function record(content) {
   return { content: buffer, hash: hashBuffer(buffer) };
 }
 
-async function tree(directory) {
+async function tree(directory, options = {}) {
   const result = new Map();
   for (const file of await listFiles(directory)) {
-    result.set(toPosixPath(path.relative(directory, file)), await readFile(file));
+    const content = await readFile(file);
+    result.set(
+      toPosixPath(path.relative(directory, file)),
+      options.normalizeLineEndings ? normalizeTextLineEndings(content) : content,
+    );
   }
   return result;
 }
@@ -36,7 +41,7 @@ function treeHash(files) {
 }
 
 function writeOperation(relative, content, current) {
-  const next = record(content);
+  const next = record(normalizeTextLineEndings(content));
   const previous = current ? record(current) : undefined;
   if (previous?.hash === next.hash) return { kind: "noop", path: relative, proposedHash: next.hash, currentHash: next.hash };
   return {
@@ -94,7 +99,7 @@ export async function planSkillUpgrade(snapshot, options = {}) {
     const localRoot = path.join(snapshot.root, ".agentic", "skills", name);
     const lockRecord = snapshot.skillsLock.skills?.[name];
     const baselineRoot = path.join(snapshot.root, lockRecord?.baselinePath ?? `.agentic/skill-baselines/${name}`);
-    const incoming = await tree(incomingRoot);
+    const incoming = await tree(incomingRoot, { normalizeLineEndings: true });
     const local = await tree(localRoot);
     let baseline = await tree(baselineRoot);
     if (baseline.size === 0 && lockRecord?.baselineHash && local.size > 0 && treeHash(local) === lockRecord.baselineHash) baseline = new Map(local);

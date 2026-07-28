@@ -44,6 +44,32 @@ describe("upgrade skill reconciliation", () => {
     assert.equal(applied.indexOf(".agentic/skills.lock.json") > payloadIndex, true);
   });
 
+  it("canonicalizes incoming CRLF skill bytes before writing and hashing them", async () => {
+    const root = await fixture();
+    const incoming = await mkdtemp(path.join(os.tmpdir(), "workspace-template-incoming-crlf-"));
+    await cp(assetsSkills, incoming, { recursive: true });
+    const incomingFile = path.join(incoming, "verify", "SKILL.md");
+    const incomingText = (await readFile(incomingFile, "utf8"))
+      .replaceAll("\r\n", "\n")
+      .replaceAll("\n", "\r\n");
+    await writeFile(incomingFile, `${incomingText}\r\n<!-- incoming CRLF change -->\r\n`);
+
+    const result = await planSkillUpgrade(await inspectUpgradeWorkspace(root), {
+      incomingSkillsRoot: incoming,
+    });
+    assert.equal(result.conflicts.length, 0, result.conflicts.join("\n"));
+    const baselineOperation = result.operations.find(
+      (item) => item.path === ".agentic/skill-baselines/verify/SKILL.md",
+    );
+    assert.ok(baselineOperation?.content);
+    const content = Buffer.from(baselineOperation.content, "base64");
+    assert.equal(content.toString("utf8").includes("\r\n"), false);
+    assert.equal(
+      result.lock.skills.verify.files["SKILL.md"].baselineHash,
+      hashBuffer(content),
+    );
+  });
+
   it("reports an overlapping three-way merge conflict without writing", async () => {
     const root = await fixture();
     const baseline = path.join(root, ".agentic", "skill-baselines", "verify", "SKILL.md");
