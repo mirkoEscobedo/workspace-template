@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, it } from "node:test";
@@ -41,6 +41,18 @@ async function generatedWorkspace() {
 }
 
 describe("workspace upgrade", () => {
+  it("ignores new ancestors that contain only excluded planned files", async () => {
+    const root = await generatedWorkspace();
+    const relative = ".agentic/new-managed-area/nested/artifact.json";
+    const before = await upgradePlan.sealVerificationInputs(root, [relative]);
+
+    await mkdir(path.dirname(path.join(root, relative)), { recursive: true });
+    await writeFile(path.join(root, relative), "{}\n");
+    const after = await upgradePlan.sealVerificationInputs(root, [relative]);
+
+    assert.deepEqual(after, before);
+  });
+
   it("builds a deterministic zero-write plan and an automatic review path", async () => {
     const root = await generatedWorkspace();
     const before = await hashDirectory(root);

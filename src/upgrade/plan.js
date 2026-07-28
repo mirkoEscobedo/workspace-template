@@ -47,7 +47,6 @@ export async function sealVerificationInputs(root, excludedPaths = []) {
       const details = await lstat(target);
       if (details.isSymbolicLink()) records.push([relative, "symlink", await readlink(target)]);
       else if (details.isDirectory()) {
-        records.push([relative, "directory"]);
         await walk(target);
       } else if (details.isFile()) records.push([relative, "file", (await readFile(target)).toString("base64")]);
       else records.push([relative, "other"]);
