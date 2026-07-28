@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import { mkdir, mkdtemp, readdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -24,6 +25,25 @@ async function fixture(options = {}) {
 }
 
 describe("upgrade apply transaction", () => {
+  it("does not treat its own mutex owner as Git working-tree drift", async () => {
+    const root = await fixture();
+    for (const args of [
+      ["init"],
+      ["config", "user.email", "workspace-template@example.invalid"],
+      ["config", "user.name", "Workspace Template Test"],
+      ["add", "."],
+      ["commit", "-m", "fixture"],
+    ]) {
+      const result = spawnSync("git", args, { cwd: root, encoding: "utf8", shell: false });
+      assert.equal(result.status, 0, result.stderr);
+    }
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+
+    const report = await applyWithVerifier(plan, async () => ({ ok: true }));
+
+    assert.equal(report.ok, true);
+  });
+
   it("rejects a stale reviewed plan before writing", async () => {
     const root = await fixture();
     const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });

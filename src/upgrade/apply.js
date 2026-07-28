@@ -424,6 +424,10 @@ async function applyUpgradePlanInternal(plan, options = {}, runtime = {}) {
   const lockPath = path.join(root, ".agentic", "transactions", "upgrade.lock");
   await ensureDirectory(path.dirname(lockPath));
   const transactionLock = await acquireUpgradeMutex(lockPath, { planId: plan.planId });
+  const lockedDirtyPaths = [
+    ...(options.allowedDirtyPaths ?? []),
+    ".agentic/transactions/upgrade.lock/owner/owner.json",
+  ];
   try {
     await assertUpgradeQuiescent(root, plan.planId);
     const lockedEvents = await readJournal(root, plan.planId);
@@ -441,7 +445,7 @@ async function applyUpgradePlanInternal(plan, options = {}, runtime = {}) {
     if (plan.metadata?.incomingCatalogHash !== await hashDirectory(assetsRoot)) {
       throw new Error("Incoming package catalog changed after the upgrade plan was sealed");
     }
-    await assertPlanApplicable(plan, { expected: { command: "upgrade" }, allowedDirtyPaths: options.allowedDirtyPaths });
+    await assertPlanApplicable(plan, { expected: { command: "upgrade" }, allowedDirtyPaths: lockedDirtyPaths });
     await assertVerificationInputsUnchanged(root, plan);
     await ensureDirectory(transaction);
     const preDoctor = await doctorProject(root);
@@ -458,7 +462,7 @@ async function applyUpgradePlanInternal(plan, options = {}, runtime = {}) {
     );
     await assertVerificationInputsUnchanged(root, plan);
     await assertUpgradeQuiescent(root, plan.planId);
-    await assertPlanApplicable(plan, { expected: { command: "upgrade" }, allowedDirtyPaths: options.allowedDirtyPaths });
+    await assertPlanApplicable(plan, { expected: { command: "upgrade" }, allowedDirtyPaths: lockedDirtyPaths });
     validatePlannedState(writeOperations);
     await validateStagedState(root, writeOperations);
     await writeJson(path.join(transaction, "plan.json"), plan);
