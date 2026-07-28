@@ -201,7 +201,25 @@ def main() -> int:
     }
 
     existing_frontier = track / "frontier.json"
-    if args.write_frontier and existing_frontier.exists():
+    track_policy: dict[str, Any] = {}
+    track_policy_path = track / "track.yaml"
+    if args.write_frontier and track_policy_path.exists():
+        try:
+            track_policy = load_yaml(track_policy_path)
+        except Exception as exc:
+            errors.append(f"cannot establish frontier write policy: {exc}")
+    track_declares_status_updater = (
+        track_policy.get("frontier_schema_version") == 2
+        or bool(track_policy.get("status_updater"))
+        or track_policy.get("generic_schema_v1_write_frontier") == "forbidden"
+    )
+    if args.write_frontier and track_declares_status_updater:
+        errors.append(
+            "refusing generic frontier writer for track-declared schema-v2 lifecycle; "
+            "use the track-declared status-preserving updater"
+        )
+        frontier["errors"] = errors
+    elif args.write_frontier and existing_frontier.exists():
         try:
             existing_schema = json.loads(existing_frontier.read_text(encoding="utf-8")).get("schema_version")
         except (OSError, json.JSONDecodeError):

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { describe, it } from "node:test";
 import { commandExists, runCommandCapture } from "../src/process-utils.js";
@@ -111,13 +111,32 @@ budgets:
   zero_owned_processes_after_run: true
 `.trimStart());
     const frontierPath = path.join(track, "frontier.json");
+    await writeFile(path.join(track, "track.yaml"), `
+track: 13-post-032-compiled-frontier
+frontier_schema_version: 2
+status_updater: node update-frontier.mjs
+generic_schema_v1_write_frontier: forbidden
+`.trimStart());
     const original = `${JSON.stringify({ schema_version: 2, preserved: true }, null, 2)}\n`;
     await writeFile(frontierPath, original);
     const script = path.resolve("assets", "scripts", "validate_ticket_pack.py");
     const result = runPython(["-B", "-S", script, track, "--write-frontier", "--json"], { cwd: path.dirname(script) });
     assert.equal(result.status, 1);
-    assert.match(result.stdout, /refusing to overwrite schema-v2 frontier/i);
+    assert.match(result.stdout, /refusing generic frontier writer.*track-declared schema-v2/i);
     assert.equal(await readFile(frontierPath, "utf8"), original);
+
+    await rm(frontierPath);
+    const missing = runPython(["-B", "-S", script, track, "--write-frontier", "--json"], { cwd: path.dirname(script) });
+    assert.equal(missing.status, 1);
+    assert.match(missing.stdout, /track-declared schema-v2/i);
+    await assert.rejects(readFile(frontierPath, "utf8"), /ENOENT/);
+
+    const malformed = "{not-json\n";
+    await writeFile(frontierPath, malformed);
+    const corrupt = runPython(["-B", "-S", script, track, "--write-frontier", "--json"], { cwd: path.dirname(script) });
+    assert.equal(corrupt.status, 1);
+    assert.match(corrupt.stdout, /track-declared schema-v2/i);
+    assert.equal(await readFile(frontierPath, "utf8"), malformed);
   });
 
   it("classifies package-local test directories as tests", async () => {
