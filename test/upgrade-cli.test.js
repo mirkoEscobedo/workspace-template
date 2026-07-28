@@ -53,14 +53,18 @@ async function runCli(args) {
 }
 
 describe("upgrade CLI completion output", () => {
-  it("completes a bare non-JSON upgrade without treating its report as a plan", async () => {
+  it("completes a bare non-JSON upgrade without treating its report as a plan", {
+    skip: process.platform !== "win32",
+  }, async () => {
     const root = await fixture();
     const result = await runCli(["upgrade", root, "--allow-network"]);
     assert.match(result.stdout, /Workspace (?:is already current|upgrade completed)/);
     assert.doesNotMatch(result.stderr, /Error:/);
   });
 
-  it("completes a saved-plan non-JSON upgrade without treating its report as a plan", async () => {
+  it("completes a saved-plan non-JSON upgrade without treating its report as a plan", {
+    skip: process.platform !== "win32",
+  }, async () => {
     const root = await fixture();
     const plan = await buildUpgradePlan(root, { allowNetwork: true });
     const planPath = path.resolve(root, defaultUpgradePlanPath(plan));

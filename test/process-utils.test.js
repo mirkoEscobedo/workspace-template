@@ -92,7 +92,9 @@ describe("upgrade verification process ownership", () => {
     assert.equal(await exists(path.join(root, ".agent", "leases")), false);
   });
 
-  it("times out the whole tree, closes its lease, and omits ambient credentials", async () => {
+  it("times out the whole tree, closes its lease, and omits ambient credentials", {
+    skip: process.platform !== "win32",
+  }, async () => {
     const root = await mkdtemp(path.join(os.tmpdir(), "workspace-template-runner-"));
     const pidPath = path.join(root, "grandchild.pid");
     const canary = "ambient-canary-credential";
@@ -138,7 +140,9 @@ describe("upgrade verification process ownership", () => {
     }
   });
 
-  it("closes the whole tree on interruption and runner failure", async () => {
+  it("closes the whole tree on interruption and runner failure", {
+    skip: process.platform !== "win32",
+  }, async () => {
     for (const terminal of ["failure", "abort"]) {
       const root = await mkdtemp(path.join(os.tmpdir(), `workspace-template-runner-${terminal}-`));
       const pidPath = path.join(root, "grandchild.pid");
@@ -186,7 +190,9 @@ describe("upgrade verification process ownership", () => {
     }
   });
 
-  it("keeps the payload behind ownership, identity, and durable-lease registration", async () => {
+  it("keeps the payload behind ownership, identity, and durable-lease registration", {
+    skip: process.platform !== "win32",
+  }, async () => {
     for (const failure of ["identity", "lease"]) {
       const root = await mkdtemp(path.join(os.tmpdir(), `workspace-template-barrier-${failure}-`));
       const sentinel = path.join(root, "payload-ran");

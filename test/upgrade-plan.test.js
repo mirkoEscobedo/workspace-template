@@ -6,12 +6,11 @@ import { describe, it } from "node:test";
 import { createProject } from "../src/create.js";
 import { exists, hashDirectory } from "../src/fs-utils.js";
 import {
-  buildUpgradePlan,
   applyUpgradePlan,
   defaultUpgradePlanPath,
   upgradeWorkspace,
 } from "../src/index.js";
-import { applyWithVerifier } from "./upgrade-internal-harness.js";
+import { applyWithVerifier, buildSupportedUpgradePlan } from "./upgrade-internal-harness.js";
 import * as upgradePlan from "../src/upgrade/plan.js";
 
 async function generatedWorkspace() {
@@ -45,8 +44,8 @@ describe("workspace upgrade", () => {
   it("builds a deterministic zero-write plan and an automatic review path", async () => {
     const root = await generatedWorkspace();
     const before = await hashDirectory(root);
-    const first = await buildUpgradePlan(root, { allowNetwork: true });
-    const second = await buildUpgradePlan(root, { allowNetwork: true });
+    const first = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+    const second = await buildSupportedUpgradePlan(root, { allowNetwork: true });
 
     assert.equal(await hashDirectory(root), before);
     assert.equal(first.command, "upgrade");
@@ -61,12 +60,12 @@ describe("workspace upgrade", () => {
 
   it("seals explicit unconfined verification approval in the reviewed plan", async () => {
     const root = await generatedWorkspace();
-    const blocked = await buildUpgradePlan(root);
+    const blocked = await buildSupportedUpgradePlan(root);
     assert.equal(blocked.canApply, false);
     assert.equal(blocked.approvals.network, false);
     assert.equal(blocked.conflicts.some((item) => /cannot be portably confined.*--allow-network/iu.test(item)), true);
 
-    const approved = await buildUpgradePlan(root, { allowNetwork: true });
+    const approved = await buildSupportedUpgradePlan(root, { allowNetwork: true });
     assert.equal(approved.canApply, true);
     assert.equal(approved.approvals.network, true);
     assert.match(approved.metadata.verificationInputs.hash, /^[a-f0-9]{64}$/u);
@@ -81,7 +80,7 @@ describe("workspace upgrade", () => {
     manifest.scripts.check = `node_modules/.bin/biome check . && node -e "require('node:fs').writeFileSync(${JSON.stringify(sentinel)},'ran')"`;
     await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 
-    const plan = await buildUpgradePlan(root, { allowNetwork: true });
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
 
     assert.equal(plan.canApply, false);
     assert.equal(plan.conflicts.some((item) =>
@@ -96,6 +95,17 @@ describe("workspace upgrade", () => {
       /POSIX.*detached-session.*native process owner/iu,
     );
     assert.equal(upgradePlan.upgradeVerificationPlatformConflict("win32"), null);
+  });
+
+  it("uses the requested verification platform when sealing plan capability", async () => {
+    const root = await generatedWorkspace();
+    const posix = await upgradePlan.buildUpgradePlan(root, { allowNetwork: true, platform: "linux" });
+    const windows = await upgradePlan.buildUpgradePlan(root, { allowNetwork: true, platform: "win32" });
+
+    assert.equal(posix.canApply, false);
+    assert.equal(posix.conflicts.some((item) =>
+      /POSIX.*detached-session.*native process owner/iu.test(item)), true);
+    assert.equal(windows.canApply, true);
   });
 
   it("persists a reviewed plan without applying it and prints an exact apply path", async () => {
@@ -116,7 +126,7 @@ describe("workspace upgrade", () => {
 
   it("applies the exact sealed plan once and retains its transaction copy", async () => {
     const root = await generatedWorkspace();
-    const plan = await buildUpgradePlan(root, { allowNetwork: true });
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
     const report = await applyWithVerifier(plan, async () => ({ ok: true }));
 
     assert.equal(report.ok, true);
@@ -126,9 +136,9 @@ describe("workspace upgrade", () => {
 
   it("keeps consecutive bare upgrades idempotent while re-verifying current state", async () => {
     const root = await generatedWorkspace();
-    const firstPlan = await buildUpgradePlan(root, { allowNetwork: true });
+    const firstPlan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
     const first = await applyWithVerifier(firstPlan, async () => ({ ok: true }), { allowCurrentReplay: true });
-    const secondPlan = await buildUpgradePlan(root, { allowNetwork: true });
+    const secondPlan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
     const second = await applyWithVerifier(secondPlan, async () => ({ ok: true }), { allowCurrentReplay: true });
     assert.equal(first.status, "current");
     assert.equal(second.status, "current");

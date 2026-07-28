@@ -92,7 +92,7 @@ export async function copyTree(source, destination, options = {}) {
 }
 
 export async function removePath(target) {
-  await rm(target, { recursive: true, force: true });
+  await rm(target, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 });
 }
 
 export async function listFiles(directory, options = {}) {

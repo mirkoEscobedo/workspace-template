@@ -3,8 +3,8 @@ import { lstat, mkdtemp, readFile, readdir, readlink, writeFile } from "node:fs/
 import os from "node:os";
 import path from "node:path";
 import { describe, it } from "node:test";
-import { applyUpgradePlan, buildUpgradePlan, createProject, refreshPlanId } from "../src/index.js";
-import { applyWithVerifier } from "./upgrade-internal-harness.js";
+import { applyUpgradePlan, createProject, refreshPlanId } from "../src/index.js";
+import { applyWithVerifier, buildSupportedUpgradePlan } from "./upgrade-internal-harness.js";
 
 async function fixture() {
   const parent = await mkdtemp(path.join(os.tmpdir(), "workspace-template-upgrade-rejection-"));
@@ -44,7 +44,7 @@ async function workspaceSnapshot(root) {
 describe("upgrade apply rejection boundary", () => {
   it("rejects a stale plan without any persistent workspace write", async () => {
     const root = await fixture();
-    const plan = await buildUpgradePlan(root, { allowNetwork: true });
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
     const configPath = path.join(root, ".agentic", "config.json");
     await writeFile(configPath, `${await readFile(configPath, "utf8")}\n`);
     const before = await workspaceSnapshot(root);
@@ -54,7 +54,7 @@ describe("upgrade apply rejection boundary", () => {
 
   it("rejects a replayed plan without any persistent workspace write", async () => {
     const root = await fixture();
-    const plan = await buildUpgradePlan(root, { allowNetwork: true });
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
     await applyWithVerifier(plan, async () => ({ ok: true }));
     const before = await workspaceSnapshot(root);
     await assert.rejects(() => applyUpgradePlan(plan), /already been applied/i);
@@ -63,7 +63,7 @@ describe("upgrade apply rejection boundary", () => {
 
   it("rejects a tampered plan without any persistent workspace write", async () => {
     const root = await fixture();
-    const plan = await buildUpgradePlan(root, { allowNetwork: true });
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
     const tampered = { ...plan, metadata: { ...plan.metadata, incomingVersion: "tampered" } };
     const before = await workspaceSnapshot(root);
     await assert.rejects(() => applyUpgradePlan(tampered), /integrity|plan ID/i);
@@ -74,7 +74,7 @@ describe("upgrade apply rejection boundary", () => {
     const root = await fixture();
     const configPath = path.join(root, ".agentic", "config.json");
     const original = await readFile(configPath, "utf8");
-    const plan = await buildUpgradePlan(root, { allowNetwork: true });
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
     await writeFile(path.join(root, "verification-input.js"), "changed after review\n");
 
     await assert.rejects(
@@ -90,7 +90,7 @@ describe("upgrade apply rejection boundary", () => {
     await writeFile(inputPath, "reviewed\n");
     const configPath = path.join(root, ".agentic", "config.json");
     const original = await readFile(configPath, "utf8");
-    const plan = await buildUpgradePlan(root, { allowNetwork: true });
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
 
     await assert.rejects(
       () => applyWithVerifier(plan, async () => {
@@ -104,7 +104,7 @@ describe("upgrade apply rejection boundary", () => {
 
   it("rejects an edited operation that touches a sealed verification manifest", async () => {
     const root = await fixture();
-    const plan = await buildUpgradePlan(root, { allowNetwork: true });
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
     const manifest = await readFile(path.join(root, "package.json"));
     const edited = refreshPlanId({
       ...plan,

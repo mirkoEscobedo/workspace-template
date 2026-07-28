@@ -3,9 +3,9 @@ import { mkdtemp, readFile, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, it } from "node:test";
-import { buildUpgradePlan, createProject, doctorProject } from "../src/index.js";
+import { createProject, doctorProject } from "../src/index.js";
 import { hashDirectory } from "../src/fs-utils.js";
-import { applyWithVerifier } from "./upgrade-internal-harness.js";
+import { applyWithVerifier, buildSupportedUpgradePlan } from "./upgrade-internal-harness.js";
 
 async function fixture() {
   const parent = await mkdtemp(path.join(os.tmpdir(), "workspace-template-upgrade-legacy-"));
@@ -36,7 +36,7 @@ describe("upgrade legacy compatibility", () => {
     delete profile.mode;
     await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`);
     await writeFile(profilePath, `${JSON.stringify(profile, null, 2)}\n`);
-    const plan = await buildUpgradePlan(root, { allowNetwork: true });
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
     assert.equal(plan.metadata.upgrade.mode, "generated");
   });
 
@@ -50,7 +50,7 @@ describe("upgrade legacy compatibility", () => {
     profile.mode = "adopted";
     await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`);
     await writeFile(profilePath, `${JSON.stringify(profile, null, 2)}\n`);
-    await assert.rejects(() => buildUpgradePlan(root, { allowNetwork: true }), /modes do not match/i);
+    await assert.rejects(() => buildSupportedUpgradePlan(root, { allowNetwork: true }), /modes do not match/i);
   });
 
   it("applies authentic legacy generations, passes doctor, preserves protected paths, and becomes a no-op", async () => {
@@ -105,7 +105,7 @@ describe("upgrade legacy compatibility", () => {
       }
       const productBefore = await readFile(path.join(root, "package.json"));
       const memoryBefore = await hashDirectory(path.join(root, "docs", "agent"));
-      const plan = await buildUpgradePlan(root, { allowNetwork: true });
+      const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
       assert.deepEqual(plan.metadata.sourceSchemas, {
         config: generation.config,
         profile: generation.profile,
@@ -117,7 +117,7 @@ describe("upgrade legacy compatibility", () => {
       assert.equal((await doctorProject(root)).ok, true);
       assert.deepEqual(await readFile(path.join(root, "package.json")), productBefore);
       assert.equal(await hashDirectory(path.join(root, "docs", "agent")), memoryBefore);
-      const second = await buildUpgradePlan(root, { allowNetwork: true });
+      const second = await buildSupportedUpgradePlan(root, { allowNetwork: true });
       assert.equal(
         second.metadata.upgrade.status,
         "current",

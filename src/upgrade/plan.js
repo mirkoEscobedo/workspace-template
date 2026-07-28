@@ -207,7 +207,7 @@ export async function buildUpgradePlan(rootDirectory, options = {}) {
   const hasVerificationCommands = [...verificationCommands.modules, verificationCommands.root]
     .filter(Boolean)
     .some((entry) => entry.fullSteps.length > 0);
-  const platformConflict = upgradeVerificationPlatformConflict();
+  const platformConflict = upgradeVerificationPlatformConflict(options.platform);
   if (hasVerificationCommands && platformConflict) conflicts.push(platformConflict);
   if (hasVerificationCommands && !options.allowNetwork) {
     conflicts.push("Full verification cannot be portably confined from external filesystem or network effects; review and pass --allow-network to seal that authority");

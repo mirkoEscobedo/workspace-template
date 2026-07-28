@@ -3,10 +3,10 @@ import { mkdir, mkdtemp, readdir, readFile, rm, symlink, writeFile } from "node:
 import os from "node:os";
 import path from "node:path";
 import { describe, it } from "node:test";
-import { applyUpgradePlan, buildUpgradePlan, createProject, readJournal, refreshPlanId } from "../src/index.js";
+import { applyUpgradePlan, createProject, readJournal, refreshPlanId } from "../src/index.js";
 import { exists } from "../src/fs-utils.js";
 import { runCommandAsync } from "../src/process-utils.js";
-import { applyWithVerifier } from "./upgrade-internal-harness.js";
+import { applyWithVerifier, buildSupportedUpgradePlan } from "./upgrade-internal-harness.js";
 
 async function fixture(options = {}) {
   const parent = await mkdtemp(path.join(os.tmpdir(), "workspace-template-upgrade-apply-"));
@@ -26,7 +26,7 @@ async function fixture(options = {}) {
 describe("upgrade apply transaction", () => {
   it("rejects a stale reviewed plan before writing", async () => {
     const root = await fixture();
-    const plan = await buildUpgradePlan(root, { allowNetwork: true });
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
     const configPath = path.join(root, ".agentic", "config.json");
     const changed = `${await readFile(configPath, "utf8")}\n`;
     await writeFile(configPath, changed);
@@ -37,7 +37,7 @@ describe("upgrade apply transaction", () => {
   it("rolls back every write when post-upgrade doctor fails", async () => {
     const root = await fixture();
     const original = await readFile(path.join(root, ".agentic", "config.json"), "utf8");
-    const plan = await buildUpgradePlan(root, { allowNetwork: true });
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
     const operations = plan.operations.map((item) => item.path === ".agentic/config.json"
       ? {
           ...item,
@@ -59,7 +59,7 @@ describe("upgrade apply transaction", () => {
     const managed = JSON.parse(await readFile(managedPath, "utf8"));
     delete managed.files[".agentic/profile.schema.json"];
     await writeFile(managedPath, `${JSON.stringify(managed, null, 2)}\n`);
-    const plan = await buildUpgradePlan(root, { allowNetwork: true });
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
     assert.equal(plan.operations.find((item) => item.path === ".agentic/profile.schema.json")?.kind, "create-upgrade-managed");
     const report = await applyWithVerifier(plan, async () => ({ ok: true }));
     assert.equal(report.ok, true);
@@ -70,7 +70,7 @@ describe("upgrade apply transaction", () => {
 
   it("writes every ownership and identity record after all payloads", async () => {
     const root = await fixture({ agents: ["codex"] });
-    const plan = await buildUpgradePlan(root, { allowNetwork: true });
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
     const ownershipPaths = [
       ".agentic/skills.lock.json",
       ".agentic/managed-projections.json",
@@ -115,7 +115,7 @@ describe("upgrade apply transaction", () => {
 
   it("rechecks process leases at apply time and reports interrupted recovery in dry-run", async () => {
     const root = await fixture();
-    const plan = await buildUpgradePlan(root, { allowNetwork: true });
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
     const leaseDirectory = path.join(root, ".agent", "leases");
     await mkdir(leaseDirectory, { recursive: true });
     await writeFile(path.join(leaseDirectory, "open.json"), "{}\n");
@@ -125,7 +125,7 @@ describe("upgrade apply transaction", () => {
     const interrupted = path.join(root, ".agentic", "transactions", "interrupted", "journal.jsonl");
     await mkdir(path.dirname(interrupted), { recursive: true });
     await writeFile(interrupted, `${JSON.stringify({ sequence: 1, event: "start", status: "running" })}\n`);
-    const preview = await buildUpgradePlan(root, { dryRun: true });
+    const preview = await buildSupportedUpgradePlan(root, { dryRun: true });
     assert.equal(preview.metadata.upgrade.status, "recovery-required");
     assert.equal(preview.canApply, false);
   });
@@ -146,7 +146,7 @@ describe("upgrade apply transaction", () => {
     const externalSentinel = path.join(external, "sentinel");
     await writeFile(externalSentinel, "external-state\n");
     await symlink(external, path.join(root, "external-link"), process.platform === "win32" ? "junction" : "dir");
-    const plan = await buildUpgradePlan(root, { allowNetwork: true });
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
     const verificationRoots = [];
 
     const report = await applyWithVerifier(plan, async (verificationRoot) => {
@@ -182,7 +182,7 @@ describe("upgrade apply transaction", () => {
     manifest.scripts.check = "npm publish";
     await writeFile(packagePath, `${JSON.stringify(manifest, null, 2)}\n`);
 
-    const plan = await buildUpgradePlan(root, { allowNetwork: true });
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
 
     assert.equal(plan.canApply, false);
     assert.equal(plan.conflicts.some((conflict) => /unauthorized.*publish.*deploy effect/iu.test(conflict)), true);
@@ -195,7 +195,7 @@ describe("upgrade apply transaction", () => {
     const canary = "persisted-verifier-canary";
     manifest.scripts.check = `node -e "process.stdout.write('token=${canary}')"`;
     await writeFile(packagePath, `${JSON.stringify(manifest, null, 2)}\n`);
-    const plan = await buildUpgradePlan(root, { allowNetwork: true });
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
 
     const report = await applyUpgradePlan(plan, { maxOutputBytes: 64 });
     const persisted = await readFile(

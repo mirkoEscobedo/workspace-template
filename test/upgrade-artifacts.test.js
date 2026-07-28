@@ -3,10 +3,10 @@ import { mkdtemp, readFile, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, it } from "node:test";
-import { buildUpgradePlan, createProject } from "../src/index.js";
+import { createProject } from "../src/index.js";
 import { hashBuffer } from "../src/fs-utils.js";
 import { inspectManagedBlock } from "../src/managed-sections.js";
-import { applyWithVerifier } from "./upgrade-internal-harness.js";
+import { applyWithVerifier, buildSupportedUpgradePlan } from "./upgrade-internal-harness.js";
 
 async function fixture() {
   const parent = await mkdtemp(path.join(os.tmpdir(), "workspace-template-upgrade-artifacts-"));
@@ -54,7 +54,7 @@ describe("upgrade artifact reconciliation", () => {
     }, null, 2)}\n`;
     await writeFile(localPresetPath, localPreset);
 
-    const plan = await buildUpgradePlan(root, { allowDirty: true, allowNetwork: true });
+    const plan = await buildSupportedUpgradePlan(root, { allowDirty: true, allowNetwork: true });
     assert.equal(plan.metadata.upgrade.mode, "adopted");
     assert.equal(plan.operations.some((item) => item.path === "src/sentinel.js"), false);
     assert.equal(plan.operations.some((item) => item.path.includes("presets/local/team.json")), false);
@@ -70,18 +70,18 @@ describe("upgrade artifact reconciliation", () => {
   it("blocks drift in a hash-owned managed artifact", async () => {
     const root = await fixture();
     await writeFile(path.join(root, ".agentic", "README.md"), "# user drift\n");
-    const plan = await buildUpgradePlan(root, { allowNetwork: true });
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
     assert.equal(plan.canApply, false);
     assert.match(plan.conflicts.join("\n"), /managed file drift/i);
   });
 
   it("blocks drifted managed role files and honors an explicit preset selection", async () => {
     const root = await fixture();
-    const selected = await buildUpgradePlan(root, { preset: "sol-only", presetExplicit: true, allowNetwork: true });
+    const selected = await buildSupportedUpgradePlan(root, { preset: "sol-only", presetExplicit: true, allowNetwork: true });
     assert.equal(selected.metadata.preset.id, "sol-only");
     const rolePath = path.join(root, ".codex", "agents", "scout.toml");
     await writeFile(rolePath, `${await readFile(rolePath, "utf8")}\n# local drift\n`);
-    const drifted = await buildUpgradePlan(root, { allowNetwork: true });
+    const drifted = await buildSupportedUpgradePlan(root, { allowNetwork: true });
     assert.equal(drifted.canApply, false);
     assert.match(drifted.conflicts.join("\n"), /scout\.toml/);
   });
@@ -119,7 +119,7 @@ old managed content
     await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
     await writeFile(agentsPath, `${custom}\nRepository-owned note added after adoption.\n`);
 
-    const plan = await buildUpgradePlan(root, { allowNetwork: true });
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
     assert.equal(plan.canApply, true, plan.conflicts.join("\n"));
     await applyWithVerifier(plan, async () => ({ ok: true }));
 
@@ -132,7 +132,7 @@ old managed content
     assert.equal(upgradedManifest.files["AGENTS.md"].mode, "managed-section");
     const drifted = upgraded.replace("## Agentic workspace", "## User-edited managed workspace");
     await writeFile(agentsPath, drifted);
-    const blocked = await buildUpgradePlan(root, { allowNetwork: true });
+    const blocked = await buildSupportedUpgradePlan(root, { allowNetwork: true });
     assert.equal(blocked.canApply, false);
     assert.match(blocked.conflicts.join("\n"), /AGENTS\.md/);
   });
