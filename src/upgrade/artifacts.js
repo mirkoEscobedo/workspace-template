@@ -4,7 +4,6 @@ import {
   exists,
   hashBuffer,
   hashFile,
-  readJsonIfExists,
 } from "../fs-utils.js";
 import { PACKAGE_VERSION } from "../constants.js";
 import { loadPresetCatalog } from "../presets/catalog.js";
@@ -22,6 +21,7 @@ import { createProfile, profileSchema } from "../profile.js";
 import { planSkillUpgrade } from "./skills.js";
 import { commandsFor, generateAgentsMd, generateManagedAgentsBlock } from "../agents-md.js";
 import { inspectManagedBlock, upsertManagedBlock } from "../managed-sections.js";
+import { loadEffectiveUpgradeWorkspace } from "./workspace.js";
 
 function jsonBuffer(value) {
   return Buffer.from(`${JSON.stringify(value, null, 2)}\n`);
@@ -71,21 +71,8 @@ function rootCommands(workspace, project, packageManager) {
 }
 
 async function managedWorkspaceArtifacts(snapshot, config, discoveredWorkspace) {
-  const effectiveWorkspace = structuredClone(
-    await readJsonIfExists(path.join(snapshot.root, ".agentic", "workspace.json"))
-      ?? discoveredWorkspace,
-  );
+  const effectiveWorkspace = await loadEffectiveUpgradeWorkspace(snapshot.root, discoveredWorkspace);
   if (!effectiveWorkspace?.modules?.length) return [];
-  for (const module of effectiveWorkspace.modules) {
-    const commands = await readJsonIfExists(path.join(
-      snapshot.root,
-      ".agentic",
-      "modules",
-      module.id,
-      "commands.json",
-    ));
-    if (commands) module.commands = { ...(module.commands ?? {}), ...commands };
-  }
   const context = {
     projectName: path.basename(snapshot.root),
     project: config.project,

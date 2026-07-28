@@ -8,6 +8,7 @@ import { planUpgradeArtifacts } from "./artifacts.js";
 import { assetsRoot } from "../workspace-artifacts.js";
 import { exists, hashDirectory, hashFile, hashText, readJson, toPosixPath } from "../fs-utils.js";
 import { discoverWorkspace } from "../workspace/discover.js";
+import { loadEffectiveUpgradeWorkspace } from "./workspace.js";
 
 function versionPart(value) {
   return String(value ?? "legacy").replace(/[^a-zA-Z0-9._-]+/g, "-");
@@ -171,7 +172,8 @@ export async function buildUpgradePlan(rootDirectory, options = {}) {
       },
     });
   }
-  const workspace = await discoverWorkspace(snapshot.root, { workspace: "all", includeRootModule: true, includeOpaque: true });
+  const discoveredWorkspace = await discoverWorkspace(snapshot.root, { workspace: "all", includeRootModule: true, includeOpaque: true });
+  const workspace = await loadEffectiveUpgradeWorkspace(snapshot.root, discoveredWorkspace, { mergeDiscovered: true });
   const desired = await planUpgradeArtifacts(snapshot, { ...options, workspace });
   const verificationCommands = await upgradeVerificationAuthority(snapshot.root, workspace);
   for (const operation of desired.operations) await assertSafeUpgradePath(snapshot.root, operation.path);

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, it } from "node:test";
@@ -86,15 +86,13 @@ describe("upgrade artifact reconciliation", () => {
     assert.match(drifted.conflicts.join("\n"), /scout\.toml/);
   });
 
-  it("preserves separately managed module commands when the workspace snapshot omits them", async () => {
+  it("preserves persisted-only modules and separately managed commands through verification", async () => {
     const root = await fixture();
     const workspacePath = path.join(root, ".agentic", "workspace.json");
     const manifestPath = path.join(root, ".agentic", "managed-files.json");
     const workspace = JSON.parse(await readFile(workspacePath, "utf8"));
     const module = workspace.modules[0];
     delete module.commands;
-    const workspaceText = `${JSON.stringify(workspace, null, 2)}\n`;
-    await writeFile(workspacePath, workspaceText);
 
     const commands = {
       fullSteps: [{ command: "node", args: ["--test", "custom-module.test.js"] }],
@@ -105,18 +103,58 @@ describe("upgrade artifact reconciliation", () => {
     const commandsText = `${JSON.stringify(commands, null, 2)}\n`;
     await writeFile(commandsPath, commandsText);
 
+    const worker = {
+      id: "python-worker",
+      name: "python-worker",
+      path: "backend/worker",
+      project: "python",
+      packageManager: "uv",
+      manifest: "backend/worker/pyproject.toml",
+      lockOwner: "backend/worker",
+      dependencies: [],
+      opaque: false,
+    };
+    const workerCommands = {
+      fullSteps: [{ command: "uv", args: ["run", "--directory", "backend/worker", "pytest"] }],
+      full: "uv run --directory backend/worker pytest",
+    };
+    workspace.modules.push(worker);
+    const workerCommandsRelative = ".agentic/modules/python-worker/commands.json";
+    const workerCommandsPath = path.join(root, ...workerCommandsRelative.split("/"));
+    await mkdir(path.dirname(workerCommandsPath), { recursive: true });
+    const workerCommandsText = `${JSON.stringify(workerCommands, null, 2)}\n`;
+    await writeFile(workerCommandsPath, workerCommandsText);
+    await mkdir(path.join(root, "backend", "worker"), { recursive: true });
+    await writeFile(path.join(root, "backend", "worker", "pyproject.toml"), "[project]\nname = \"python-worker\"\nversion = \"0.1.0\"\n");
+    const expandedWorkspaceText = `${JSON.stringify(workspace, null, 2)}\n`;
+    await writeFile(workspacePath, expandedWorkspaceText);
+
     const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
-    manifest.files[".agentic/workspace.json"].hash = hashBuffer(Buffer.from(workspaceText));
+    manifest.files[".agentic/workspace.json"].hash = hashBuffer(Buffer.from(expandedWorkspaceText));
     manifest.files[relativeCommandsPath].hash = hashBuffer(Buffer.from(commandsText));
+    manifest.files[workerCommandsRelative] = {
+      mode: "managed",
+      hash: hashBuffer(Buffer.from(workerCommandsText)),
+    };
     await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 
     const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
     assert.equal(plan.canApply, true, plan.conflicts.join("\n"));
+    const verificationModules = plan.metadata.verificationCommands.modules;
+    assert.deepEqual(verificationModules.find((item) => item.id === module.id).fullSteps, commands.fullSteps);
+    assert.deepEqual(verificationModules.find((item) => item.id === worker.id).fullSteps, workerCommands.fullSteps);
     await applyWithVerifier(plan, async () => ({ ok: true }));
 
-    assert.deepEqual(JSON.parse(await readFile(commandsPath, "utf8")), commands);
+    const upgradedCommands = JSON.parse(await readFile(commandsPath, "utf8"));
+    assert.deepEqual(upgradedCommands.fullSteps, commands.fullSteps);
+    assert.equal(upgradedCommands.full, commands.full);
     const upgradedWorkspace = JSON.parse(await readFile(workspacePath, "utf8"));
-    assert.deepEqual(upgradedWorkspace.modules.find((item) => item.id === module.id).commands, commands);
+    const upgradedModule = upgradedWorkspace.modules.find((item) => item.id === module.id);
+    assert.deepEqual(upgradedModule.commands.fullSteps, commands.fullSteps);
+    assert.equal(upgradedModule.commands.full, commands.full);
+    const upgradedWorker = upgradedWorkspace.modules.find((item) => item.id === worker.id);
+    assert.deepEqual(upgradedWorker.commands.fullSteps, workerCommands.fullSteps);
+    assert.equal(upgradedWorker.commands.full, workerCommands.full);
   });
 
   it("updates only the managed AGENTS block and preserves adopted ownership", async () => {

@@ -25,6 +25,7 @@ import { UpgradeVerificationRunner, verifyWorkspace } from "../workspace/verify.
 import { discoverWorkspace } from "../workspace/discover.js";
 import { assetsRoot } from "../workspace-artifacts.js";
 import { resolveProcessIdentity } from "../process-utils.js";
+import { loadEffectiveUpgradeWorkspace } from "./workspace.js";
 
 async function interruptedBackup(events) {
   const event = [...events].reverse().find((item) => item.event === "backup" && item.directory);
@@ -75,7 +76,8 @@ function validatePlannedState(operations) {
 }
 
 async function workspaceWithSealedVerificationAuthority(root, sealedAuthority) {
-  const workspace = await discoverWorkspace(root, { workspace: "all", includeRootModule: true, includeOpaque: true });
+  const discoveredWorkspace = await discoverWorkspace(root, { workspace: "all", includeRootModule: true, includeOpaque: true });
+  const workspace = await loadEffectiveUpgradeWorkspace(root, discoveredWorkspace, { mergeDiscovered: true });
   const currentAuthority = await upgradeVerificationAuthority(root, workspace);
   assertLocalVerificationAuthority(sealedAuthority);
   assertLocalVerificationAuthority(currentAuthority);
