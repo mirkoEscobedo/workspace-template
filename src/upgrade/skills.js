@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { lstat, readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import {
   exists,
@@ -63,8 +63,187 @@ function namesEqual(left, right) {
   return JSON.stringify([...left].sort()) === JSON.stringify([...right].sort());
 }
 
+function treesEqual(left, right) {
+  if (!namesEqual(left.keys(), right.keys())) return false;
+  for (const [relative, content] of left) {
+    if (!content.equals(right.get(relative))) return false;
+  }
+  return true;
+}
+
 async function projectionNames(root) {
   return (await listDirectories(root)).map((directory) => path.basename(directory)).sort();
+}
+
+async function regularDirectoryTree(directory) {
+  let details;
+  try {
+    details = await lstat(directory);
+  } catch {
+    return false;
+  }
+  if (!details.isDirectory() || details.isSymbolicLink()) return false;
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const target = path.join(directory, entry.name);
+    const targetDetails = await lstat(target);
+    if (targetDetails.isSymbolicLink()) return false;
+    if (targetDetails.isDirectory()) {
+      if (!await regularDirectoryTree(target)) return false;
+    } else if (!targetDetails.isFile()) {
+      return false;
+    }
+  }
+  return true;
+}
+
+async function catalogStructureMatches(root, expectedNames, allowedRootFiles = []) {
+  let details;
+  try {
+    details = await lstat(root);
+  } catch {
+    return false;
+  }
+  if (!details.isDirectory() || details.isSymbolicLink()) return false;
+  const expectedDirectories = new Set(expectedNames);
+  const expectedFiles = new Set(allowedRootFiles);
+  const entries = await readdir(root, { withFileTypes: true });
+  if (entries.length !== expectedDirectories.size + expectedFiles.size) return false;
+  for (const entry of entries) {
+    const target = path.join(root, entry.name);
+    const targetDetails = await lstat(target);
+    if (targetDetails.isSymbolicLink()) return false;
+    if (expectedDirectories.has(entry.name)) {
+      if (!targetDetails.isDirectory() || !await regularDirectoryTree(target)) return false;
+    } else if (expectedFiles.has(entry.name)) {
+      if (!targetDetails.isFile()) return false;
+    } else {
+      return false;
+    }
+  }
+  return true;
+}
+
+function hasCompleteHashRecord(record) {
+  return typeof record?.baselineHash === "string"
+    && typeof record?.installedHash === "string";
+}
+
+const RISK_ARRAY_FIELDS = [
+  "executableFiles",
+  "shellFiles",
+  "networkFiles",
+  "allowedTools",
+];
+
+function incomingRiskIsRisky(risk) {
+  return RISK_ARRAY_FIELDS.some((field) => (risk?.[field] ?? []).length > 0);
+}
+
+async function skillBaselineMetadataIsTrusted(snapshot, name) {
+  const lockRecord = snapshot.skillsLock.skills?.[name];
+  const expectedBaselinePath = `.agentic/skill-baselines/${name}`;
+  const baselineRoot = path.join(snapshot.root, ".agentic", "skill-baselines", name);
+  if (lockRecord?.baselinePath !== expectedBaselinePath
+    || !await regularDirectoryTree(baselineRoot)) {
+    return false;
+  }
+  const baseline = await tree(baselineRoot);
+  const baselineFiles = [...baseline.keys()].sort();
+  if (lockRecord.baselineHash !== treeHash(baseline)
+    || !namesEqual(Object.keys(lockRecord.files ?? {}), baselineFiles)) {
+    return false;
+  }
+  return baselineFiles.every((relative) => (
+    lockRecord.files[relative]?.baselineHash === hashBuffer(baseline.get(relative))
+  ));
+}
+
+async function canonicalCatalogConverges(snapshot, incomingSkillsRoot, incomingNames) {
+  const expectedNames = [...incomingNames].sort();
+  const lock = snapshot.skillsLock;
+  if (lock?.version !== 2 || lock.source?.package !== "workspace-template") return false;
+  if (!namesEqual(Object.keys(lock.skills ?? {}), expectedNames)) return false;
+  if (!await catalogStructureMatches(incomingSkillsRoot, expectedNames)) return false;
+  if (!await catalogStructureMatches(path.join(snapshot.root, ".agentic", "skills"), expectedNames)) return false;
+  if (!await catalogStructureMatches(path.join(snapshot.root, ".agentic", "skill-baselines"), expectedNames)) return false;
+
+  for (const name of expectedNames) {
+    const lockRecord = lock.skills[name];
+    if (lockRecord?.path !== `.agentic/skills/${name}`
+      || lockRecord?.baselinePath !== `.agentic/skill-baselines/${name}`
+      || !hasCompleteHashRecord(lockRecord)) {
+      return false;
+    }
+    const incoming = await tree(path.join(incomingSkillsRoot, name), { normalizeLineEndings: true });
+    const canonical = await tree(path.join(snapshot.root, ".agentic", "skills", name));
+    const baseline = await tree(path.join(snapshot.root, ".agentic", "skill-baselines", name));
+    if (!treesEqual(incoming, canonical) || !treesEqual(incoming, baseline)) return false;
+    const expectedFiles = [...incoming.keys()].sort();
+    if (!namesEqual(Object.keys(lockRecord.files ?? {}), expectedFiles)) return false;
+    if (expectedFiles.some((relative) => !hasCompleteHashRecord(lockRecord.files[relative]))) return false;
+  }
+  return true;
+}
+
+async function wholeCatalogConverges(
+  snapshot,
+  incomingSkillsRoot,
+  incomingNames,
+  targets,
+  projectionManifest,
+  canonicalConverges,
+) {
+  if (!canonicalConverges) return false;
+  const expectedNames = [...incomingNames].sort();
+  if (targets.length === 0
+    || projectionManifest?.version !== 2
+    || projectionManifest.generator !== "workspace-template"
+    || projectionManifest.canonical !== ".agentic/skills"
+    || !namesEqual(projectionManifest.skillNames ?? [], expectedNames)
+    || !namesEqual(Object.keys(projectionManifest.skillHashes ?? {}), expectedNames)
+    || !namesEqual(projectionManifest.agentTargets ?? [], targets)
+    || !namesEqual(Object.keys(projectionManifest.projections ?? {}), targets)) {
+    return false;
+  }
+  if (expectedNames.some((name) => typeof projectionManifest.skillHashes[name] !== "string")) return false;
+
+  const incomingTrees = new Map();
+  for (const name of expectedNames) {
+    incomingTrees.set(
+      name,
+      await tree(path.join(incomingSkillsRoot, name), { normalizeLineEndings: true }),
+    );
+  }
+  for (const agent of targets) {
+    const destination = PROJECTION_ROOTS[agent];
+    const projection = projectionManifest.projections[agent];
+    if (!destination
+      || projection?.path !== destination
+      || !namesEqual(projection.skills ?? [], expectedNames)) {
+      return false;
+    }
+    const marker = await readJsonIfExists(
+      path.join(snapshot.root, destination, ".managed-by-workspace-template.json"),
+    );
+    if (!await catalogStructureMatches(
+      path.join(snapshot.root, destination),
+      expectedNames,
+      [".managed-by-workspace-template.json"],
+    )
+      || marker?.version !== 2
+      || marker.generator !== "workspace-template"
+      || marker.canonical !== ".agentic/skills"
+      || !namesEqual(marker.skills ?? [], expectedNames)
+      || !namesEqual(Object.keys(marker.skillHashes ?? {}), expectedNames)
+      || expectedNames.some((name) => typeof marker.skillHashes[name] !== "string")) {
+      return false;
+    }
+    for (const name of expectedNames) {
+      const projected = await tree(path.join(snapshot.root, destination, name));
+      if (!treesEqual(projected, incomingTrees.get(name))) return false;
+    }
+  }
+  return true;
 }
 
 function projectionManifestMatches(manifest, agent, destination, expectedNames, skills) {
@@ -94,6 +273,31 @@ export async function planSkillUpgrade(snapshot, options = {}) {
   const incomingCatalog = await inspectSkillCatalog(incomingSkillsRoot);
   const baselineCatalog = await inspectSkillCatalog(path.join(snapshot.root, ".agentic", "skill-baselines"));
   const incomingNames = new Set((await listFiles(incomingSkillsRoot)).map((file) => path.relative(incomingSkillsRoot, file).split(path.sep)[0]));
+  const targets = (snapshot.config.agentTargets ?? snapshot.profile.agentTargets ?? [])
+    .filter((agent) => !options.preserveHostBundles || !preservesHostBundleProjection(agent));
+  const projectionManifest = await readJsonIfExists(path.join(snapshot.root, ".agentic", "managed-projections.json"));
+  const canonicalConverges = await canonicalCatalogConverges(
+    snapshot,
+    incomingSkillsRoot,
+    incomingNames,
+  );
+  const convergedCatalog = await wholeCatalogConverges(
+    snapshot,
+    incomingSkillsRoot,
+    incomingNames,
+    targets,
+    projectionManifest,
+    canonicalConverges,
+  );
+  if (!options.allowRiskyToolChanges) {
+    for (const name of [...incomingNames].sort()) {
+      const incomingRisk = incomingCatalog.skills[name]?.risk;
+      if (incomingRiskIsRisky(incomingRisk)
+        && !await skillBaselineMetadataIsTrusted(snapshot, name)) {
+        conflicts.push(`${name}: untrusted risky skill baseline requires review; pass --allow-risky-tool-changes`);
+      }
+    }
+  }
 
   for (const name of [...incomingNames].sort()) {
     const incomingRoot = path.join(incomingSkillsRoot, name);
@@ -200,9 +404,6 @@ export async function planSkillUpgrade(snapshot, options = {}) {
     const previous = snapshot.skillsLock.skills?.[name];
     return previous && value.installedHash !== previous.installedHash;
   });
-  const targets = (snapshot.config.agentTargets ?? snapshot.profile.agentTargets ?? [])
-    .filter((agent) => !options.preserveHostBundles || !preservesHostBundleProjection(agent));
-  const projectionManifest = await readJsonIfExists(path.join(snapshot.root, ".agentic", "managed-projections.json"));
   if (!catalogChanged && !localChanged && conflicts.length === 0) {
     for (const agent of targets) {
       const destination = PROJECTION_ROOTS[agent];
@@ -257,10 +458,10 @@ export async function planSkillUpgrade(snapshot, options = {}) {
     const legacyProjectionSafe = legacyProjectionHash
       && await hashDirectory(path.join(snapshot.root, destination)) === legacyProjectionHash;
     const installedNames = Object.keys(snapshot.skillsLock.skills ?? {}).sort();
-    if (!projectionMarker?.skillHashes && !legacyProjectionSafe) {
+    if (!convergedCatalog && !projectionMarker?.skillHashes && !legacyProjectionSafe) {
       conflicts.push(`Projection drift blocks upgrade: ${destination}`);
     }
-    if (projectionMarker?.skillHashes) {
+    if (!convergedCatalog && projectionMarker?.skillHashes) {
       const recordedNames = Object.keys(projectionMarker.skillHashes).sort();
       if (!namesEqual(projectionMarker.skills ?? [], installedNames)
         || !namesEqual(recordedNames, installedNames)
@@ -270,6 +471,7 @@ export async function planSkillUpgrade(snapshot, options = {}) {
       }
     }
     for (const name of installedNames) {
+      if (convergedCatalog) break;
       if (legacyProjectionSafe) break;
       const projectedRoot = path.join(snapshot.root, destination, name);
       if (await exists(projectedRoot)) {

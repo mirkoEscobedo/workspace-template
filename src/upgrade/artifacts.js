@@ -3,7 +3,6 @@ import path from "node:path";
 import {
   exists,
   hashBuffer,
-  hashFile,
   normalizeTextLineEndings,
 } from "../fs-utils.js";
 import { PACKAGE_VERSION } from "../constants.js";
@@ -47,6 +46,11 @@ function operation(relative, content, existing) {
     contentEncoding: "base64",
     content: buffer.toString("base64"),
   };
+}
+
+function recordedHashAllowsManagedUpdate(record, currentHash, proposedHash) {
+  return Boolean(record?.hash)
+    && (record.hash === currentHash || currentHash === proposedHash);
 }
 
 function uniqueOperations(operations) {
@@ -201,7 +205,8 @@ export async function planUpgradeArtifacts(snapshot, options = {}) {
     const record = snapshot.managed.files?.[normalizedItem.path];
     const structured = snapshot.managed.settings?.[normalizedItem.path];
     const identityFile = [".agentic/config.json", ".agentic/profile.json"].includes(normalizedItem.path);
-    if (!identityFile && !structured && normalizedItem.currentHash && (!record?.hash || record.hash !== normalizedItem.currentHash)) {
+    if (!identityFile && !structured && normalizedItem.currentHash
+      && !recordedHashAllowsManagedUpdate(record, normalizedItem.currentHash, normalizedItem.proposedHash)) {
       operations.push({ ...normalizedItem, kind: "blocked-drift", content: undefined, contentEncoding: undefined });
     } else {
       operations.push(normalizedItem);
@@ -213,21 +218,23 @@ export async function planUpgradeArtifacts(snapshot, options = {}) {
     if (artifact.path.startsWith(".agentic/presets/local/")) continue;
     const existing = await current(snapshot.root, artifact.path);
     const ownership = snapshot.managed.files?.[artifact.path];
+    const planned = operation(artifact.path, artifact.content, existing);
     if (existing && !ownership) {
       operations.push({ kind: "blocked-drift", path: artifact.path, currentHash: hashBuffer(existing), proposedHash: hashBuffer(Buffer.from(artifact.content)) });
       continue;
     }
-    if (existing && ownership?.hash && await hashFile(path.join(snapshot.root, ...artifact.path.split("/"))) !== ownership.hash) {
+    if (existing && !recordedHashAllowsManagedUpdate(ownership, planned.currentHash, planned.proposedHash)) {
       operations.push({ kind: "blocked-drift", path: artifact.path, currentHash: hashBuffer(existing), proposedHash: hashBuffer(Buffer.from(artifact.content)) });
       continue;
     }
-    operations.push(operation(artifact.path, artifact.content, existing));
+    operations.push(planned);
   }
   for (const [relative, ownership] of Object.entries(snapshot.managed.files ?? {})) {
     if (preserveHostBundles && isHostBundlePath(relative)) continue;
     if (!relative.startsWith(".codex/agents/") && !relative.startsWith(".opencode/prompts/")) continue;
     const existing = await current(snapshot.root, relative);
-    if (existing && ownership.hash && hashBuffer(existing) !== ownership.hash) {
+    const desired = operations.find((item) => item.path === relative && item.kind !== "blocked-drift");
+    if (existing && !recordedHashAllowsManagedUpdate(ownership, hashBuffer(existing), desired?.proposedHash)) {
       operations.push({ kind: "blocked-drift", path: relative, currentHash: hashBuffer(existing), proposedHash: ownership.hash });
     }
   }
@@ -258,7 +265,11 @@ export async function planUpgradeArtifacts(snapshot, options = {}) {
       if (proposedBlock.state === "valid") managedBlockHashes.set(artifact.path, hashBuffer(Buffer.from(proposedBlock.body)));
     }
     if (existing && ownership?.mode !== "managed-section"
-      && (!ownership?.hash || ownership.hash !== hashBuffer(existing))) {
+      && !recordedHashAllowsManagedUpdate(
+        ownership,
+        hashBuffer(existing),
+        hashBuffer(normalizeTextLineEndings(Buffer.from(artifact.content))),
+      )) {
       operations.push({
         kind: "blocked-drift",
         path: artifact.path,

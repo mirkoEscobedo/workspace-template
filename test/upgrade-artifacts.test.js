@@ -8,12 +8,12 @@ import { hashBuffer, hashFile } from "../src/fs-utils.js";
 import { inspectManagedBlock } from "../src/managed-sections.js";
 import { applyWithVerifier, buildSupportedUpgradePlan } from "./upgrade-internal-harness.js";
 
-async function fixture() {
+async function fixture(options = {}) {
   const parent = await mkdtemp(path.join(os.tmpdir(), "workspace-template-upgrade-artifacts-"));
   const root = path.join(parent, "repo");
   await createProject({
     target: root, project: "javascript", style: "functional-core", tdd: "pragmatic",
-    packageManager: "npm", agents: ["codex", "opencode"], preset: "sol-codex",
+    packageManager: "npm", agents: ["codex", "opencode"], preset: options.preset ?? "sol-codex",
     install: false, git: false, bootstrap: false, force: false, dryRun: false, yes: true,
   });
   const packagePath = path.join(root, "package.json");
@@ -114,6 +114,30 @@ describe("upgrade artifact reconciliation", () => {
     const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
     assert.equal(plan.canApply, false);
     assert.match(plan.conflicts.join("\n"), /managed file drift/i);
+  });
+
+  it("heals a stale managed preset hash only when the current bytes already equal the proposal", async () => {
+    const root = await fixture({ preset: "sol-only" });
+    const relative = ".agentic/policies/model-routing.yaml";
+    const target = path.join(root, ...relative.split("/"));
+    const manifestPath = path.join(root, ".agentic", "managed-files.json");
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+    manifest.files[relative].hash = "0".repeat(64);
+    await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+
+    const converged = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+    assert.equal(converged.canApply, true, converged.conflicts.join("\n"));
+    await applyWithVerifier(converged, async () => ({ ok: true }));
+    const healed = JSON.parse(await readFile(manifestPath, "utf8"));
+    assert.equal(healed.files[relative].hash, await hashFile(target));
+
+    const driftedManifest = structuredClone(healed);
+    driftedManifest.files[relative].hash = "f".repeat(64);
+    await writeFile(manifestPath, `${JSON.stringify(driftedManifest, null, 2)}\n`);
+    await writeFile(target, `${await readFile(target, "utf8")}\n# local byte drift\n`);
+    const drifted = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+    assert.equal(drifted.canApply, false);
+    assert.match(drifted.conflicts.join("\n"), /model-routing\.yaml/);
   });
 
   it("blocks drifted managed role files and honors an explicit preset selection", async () => {

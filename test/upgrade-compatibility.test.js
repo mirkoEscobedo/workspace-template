@@ -105,23 +105,36 @@ describe("upgrade legacy compatibility", () => {
       }
       const productBefore = await readFile(path.join(root, "package.json"));
       const memoryBefore = await hashDirectory(path.join(root, "docs", "agent"));
-      const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+      const allowLegacyRisk = generation.lock === 1;
+      const plan = await buildSupportedUpgradePlan(root, {
+        allowNetwork: true,
+        allowRiskyToolChanges: allowLegacyRisk,
+      });
       assert.deepEqual(plan.metadata.sourceSchemas, {
         config: generation.config,
         profile: generation.profile,
         managedFiles: generation.managed,
         skillsLock: generation.lock,
       });
+      assert.equal(plan.approvals.riskySkillPermissions, allowLegacyRisk);
       assert.equal(plan.canApply, true, plan.conflicts.join("\n"));
       await applyWithVerifier(plan, async () => ({ ok: true }));
       assert.equal((await doctorProject(root)).ok, true);
       assert.deepEqual(await readFile(path.join(root, "package.json")), productBefore);
       assert.equal(await hashDirectory(path.join(root, "docs", "agent")), memoryBefore);
-      const second = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+      const second = await buildSupportedUpgradePlan(root, {
+        allowNetwork: true,
+        allowRiskyToolChanges: allowLegacyRisk,
+      });
+      assert.equal(second.approvals.riskySkillPermissions, allowLegacyRisk);
       assert.equal(
         second.metadata.upgrade.status,
         "current",
-        JSON.stringify({ generation, operations: second.operations.filter((item) => item.kind !== "noop").map((item) => [item.kind, item.path]) }),
+        JSON.stringify({
+          generation,
+          conflicts: second.conflicts,
+          operations: second.operations.filter((item) => item.kind !== "noop").map((item) => [item.kind, item.path]),
+        }),
       );
       assert.equal(second.metadata.upgrade.operationCount, 0);
     }

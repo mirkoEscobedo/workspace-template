@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, it } from "node:test";
@@ -10,12 +10,12 @@ import { inspectUpgradeWorkspace } from "../src/upgrade/inspect.js";
 import { planSkillUpgrade } from "../src/upgrade/skills.js";
 import { applyWithVerifier, buildSupportedUpgradePlan } from "./upgrade-internal-harness.js";
 
-async function fixture() {
+async function fixture(options = {}) {
   const parent = await mkdtemp(path.join(os.tmpdir(), "workspace-template-upgrade-skills-"));
   const root = path.join(parent, "repo");
   await createProject({
     target: root, project: "javascript", style: "functional-core", tdd: "pragmatic",
-    packageManager: "npm", agents: ["codex"], preset: "sol-codex",
+    packageManager: "npm", agents: options.agents ?? ["codex"], preset: "sol-codex",
     install: false, git: false, bootstrap: false, force: false, dryRun: false, yes: true,
   });
   const packagePath = path.join(root, "package.json");
@@ -23,6 +23,57 @@ async function fixture() {
   for (const section of ["dependencies", "devDependencies", "optionalDependencies", "peerDependencies"]) delete packageJson[section];
   await writeFile(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
   return root;
+}
+
+async function staleSkillHashes(root, name) {
+  const staleHash = "0".repeat(64);
+  const lockPath = path.join(root, ".agentic", "skills.lock.json");
+  const lock = JSON.parse(await readFile(lockPath, "utf8"));
+  lock.skills[name].baselineHash = staleHash;
+  lock.skills[name].installedHash = staleHash;
+  for (const hashes of Object.values(lock.skills[name].files)) {
+    hashes.baselineHash = staleHash;
+    hashes.installedHash = staleHash;
+  }
+  await writeFile(lockPath, `${JSON.stringify(lock, null, 2)}\n`);
+
+  for (const destination of [".agents/skills", ".opencode/skills"]) {
+    const markerPath = path.join(root, ...destination.split("/"), ".managed-by-workspace-template.json");
+    const marker = JSON.parse(await readFile(markerPath, "utf8"));
+    marker.skillHashes[name] = staleHash;
+    await writeFile(markerPath, `${JSON.stringify(marker, null, 2)}\n`);
+  }
+  const manifestPath = path.join(root, ".agentic", "managed-projections.json");
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  manifest.skillHashes[name] = staleHash;
+  await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+}
+
+async function staleSkillBaselineHashes(root, name) {
+  const staleHash = "0".repeat(64);
+  const lockPath = path.join(root, ".agentic", "skills.lock.json");
+  const lock = JSON.parse(await readFile(lockPath, "utf8"));
+  lock.skills[name].baselineHash = staleHash;
+  for (const hashes of Object.values(lock.skills[name].files)) hashes.baselineHash = staleHash;
+  await writeFile(lockPath, `${JSON.stringify(lock, null, 2)}\n`);
+}
+
+async function malformSkillBaselineHashes(root, name) {
+  const lockPath = path.join(root, ".agentic", "skills.lock.json");
+  const lock = JSON.parse(await readFile(lockPath, "utf8"));
+  delete lock.skills[name].baselineHash;
+  lock.skills[name].files["SKILL.md"].baselineHash = 42;
+  await writeFile(lockPath, `${JSON.stringify(lock, null, 2)}\n`);
+}
+
+async function modernizeProjectionMetadata(root) {
+  const lockPath = path.join(root, ".agentic", "skills.lock.json");
+  const lock = JSON.parse(await readFile(lockPath, "utf8"));
+  lock.source.version = "0.0.0-test";
+  await writeFile(lockPath, `${JSON.stringify(lock, null, 2)}\n`);
+  const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+  assert.equal(plan.canApply, true, plan.conflicts.join("\n"));
+  await applyWithVerifier(plan, async () => ({ ok: true }));
 }
 
 describe("upgrade skill reconciliation", () => {
@@ -83,6 +134,319 @@ describe("upgrade skill reconciliation", () => {
     assert.equal(plan.canApply, false);
     assert.match(plan.conflicts.join("\n"), /skill merge conflict/i);
     assert.equal(await readFile(canonical, "utf8"), before);
+  });
+
+  it("heals stale skill hashes when the entire canonical, baseline, and projection catalog converges", async () => {
+    const root = await fixture({ agents: ["codex", "opencode"] });
+    await modernizeProjectionMetadata(root);
+    await staleSkillHashes(root, "ticket-review");
+
+    const plan = await buildSupportedUpgradePlan(root, {
+      allowNetwork: true,
+      allowRiskyToolChanges: true,
+    });
+    assert.equal(plan.canApply, true, plan.conflicts.join("\n"));
+
+    const plannedJson = (relative) => JSON.parse(Buffer.from(
+      plan.operations.find((item) => item.path === relative).content,
+      "base64",
+    ).toString("utf8"));
+    const lock = plannedJson(".agentic/skills.lock.json");
+    const canonicalHash = await hashDirectory(path.join(root, ".agentic", "skills", "ticket-review"));
+    const baselineHash = await hashDirectory(path.join(root, ".agentic", "skill-baselines", "ticket-review"));
+    assert.equal(lock.skills["ticket-review"].installedHash, canonicalHash);
+    assert.equal(lock.skills["ticket-review"].baselineHash, baselineHash);
+    for (const destination of [".agents/skills", ".opencode/skills"]) {
+      const marker = plannedJson(`${destination}/.managed-by-workspace-template.json`);
+      assert.equal(marker.skillHashes["ticket-review"], canonicalHash);
+    }
+    const manifest = plannedJson(".agentic/managed-projections.json");
+    assert.equal(manifest.skillHashes["ticket-review"], canonicalHash);
+  });
+
+  it("heals stale converged non-risky skill hashes without risky-tool approval", async () => {
+    const root = await fixture({ agents: ["codex", "opencode"] });
+    await modernizeProjectionMetadata(root);
+    await staleSkillHashes(root, "verify");
+
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+    assert.equal(plan.canApply, true, plan.conflicts.join("\n"));
+    const lockOperation = plan.operations.find((item) => item.path === ".agentic/skills.lock.json");
+    const lock = JSON.parse(Buffer.from(lockOperation.content, "base64").toString("utf8"));
+    assert.equal(
+      lock.skills.verify.installedHash,
+      await hashDirectory(path.join(root, ".agentic", "skills", "verify")),
+    );
+  });
+
+  it("does not heal stale skill hashes when canonical bytes differ from the incoming catalog", async () => {
+    const root = await fixture({ agents: ["codex", "opencode"] });
+    await modernizeProjectionMetadata(root);
+    await staleSkillHashes(root, "ticket-review");
+    const canonical = path.join(root, ".agentic", "skills", "ticket-review", "SKILL.md");
+    await writeFile(canonical, `${await readFile(canonical, "utf8")}\n<!-- canonical drift -->\n`);
+
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+    assert.equal(plan.canApply, false);
+    assert.match(plan.conflicts.join("\n"), /projection drift.*ticket-review/i);
+  });
+
+  it("does not heal stale skill hashes when one managed projection differs", async () => {
+    const root = await fixture({ agents: ["codex", "opencode"] });
+    await modernizeProjectionMetadata(root);
+    await staleSkillHashes(root, "ticket-review");
+    const projected = path.join(root, ".agents", "skills", "ticket-review", "SKILL.md");
+    await writeFile(projected, `${await readFile(projected, "utf8")}\n<!-- one-target drift -->\n`);
+
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+    assert.equal(plan.canApply, false);
+    assert.match(plan.conflicts.join("\n"), /projection drift.*ticket-review/i);
+  });
+
+  it("does not heal stale skill hashes when a projection root has an extra file", async () => {
+    const root = await fixture({ agents: ["codex", "opencode"] });
+    await modernizeProjectionMetadata(root);
+    await staleSkillHashes(root, "ticket-review");
+    await writeFile(path.join(root, ".agents", "skills", "unmanaged.txt"), "unmanaged\n");
+
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+    assert.equal(plan.canApply, false);
+    assert.match(plan.conflicts.join("\n"), /projection drift/i);
+  });
+
+  it("does not heal stale skill hashes through a projection-tree symlink", async (context) => {
+    const root = await fixture({ agents: ["codex", "opencode"] });
+    await modernizeProjectionMetadata(root);
+    await staleSkillHashes(root, "ticket-review");
+    const projected = path.join(root, ".agents", "skills", "ticket-review");
+    try {
+      await symlink(
+        path.join(projected, "agents"),
+        path.join(projected, "linked-agents"),
+        process.platform === "win32" ? "junction" : "dir",
+      );
+    } catch (error) {
+      if (["EPERM", "EACCES", "ENOTSUP"].includes(error.code)) {
+        context.skip(`symlinks unavailable: ${error.code}`);
+        return;
+      }
+      throw error;
+    }
+
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+    assert.equal(plan.canApply, false);
+    assert.match(plan.conflicts.join("\n"), /projection drift/i);
+  });
+
+  it("requires risky-tool approval for every stale converged risky skill", async () => {
+    const root = await fixture({ agents: ["codex", "opencode"] });
+    await modernizeProjectionMetadata(root);
+    await staleSkillHashes(root, "process-lifecycle");
+
+    const blocked = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+    assert.equal(blocked.canApply, false);
+    assert.match(blocked.conflicts.join("\n"), /process-lifecycle.*risky.*allow-risky-tool-changes/i);
+
+    const reviewed = await buildSupportedUpgradePlan(root, {
+      allowNetwork: true,
+      allowRiskyToolChanges: true,
+    });
+    assert.equal(reviewed.canApply, true, reviewed.conflicts.join("\n"));
+  });
+
+  it("keeps stale risky lock healing gated when host projections are preserved", async () => {
+    const root = await fixture({ agents: ["codex", "opencode"] });
+    await modernizeProjectionMetadata(root);
+    await staleSkillHashes(root, "process-lifecycle");
+    const configPath = path.join(root, ".agentic", "config.json");
+    const config = JSON.parse(await readFile(configPath, "utf8"));
+    config.hostBundles = "preserve";
+    await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`);
+
+    const blocked = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+    assert.equal(blocked.canApply, false);
+    assert.match(blocked.conflicts.join("\n"), /process-lifecycle.*risky.*allow-risky-tool-changes/i);
+
+    const reviewed = await buildSupportedUpgradePlan(root, {
+      allowNetwork: true,
+      allowRiskyToolChanges: true,
+    });
+    assert.equal(reviewed.canApply, true, reviewed.conflicts.join("\n"));
+    assert.equal(
+      reviewed.operations.some((item) => (
+        item.path.startsWith(".agents/")
+        || item.path.startsWith(".codex/")
+        || item.path.startsWith(".opencode/")
+      )),
+      false,
+    );
+  });
+
+  it("gates each stale risky skill independently when another preserved skill has local edits", async () => {
+    const root = await fixture({ agents: ["codex", "opencode"] });
+    await modernizeProjectionMetadata(root);
+    const editedSkill = path.join(root, ".agentic", "skills", "verify", "SKILL.md");
+    await writeFile(editedSkill, `${await readFile(editedSkill, "utf8")}\n<!-- preserved local edit -->\n`);
+    await staleSkillHashes(root, "process-lifecycle");
+    const configPath = path.join(root, ".agentic", "config.json");
+    const config = JSON.parse(await readFile(configPath, "utf8"));
+    config.hostBundles = "preserve";
+    await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`);
+
+    const blocked = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+    assert.equal(blocked.canApply, false);
+    assert.match(blocked.conflicts.join("\n"), /process-lifecycle.*risky.*allow-risky-tool-changes/i);
+
+    const reviewed = await buildSupportedUpgradePlan(root, {
+      allowNetwork: true,
+      allowRiskyToolChanges: true,
+    });
+    assert.equal(reviewed.canApply, true, reviewed.conflicts.join("\n"));
+    const lockOperation = reviewed.operations.find((item) => item.path === ".agentic/skills.lock.json");
+    const lock = JSON.parse(Buffer.from(lockOperation.content, "base64").toString("utf8"));
+    assert.equal(lock.skills.verify.installedHash, await hashDirectory(path.dirname(editedSkill)));
+    assert.equal(
+      reviewed.operations.some((item) => (
+        item.path.startsWith(".agents/")
+        || item.path.startsWith(".codex/")
+        || item.path.startsWith(".opencode/")
+      )),
+      false,
+    );
+  });
+
+  it("gates stale risky baselines while preserving a local edit in that same skill", async () => {
+    const root = await fixture({ agents: ["codex", "opencode"] });
+    await modernizeProjectionMetadata(root);
+    const editedSkill = path.join(root, ".agentic", "skills", "process-lifecycle", "SKILL.md");
+    await writeFile(editedSkill, `${await readFile(editedSkill, "utf8")}\n<!-- approved local extension -->\n`);
+    await staleSkillBaselineHashes(root, "process-lifecycle");
+    const configPath = path.join(root, ".agentic", "config.json");
+    const config = JSON.parse(await readFile(configPath, "utf8"));
+    config.hostBundles = "preserve";
+    await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`);
+
+    const blocked = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+    assert.equal(blocked.canApply, false);
+    assert.match(blocked.conflicts.join("\n"), /process-lifecycle.*risky.*allow-risky-tool-changes/i);
+
+    const reviewed = await buildSupportedUpgradePlan(root, {
+      allowNetwork: true,
+      allowRiskyToolChanges: true,
+    });
+    assert.equal(reviewed.canApply, true, reviewed.conflicts.join("\n"));
+    const lockOperation = reviewed.operations.find((item) => item.path === ".agentic/skills.lock.json");
+    const lock = JSON.parse(Buffer.from(lockOperation.content, "base64").toString("utf8"));
+    assert.equal(
+      lock.skills["process-lifecycle"].installedHash,
+      await hashDirectory(path.dirname(editedSkill)),
+    );
+    assert.equal(
+      reviewed.operations.some((item) => (
+        item.path.startsWith(".agents/")
+        || item.path.startsWith(".codex/")
+        || item.path.startsWith(".opencode/")
+      )),
+      false,
+    );
+  });
+
+  it("gates stale risky baselines independently from managed projection convergence", async () => {
+    const root = await fixture({ agents: ["codex", "opencode"] });
+    await modernizeProjectionMetadata(root);
+    const editedSkill = path.join(root, ".agentic", "skills", "process-lifecycle", "SKILL.md");
+    const extension = "<!-- managed projection local extension -->";
+    await writeFile(editedSkill, `${await readFile(editedSkill, "utf8")}\n${extension}\n`);
+    await staleSkillBaselineHashes(root, "process-lifecycle");
+
+    const blocked = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+    assert.equal(blocked.canApply, false);
+    assert.match(blocked.conflicts.join("\n"), /process-lifecycle.*risky.*allow-risky-tool-changes/i);
+
+    const reviewed = await buildSupportedUpgradePlan(root, {
+      allowNetwork: true,
+      allowRiskyToolChanges: true,
+    });
+    assert.equal(reviewed.canApply, true, reviewed.conflicts.join("\n"));
+    for (const destination of [".agents/skills", ".opencode/skills"]) {
+      const projected = reviewed.operations.find(
+        (item) => item.path === `${destination}/process-lifecycle/SKILL.md`,
+      );
+      assert.match(Buffer.from(projected.content, "base64").toString("utf8"), /managed projection local extension/);
+    }
+    const lockOperation = reviewed.operations.find((item) => item.path === ".agentic/skills.lock.json");
+    const lock = JSON.parse(Buffer.from(lockOperation.content, "base64").toString("utf8"));
+    assert.equal(
+      lock.skills["process-lifecycle"].installedHash,
+      await hashDirectory(path.dirname(editedSkill)),
+    );
+  });
+
+  it("treats missing and malformed risky baseline hashes as requiring authority", async () => {
+    const root = await fixture({ agents: ["codex", "opencode"] });
+    await modernizeProjectionMetadata(root);
+    await malformSkillBaselineHashes(root, "process-lifecycle");
+    const configPath = path.join(root, ".agentic", "config.json");
+    const config = JSON.parse(await readFile(configPath, "utf8"));
+    config.hostBundles = "preserve";
+    await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`);
+
+    const blocked = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+    assert.equal(blocked.canApply, false);
+    assert.match(blocked.conflicts.join("\n"), /process-lifecycle.*risky.*allow-risky-tool-changes/i);
+
+    const reviewed = await buildSupportedUpgradePlan(root, {
+      allowNetwork: true,
+      allowRiskyToolChanges: true,
+    });
+    assert.equal(reviewed.canApply, true, reviewed.conflicts.join("\n"));
+  });
+
+  it("requires risky-tool authority when baseline text no longer matches its recorded hashes", async () => {
+    const root = await fixture({ agents: ["codex", "opencode"] });
+    await modernizeProjectionMetadata(root);
+    const baseline = path.join(root, ".agentic", "skill-baselines", "process-lifecycle", "SKILL.md");
+    await writeFile(baseline, `${await readFile(baseline, "utf8")}\n<!-- altered baseline -->\n`);
+
+    const blocked = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+    assert.equal(blocked.canApply, false);
+    assert.match(blocked.conflicts.join("\n"), /process-lifecycle.*risky.*allow-risky-tool-changes/i);
+  });
+
+  it("requires risky-tool authority when the baseline contains an unrecorded file", async () => {
+    const root = await fixture({ agents: ["codex", "opencode"] });
+    await modernizeProjectionMetadata(root);
+    await writeFile(
+      path.join(root, ".agentic", "skill-baselines", "process-lifecycle", "unrecorded.md"),
+      "# Unrecorded baseline file\n",
+    );
+
+    const blocked = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+    assert.equal(blocked.canApply, false);
+    assert.match(blocked.conflicts.join("\n"), /process-lifecycle.*risky.*allow-risky-tool-changes/i);
+  });
+
+  it("requires risky-tool authority when the baseline tree contains a symlink", async (context) => {
+    const root = await fixture({ agents: ["codex", "opencode"] });
+    await modernizeProjectionMetadata(root);
+    const baseline = path.join(root, ".agentic", "skill-baselines", "process-lifecycle");
+    try {
+      await symlink(
+        path.join(baseline, "scripts"),
+        path.join(baseline, "linked-scripts"),
+        process.platform === "win32" ? "junction" : "dir",
+      );
+    } catch (error) {
+      if (["EPERM", "EACCES", "ENOTSUP"].includes(error.code)) {
+        context.skip(`symlinks unavailable: ${error.code}`);
+        return;
+      }
+      throw error;
+    }
+
+    const blocked = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+    assert.equal(blocked.canApply, false);
+    assert.match(blocked.conflicts.join("\n"), /process-lifecycle.*risky.*allow-risky-tool-changes/i);
   });
 
   it("removes an upstream-deleted skill file from canonical, baseline, and projections", async () => {
