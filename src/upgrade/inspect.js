@@ -54,7 +54,10 @@ export async function assertUpgradeQuiescent(root, excludePlanId) {
     if (!terminal) throw new Error(`Active transaction blocks upgrade: ${path.basename(directory)}`);
   }
   const leases = (await listFiles(path.join(root, ".agent", "leases")))
-    .filter((file) => path.basename(file) !== ".gitkeep");
+    .filter((file) => {
+      const name = path.basename(file);
+      return name !== ".gitkeep" && !name.endsWith(".final.json");
+    });
   if (leases.length > 0) throw new Error(`Open process lease blocks upgrade: ${path.relative(root, leases[0])}`);
 }
 

@@ -195,6 +195,20 @@ describe("upgrade apply transaction", () => {
     assert.equal(preview.canApply, false);
   });
 
+  it("allows finalized lease receipts while live leases still block apply", async () => {
+    const root = await fixture();
+    const leaseDirectory = path.join(root, ".agent", "leases");
+    await mkdir(leaseDirectory, { recursive: true });
+    await writeFile(path.join(leaseDirectory, "completed.final.json"), "{}\n");
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+
+    await writeFile(path.join(leaseDirectory, "live.json"), "{}\n");
+    await assert.rejects(
+      () => applyWithVerifier(plan, async () => ({ ok: true })),
+      /lease blocks upgrade/i,
+    );
+  });
+
   it("runs full verification only in disposable copies isolated from repository-local state", async () => {
     const root = await fixture();
     const sourceSentinels = [
