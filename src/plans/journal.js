@@ -1,6 +1,5 @@
-import { appendFile } from "node:fs/promises";
 import path from "node:path";
-import { ensureDirectory, readTextIfExists, writeJson } from "../fs-utils.js";
+import { ensureDirectory, readTextIfExists, writeBytesAtomic, writeJson } from "../fs-utils.js";
 
 export function journalPath(root, planId) {
   return path.join(root, ".agentic", "transactions", planId, "journal.jsonl");
@@ -19,23 +18,42 @@ export async function appendJournal(root, planId, event) {
     at: new Date().toISOString(),
     ...event,
   };
-  await appendFile(file, `${JSON.stringify(record)}\n`, "utf8");
+  const records = [...previous, record].map((item) => JSON.stringify(item)).join("\n");
+  await writeBytesAtomic(file, Buffer.from(`${records}\n`, "utf8"));
   return record;
+}
+
+function isTornFinalFragment(fragment, error) {
+  const trimmed = fragment.trim();
+  if (!trimmed.startsWith("{")) return false;
+  if (/unterminated|unexpected end/i.test(error.message)) return true;
+  if (/[}\]]$/u.test(trimmed)) return false;
+  const position = /position (\d+)/i.exec(error.message)?.[1];
+  return position !== undefined && Number(position) >= fragment.length - 1;
 }
 
 export async function readJournal(root, planId) {
   const raw = await readTextIfExists(journalPath(root, planId));
   if (!raw) return [];
-  return raw
-    .split(/\r?\n/)
-    .filter(Boolean)
-    .map((line, index) => {
-      try {
-        return JSON.parse(line);
-      } catch (error) {
-        throw new Error(`Invalid transaction journal ${planId} at line ${index + 1}: ${error.message}`);
-      }
-    });
+  const lines = raw.split(/\r?\n/);
+  if (lines.at(-1) === "") lines.pop();
+  const records = [];
+  for (const [index, line] of lines.entries()) {
+    if (!line) throw new Error(`Invalid transaction journal ${planId} at line ${index + 1}: empty record`);
+    try {
+      records.push(JSON.parse(line));
+    } catch (error) {
+      const finalUnterminated = index === lines.length - 1 && !raw.endsWith("\n");
+      if (finalUnterminated && isTornFinalFragment(line, error)) break;
+      throw new Error(`Invalid transaction journal ${planId} at line ${index + 1}: ${error.message}`);
+    }
+  }
+  for (const [index, record] of records.entries()) {
+    if (record.sequence !== index + 1) {
+      throw new Error(`Invalid transaction journal ${planId} sequence at line ${index + 1}`);
+    }
+  }
+  return records;
 }
 
 function completed(event) {

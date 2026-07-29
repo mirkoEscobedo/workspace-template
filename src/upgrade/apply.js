@@ -1,20 +1,16 @@
 import { randomUUID } from "node:crypto";
 import { lstat, readFile, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { createCheckpoint, createFileBackup, restoreFileBackup } from "../checkpoints/index.js";
+import { createCheckpoint, createFileBackup } from "../checkpoints/index.js";
 import { doctorProject } from "../doctor.js";
 import {
   ensureDirectory,
   isPathInside,
   hashDirectory,
-  readJson,
-  writeBytesAtomic,
   writeJson,
-  removePath,
 } from "../fs-utils.js";
 import { assertPlanApplicable, assertValidPlan } from "../plans/index.js";
 import {
-  appendJournal,
   assertNotApplied,
   readJournal,
   writeReport,
@@ -26,13 +22,22 @@ import { discoverWorkspace } from "../workspace/discover.js";
 import { assetsRoot } from "../workspace-artifacts.js";
 import { resolveProcessIdentity } from "../process-utils.js";
 import { loadEffectiveUpgradeWorkspace } from "./workspace.js";
-
-async function interruptedBackup(events) {
-  const event = [...events].reverse().find((item) => item.event === "backup" && item.directory);
-  if (!event) return undefined;
-  return { directory: event.directory, digest: event.digest, manifest: await readJson(path.join(event.directory, "manifest.json")) };
-}
-
+import {
+  appendUpgradeJournal,
+  assertAutomaticRecoveryAllowed,
+  commitStagedOperation,
+  ensureSafeTransactionDirectory,
+  operationJournalRecord,
+  stageUpgradeOperation,
+  validatePlannedState,
+  validateRecoveryBackup,
+  validateStagedState,
+} from "./transaction-safety.js";
+import {
+  assertDurableManualRecoveryAllowed,
+  recoverAppliedTransaction,
+  recoverInterruptedTransaction,
+} from "./transaction-recovery.js";
 function orderedOperations(operations) {
   const priority = (item) => item.path === ".agentic/managed-files.json" ? 40
     : [".agentic/config.json", ".agentic/profile.json"].includes(item.path) ? 30
@@ -40,41 +45,6 @@ function orderedOperations(operations) {
         : 10;
   return [...operations].sort((left, right) => priority(left) - priority(right) || left.path.localeCompare(right.path));
 }
-
-async function validateRecoveryBackup(plan, transaction, backup, reviewedPaths) {
-  if (!isPathInside(transaction, backup.directory) || path.resolve(backup.manifest.root) !== path.resolve(plan.root)) {
-    throw new Error("Interrupted upgrade backup is not bound to the sealed transaction");
-  }
-  if (!backup.digest || await hashDirectory(backup.directory) !== backup.digest) {
-    throw new Error("Interrupted upgrade backup integrity check failed");
-  }
-  for (const record of Object.values(backup.manifest.files ?? {})) {
-    if (!["absent", "directory", "symlink", "file"].includes(record.state)) throw new Error("Interrupted upgrade backup contains an invalid state");
-  }
-  const actual = Object.keys(backup.manifest.files ?? {}).sort();
-  const expected = [...reviewedPaths].sort();
-  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
-    throw new Error("Interrupted upgrade backup write set does not match the sealed plan");
-  }
-  for (const ancestor of backup.manifest.absentAncestors ?? []) {
-    if (!ancestor || ancestor === "." || !actual.some((relative) => relative.startsWith(`${ancestor}/`) && backup.manifest.files[relative]?.state === "absent")) {
-      throw new Error("Interrupted upgrade backup contains an invalid absent ancestor");
-    }
-  }
-  for (const relative of actual) await assertSafeUpgradePath(plan.root, relative);
-}
-
-function validatePlannedState(operations) {
-  for (const item of operations) {
-    if (!item.content || !item.path.endsWith(".json")) continue;
-    try {
-      JSON.parse(Buffer.from(item.content, item.contentEncoding ?? "base64").toString("utf8"));
-    } catch (error) {
-      throw new Error(`Planned JSON is invalid for ${item.path}: ${error.message}`);
-    }
-  }
-}
-
 async function workspaceWithSealedVerificationAuthority(root, sealedAuthority) {
   const discoveredWorkspace = await discoverWorkspace(root, { workspace: "all", includeRootModule: true, includeOpaque: true });
   const workspace = await loadEffectiveUpgradeWorkspace(root, discoveredWorkspace, { mergeDiscovered: true });
@@ -86,7 +56,6 @@ async function workspaceWithSealedVerificationAuthority(root, sealedAuthority) {
   }
   return workspace;
 }
-
 function assertPlannedVerificationInputsUntouched(plan) {
   const protectedPaths = plan.metadata?.verificationInputPaths ?? [];
   for (const operation of plan.operations) {
@@ -96,7 +65,6 @@ function assertPlannedVerificationInputsUntouched(plan) {
     }
   }
 }
-
 async function assertVerificationInputsUnchanged(root, plan) {
   const sealed = plan.metadata?.verificationInputs;
   if (!sealed?.hash || !Array.isArray(sealed.excludedPaths)) {
@@ -107,7 +75,6 @@ async function assertVerificationInputsUnchanged(root, plan) {
     throw new Error("Repository-local verification inputs changed after the upgrade plan was sealed");
   }
 }
-
 function sealedDependencyInstalls(authority) {
   const seen = new Set();
   return [...authority.modules, authority.root]
@@ -121,7 +88,6 @@ function sealedDependencyInstalls(authority) {
       return true;
     });
 }
-
 async function installVerificationDependencies(root, authority, runner, options, context) {
   const results = [];
   for (const [index, install] of sealedDependencyInstalls(authority).entries()) {
@@ -145,7 +111,6 @@ async function installVerificationDependencies(root, authority, runner, options,
   }
   return results;
 }
-
 async function initializeVerificationGit(root, runner, options, context) {
   const results = [];
   const run = async (args, stepId) => {
@@ -430,25 +395,10 @@ export async function acquireUpgradeMutex(lockPath, options) {
   throw new Error("Could not acquire the workspace upgrade lock");
 }
 
-async function validateStagedState(root, operations) {
-  if (operations.length === 0) return;
-  const checkpoint = await createCheckpoint(root, "copy");
-  try {
-    for (const item of operations) {
-      const target = path.join(checkpoint.root, ...item.path.split("/"));
-      if (item.kind === "delete-upgrade-managed") await removePath(target);
-      else await writeBytesAtomic(target, Buffer.from(item.content, item.contentEncoding ?? "base64"));
-    }
-    const report = await doctorProject(checkpoint.root);
-    if (!report.ok) throw new Error(`Staged upgrade doctor failed:\n- ${report.errors.join("\n- ")}`);
-  } finally {
-    await checkpoint.cleanup();
-  }
-}
-
 async function applyUpgradePlanInternal(plan, options = {}, runtime = {}) {
   assertValidPlan(plan, { command: "upgrade" });
   const root = path.resolve(plan.root);
+  await assertDurableManualRecoveryAllowed(root, plan.planId);
   assertPlannedVerificationInputsUntouched(plan);
   if (!runtime.verifier && !plan.approvals?.network) {
     throw new Error("Full verification requires the sealed --allow-network approval");
@@ -456,12 +406,17 @@ async function applyUpgradePlanInternal(plan, options = {}, runtime = {}) {
   await assertVerificationInputsUnchanged(root, plan);
   const writeOperations = orderedOperations(plan.operations.filter((item) => item.kind !== "noop" && (item.content || item.kind === "delete-upgrade-managed")));
   const paths = [...new Set(writeOperations.map((item) => item.path))];
+  const transaction = path.join(root, ".agentic", "transactions", plan.planId);
+  const lockPath = path.join(root, ".agentic", "transactions", "upgrade.lock");
+  await ensureSafeTransactionDirectory(root, transaction);
   await assertUpgradeQuiescent(root, plan.planId);
+  await ensureSafeTransactionDirectory(root, transaction);
   const existingEvents = await readJournal(root, plan.planId);
   const alreadyCompleted = existingEvents.some((event) => event.event === "finish" && event.status === "completed");
   const existingPrior = alreadyCompleted && writeOperations.length === 0 && options.allowCurrentReplay
     ? []
-    : await assertNotApplied(root, plan.planId);
+    : (await ensureSafeTransactionDirectory(root, transaction), await assertNotApplied(root, plan.planId));
+  assertAutomaticRecoveryAllowed(existingPrior, plan.planId);
   if (plan.metadata?.incomingCatalogHash !== await hashDirectory(assetsRoot)) {
     throw new Error("Incoming package catalog changed after the upgrade plan was sealed");
   }
@@ -474,38 +429,51 @@ async function applyUpgradePlanInternal(plan, options = {}, runtime = {}) {
   const gitHead = plan.preconditions.find((item) => item.kind === "git-head")?.value;
   const gitRepository = gitRoot && gitHead ? { root: gitRoot, head: gitHead } : undefined;
 
-  const transaction = path.join(root, ".agentic", "transactions", plan.planId);
-  const lockPath = path.join(root, ".agentic", "transactions", "upgrade.lock");
   await ensureDirectory(path.dirname(lockPath));
+  await ensureSafeTransactionDirectory(root, transaction);
   const transactionLock = await acquireUpgradeMutex(lockPath, { planId: plan.planId });
   const lockedDirtyPaths = [
     ...(options.allowedDirtyPaths ?? []),
     ".agentic/transactions/upgrade.lock/owner/owner.json",
   ];
   try {
+    await ensureSafeTransactionDirectory(root, transaction);
     await assertUpgradeQuiescent(root, plan.planId);
+    await ensureSafeTransactionDirectory(root, transaction);
     const lockedEvents = await readJournal(root, plan.planId);
     const lockedCompleted = lockedEvents.some((event) => event.event === "finish" && event.status === "completed");
     const prior = lockedCompleted && writeOperations.length === 0 && options.allowCurrentReplay
       ? []
-      : await assertNotApplied(root, plan.planId);
+      : (await ensureSafeTransactionDirectory(root, transaction), await assertNotApplied(root, plan.planId));
+    assertAutomaticRecoveryAllowed(prior, plan.planId);
     if (prior.length > 0) {
-      const backup = await interruptedBackup(prior);
-      if (!backup) throw new Error(`Interrupted upgrade ${plan.planId} has no recoverable backup`);
-      await validateRecoveryBackup(plan, transaction, backup, paths);
-      await restoreFileBackup(backup);
-      await appendJournal(root, plan.planId, { event: "recovered", status: "restored" });
+      const recovery = await recoverInterruptedTransaction({
+        root, plan, transaction, operations: writeOperations, events: prior, hooks: runtime.hooks,
+      });
+      await appendUpgradeJournal(root, plan.planId, {
+        event: "recovered",
+        status: "restored",
+        paths: recovery.restoredPaths,
+      });
     }
     if (plan.metadata?.incomingCatalogHash !== await hashDirectory(assetsRoot)) {
       throw new Error("Incoming package catalog changed after the upgrade plan was sealed");
     }
     await assertPlanApplicable(plan, { expected: { command: "upgrade" }, allowedDirtyPaths: lockedDirtyPaths });
     await assertVerificationInputsUnchanged(root, plan);
+    await ensureSafeTransactionDirectory(root, transaction);
     await ensureDirectory(transaction);
+    await ensureSafeTransactionDirectory(root, transaction);
     const preDoctor = await doctorProject(root);
     const repairable = new Set(writeOperations.filter((item) => item.kind === "create-upgrade-managed").map((item) => item.path));
     const blockingDoctorErrors = preDoctor.errors.filter((error) => ![...repairable].some((relative) => error.includes(relative)));
-    if (blockingDoctorErrors.length > 0) throw new Error(`Pre-upgrade doctor failed:\n- ${blockingDoctorErrors.join("\n- ")}`);
+    if (blockingDoctorErrors.length > 0 && writeOperations.length === 0) {
+      throw new Error(`Pre-upgrade doctor failed:\n- ${blockingDoctorErrors.join("\n- ")}`);
+    }
+    if (writeOperations.length > 0) {
+      validatePlannedState(writeOperations);
+      await validateStagedState(root, writeOperations);
+    }
     const preVerification = await runAtomicVerification(
       root,
       options,
@@ -523,19 +491,33 @@ async function applyUpgradePlanInternal(plan, options = {}, runtime = {}) {
     await assertPlanApplicable(plan, { expected: { command: "upgrade" }, allowedDirtyPaths: lockedDirtyPaths });
     validatePlannedState(writeOperations);
     await validateStagedState(root, writeOperations);
+    await runtime.hooks?.afterFinalStagedValidation?.({ root, plan, operations: writeOperations });
+    await assertVerificationInputsUnchanged(root, plan);
+    await assertUpgradeQuiescent(root, plan.planId);
+    await assertPlanApplicable(plan, { expected: { command: "upgrade" }, allowedDirtyPaths: lockedDirtyPaths });
+    await ensureSafeTransactionDirectory(root, transaction);
     await writeJson(path.join(transaction, "plan.json"), plan);
     for (const relative of paths) await assertSafeUpgradePath(root, relative);
+    await ensureSafeTransactionDirectory(root, transaction);
     const backup = await createFileBackup(root, paths, { baseDirectory: transaction });
+    await ensureSafeTransactionDirectory(root, transaction);
     backup.digest = await hashDirectory(backup.directory);
-    await appendJournal(root, plan.planId, { event: "backup", status: "ready", directory: backup.directory, digest: backup.digest });
-    await appendJournal(root, plan.planId, { event: "start", status: "running", operationCount: writeOperations.length });
+    await runtime.hooks?.afterBackupDigest?.({ root, plan, operations: writeOperations, backup });
+    await validateRecoveryBackup(plan, transaction, backup, writeOperations);
+    await appendUpgradeJournal(root, plan.planId, { event: "backup", status: "ready", directory: backup.directory, digest: backup.digest });
+    await appendUpgradeJournal(root, plan.planId, { event: "start", status: "running", operationCount: writeOperations.length });
+    const appliedOperations = [];
     try {
+      await runtime.hooks?.afterBackupReady?.({ root, plan, operations: writeOperations });
       for (const item of writeOperations) {
         await assertSafeUpgradePath(root, item.path);
-        const target = path.join(root, ...item.path.split("/"));
-        if (item.kind === "delete-upgrade-managed") await removePath(target);
-        else await writeBytesAtomic(target, Buffer.from(item.content, item.contentEncoding ?? "base64"));
-        await appendJournal(root, plan.planId, { event: "operation", status: "applied", kind: item.kind, path: item.path });
+        const stagingPath = await stageUpgradeOperation(root, transaction, item);
+        await runtime.hooks?.afterOperationStaged?.({ root, plan, operation: item, stagingPath });
+        await appendUpgradeJournal(root, plan.planId, operationJournalRecord(item, "operation-intent", "pending"));
+        await commitStagedOperation(root, transaction, item, stagingPath);
+        appliedOperations.push(item);
+        await appendUpgradeJournal(root, plan.planId, operationJournalRecord(item, "operation", "applied"));
+        await runtime.hooks?.afterOperationApplied?.({ root, plan, operation: item, backup });
       }
       const doctor = await doctorProject(root);
       if (!doctor.ok) throw new Error(`Post-upgrade doctor failed:\n- ${doctor.errors.join("\n- ")}`);
@@ -561,13 +543,19 @@ async function applyUpgradePlanInternal(plan, options = {}, runtime = {}) {
       };
       await writeReport(root, plan.planId, report, "upgrade");
       await assertUpgradeQuiescent(root, plan.planId);
-      await appendJournal(root, plan.planId, { event: "finish", status: "completed" });
+      await appendUpgradeJournal(root, plan.planId, { event: "finish", status: "completed" });
       return report;
     } catch (error) {
-      await validateRecoveryBackup(plan, transaction, backup, paths);
-      await restoreFileBackup(backup);
-      await appendJournal(root, plan.planId, { event: "rollback", status: "restored" });
-      await appendJournal(root, plan.planId, { event: "finish", status: "failed", message: error.message });
+      const recovery = await recoverAppliedTransaction({
+        root, plan, transaction, backup, operations: writeOperations,
+        appliedOperations, hooks: runtime.hooks, cause: error,
+      });
+      await appendUpgradeJournal(root, plan.planId, {
+        event: "rollback",
+        status: "restored",
+        paths: recovery.restoredPaths,
+      });
+      await appendUpgradeJournal(root, plan.planId, { event: "finish", status: "failed", message: error.message });
       throw error;
     }
   } finally {
@@ -586,6 +574,7 @@ export function createUpgradeApplyTestHarness(dependencies = {}) {
       return applyUpgradePlanInternal(plan, options, {
         verifier: dependencies.verifier,
         runner: dependencies.runner,
+        hooks: dependencies.hooks,
       });
     },
   };
