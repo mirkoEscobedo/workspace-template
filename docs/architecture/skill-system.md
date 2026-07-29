@@ -42,13 +42,13 @@ Configured copies are generated under paths such as:
 
 Codex additionally receives `.codex/config.toml`, `.codex/agents/*.toml`, and hooks. OpenCode receives `opencode.json` and `.opencode/prompts/frontier-loop/`. Cursor uses a managed rule because its native format differs.
 
-A projection is writable only when absent, hash-identical and explicitly adopted, or proven generator-owned. Custom same-name content blocks synchronization before writes.
+A projection is writable only when absent, hash-identical and explicitly adopted, or proven generator-owned. Custom same-name content blocks synchronization before writes. When projections are disabled or host bundles are preserved, implicit synchronization reports `no-projection` and performs no projection writes; an explicit protected target fails closed. Managed projection mode retains its existing reconciliation behavior.
 
 ### Project-owned baselines
 
 `.agentic/skill-baselines/<skill>/` stores the exact upstream input from the last successful installation/update. The skill lock records provenance, baseline/installed hashes, per-file state, and risk metadata. This supports offline three-way updates while preserving local edits.
 
-## Skill catalog in 0.6.0
+## Skill catalog in 0.6.1
 
 ### Router and planning
 
@@ -148,6 +148,11 @@ Compiled tickets are short-lived execution packets rather than long-lived guesse
 
 The local frontier consists only of tickets whose dependencies pass, whose conflicts are not active, and whose human/authority gates permit work.
 
+Executable contracts additionally require at least one nonblank exact command
+under `verification.commands`. Missing verification, missing/empty commands,
+and blank-only commands are specification errors. Aggregate-only and historical
+records remain explicit non-executable exceptions.
+
 ## TDD and test topology
 
 The inner loop remains vertical:
@@ -182,7 +187,7 @@ Updates use baseline/local/incoming comparison. Clean non-overlapping text edits
 
 ## Process ownership
 
-Agent completion is not accepted solely because a model says it finished. Generated Stop/SubagentStop guards check open process leases. The managed command wrapper records run/ticket/agent identity, process identity, deadline, command digest, output, and termination result; it owns process groups or a Windows Job Object where available and checks that no owned descendants survive.
+Agent completion is not accepted solely because a model says it finished. Generated Stop/SubagentStop guards check open process leases. The managed command wrapper records run/ticket/agent identity, process identity, deadline, command digest, output, and termination result; it owns process groups or a Windows Job Object where available and checks that no owned descendants survive. A finalized receipt remains durable evidence but is ignored by upgrade dirty-state inspection; an open lease remains a blocker.
 
 ## Information-placement rule
 

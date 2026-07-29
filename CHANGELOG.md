@@ -2,6 +2,28 @@
 
 All notable changes to this package are documented here.
 
+## 0.6.1 — 2026-07-29
+
+### Upgrade portability and preservation
+
+- Preserved workspace-module commands during Windows upgrades and made generated
+  workspace hashes insensitive to CRLF/LF materialization.
+- Kept Git evidence available in disposable verification copies while excluding
+  only planned or finalized operational artifacts from upgrade fingerprints.
+- Preserved existing Codex and OpenCode host bundles through adoption and
+  upgrades without weakening the default managed-projection behavior.
+
+### Projection and contract safety
+
+- Made disabled projection mode a successful zero-write operation for direct
+  `sync` and skill updates; explicit requests for protected projection targets
+  now fail before any write.
+- Required every executable ticket contract to provide at least one nonblank
+  exact verification command. Aggregate-only and historical records remain
+  explicitly non-executable.
+- Kept finalized process receipts as evidence while preventing them from making
+  a clean workspace appear dirty; open leases remain completion blockers.
+
 ## 0.6.0 — 2026-07-24
 
 ### Frontier Loop workflow

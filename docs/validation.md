@@ -1,123 +1,86 @@
-# Validation record — 0.6.0
+# Validation record — 0.6.1 candidate
 
-**Validation date:** 2026-07-24  
-**Package:** `workspace-template@0.6.0`  
-**Runtime:** Node.js 22.16.0, npm 10.9.2, Git 2.47.3, Python 3.13.5
+**Candidate date:** 2026-07-29
 
-## Release result
+**Package:** `workspace-template@0.6.1`
 
-The 0.6.0 source tree and actual npm tarball passed the release gates described below. The validation deliberately separates deterministic structural/JavaScript evidence from unavailable external toolchains and from any live paid model.
+**Status:** local candidate; release-final evidence pending
 
-## Source checks
+## Candidate scope
 
-```bash
-npm run check
-```
+The `0.6.1` candidate reconciles the Windows/LF upgrade-preservation chain with
+the host-bundle boundary and adds two fail-closed safety repairs:
 
-Result:
+- disabled or preserved projections are an implicit zero-write
+  `no-projection` operation, while explicitly targeting a protected projection
+  is an error;
+- executable ticket contracts require at least one nonblank exact verification
+  command.
 
-```text
-self-check: pass
-Node tests: 89 passed, 0 failed
-Suites: 19
-```
+Finalized process receipts remain durable evidence but are excluded from
+upgrade dirty-state inspection. Active leases and surviving owned descendants
+remain blockers.
 
-The self-check validates:
+## Required release gates
 
-- package/internal version consistency;
-- published package file declarations;
-- 17 repository skills;
-- skill frontmatter, names, local links/resources, and eval JSON where present;
-- JavaScript syntax across source, binary, scripts, and tests;
-- non-scaffold internal JavaScript imports;
-- no runtime PyYAML import in standalone Python tooling;
-- Python syntax when Python is present;
-- Sol-high/Codex-high Codex and OpenCode routing;
-- required release docs/scripts;
-- absence of superseded draft modules.
+The release coordinator must bind results to the exact candidate commit. Until
+that binding is recorded, the following are requirements rather than completed
+release claims:
 
-The Node suite covers:
+| Gate | Command or proof | Candidate status |
+|---|---|---|
+| source/static/full Node checks | `npm run check` | pending exact-commit binding |
+| publishable payload | `npm run pack:check` | pending exact-commit binding |
+| installed tarball behavior | `npm run test:packed` | pending exact-commit binding |
+| package/internal/CLI version agreement | package JSON, `PACKAGE_VERSION`, installed `--version` | pending exact-commit binding |
+| disabled projection boundary | focused direct-sync and skills-update tests | pending exact-commit binding |
+| managed projection compatibility | focused projection regression tests | pending exact-commit binding |
+| executable ticket non-vacuity | Python validator/schema contract tests | pending exact-commit binding |
+| process postcondition | zero open leases and zero owned descendants | pending exact-commit binding |
+| source review | exact final diff review | pending |
+| workspace-template dogfood | sync/doctor on the integrated checkout | pending |
+| Ultima downstream | disabled projections, preserved product host bundles, Node/Python checks | pending |
+| agent-cad downstream | enabled Codex/OpenCode projections and repaired Ticket 002 acceptance | pending |
 
-- every supported new-project stack and all style combinations;
-- conflict-safe projection and drift repair;
-- safe adoption planning/apply, custom instruction preservation, managed blocks, dirty-tree and unmanaged-skill gates;
-- persisted-plan round trips, integrity and stale-state rejection;
-- monorepo adoption and nested instruction scope;
-- npm-family/Cargo/Flutter-Dart workspace discovery, internal dependency edges, affected selection, dependency-aware verification, lock ownership, opaque modules, polyglot roots, and conflict cases;
-- package-manager adapter command planning, network/runtime/lifecycle authority, structured JSON/YAML/TOML integration, unplanned mutation rejection, and rollback;
-- project-owned skill baselines, three-way merges, conflict/risk/removal gates, partial/atomic behavior, and incoming-catalog invalidation;
-- worktree/copy checkpoints and file restoration;
-- conservative JavaScript/TypeScript, Rust, and Dart reference rewrite planning plus target restoration;
-- architecture assessment, bounded slice planning, manual/command executor behavior, actual-diff guards, task-by-task resume, final verification, and restoration;
-- dependency-free Python docs/ticket/budget scripts under `python -S`.
+Publication, tagging, pushing, remote mutation, and deployment are not part of
+this candidate record.
 
-## Python tooling
+## Packed-artifact contract
 
-The standalone retrofit and budget scripts were executed through tests with site packages disabled:
+The packed smoke test must create a real tarball, install it into a clean local
+consumer without a registry fetch, read the installed package metadata, and
+compare the installed CLI version with that metadata. It must also exercise the
+documented creation, adoption, upgrade, workspace, skill-update, tooling,
+restructure, and bounded alignment paths.
 
-```text
-python3 -S ...
-```
+The smoke test's version oracle comes from the packed `package.json`; it does
+not embed a second hard-coded current release number.
 
-They used the bundled `_mini_yaml.py` fallback. PyYAML is not required. Release packaging excludes `__pycache__` and `.pyc` files.
+## Downstream acceptance
 
-## Package dry run and contents
+Downstream verification is deliberately separate from source-package checks:
 
-```bash
-npm pack --dry-run --json
-```
+- Ultima must report disabled projections and preserved host bundles with zero
+  host-projection writes.
+- agent-cad must retain its intentionally enabled Codex and OpenCode
+  projections.
+- agent-cad Ticket 002 must pass its repaired, non-vacuous locked acceptance
+  and process-lifecycle evidence requirements.
 
-Result: **pass**. The dry run produced 230 publishable entries and included the executable, runtime modules, harness configurations, project templates, 17 repository skills, process/retrofit scripts, tooling-pack catalog, Markdown/HTML documentation, and the versioned retrofit plan. Tests, GitHub workflow files, caches, bytecode, and local tarballs are excluded.
+None of those downstream outcomes is claimed until the coordinator records
+fresh evidence.
 
-## Actual tarball smoke test
+## Toolchain and capability boundaries
 
-The release procedure creates the real `.tgz`, installs it into a new package consumer using:
+- Rust and Flutter/Dart structural generator coverage is not a substitute for
+  running Cargo or Flutter/Dart commands where those toolchains are required.
+- Native whole-tree upgrade verification currently relies on the Windows Job
+  Object owner. POSIX upgrade verification fails closed before payload or lease
+  creation when detached-session containment is unavailable.
+- No live paid model is required by deterministic source or packed tests.
+- Architecture assessment remains source-located heuristic evidence, not an
+  automatic proof of semantic correctness.
 
-```bash
-npm install --ignore-scripts --no-audit --no-fund --package-lock=false <tarball>
-```
-
-and then invokes the installed binary. The packed smoke test passed these gates:
-
-1. package version and required packed payload;
-2. TypeScript project creation and `doctor`;
-3. GPT-5.6 Sol high / native GPT-5.3 Codex high / OpenCode GPT-5.3 Codex Spark `sol-codex` generated harness configuration;
-4. immutable adoption-plan persist/load/apply round trip;
-5. existing source and custom `AGENTS.md` byte preservation plus proposal generation;
-6. project-owned skill-update check;
-7. workspace discovery, internal dependency edge, and dependency-aware verification;
-8. an actual native npm tooling transaction using only a local `file:` package, with no network;
-9. an actual mechanical TypeScript file move and import rewrite from an immutable restructure plan;
-10. a manual architecture-alignment plan/execute/status flow that emits one task and stops without launching a model or mutating application source.
-
-This validates the distributed artifact rather than relying only on imports from the source checkout.
-
-## Publish dry run
-
-```bash
-npm publish --dry-run --ignore-scripts
-```
-
-Result: **pass**. npm accepted the package for dry-run publication and produced the same package identity and integrity metadata as `npm pack`. No package was actually published.
-
-## Toolchain limitations
-
-The validation environment did not contain `cargo`, `rustc`, `flutter`, or `dart`. Therefore:
-
-- Rust and Flutter/Dart starter trees, profiles, skills, workspace detection, package-manager command planning, and structural adapters were tested structurally in JavaScript;
-- Rust source was **not** compiled and Cargo commands were **not** executed against a real toolchain;
-- Dart/Flutter source was **not** analyzed/compiled and Flutter/Dart package commands were **not** executed against a real toolchain.
-
-Consumers using those stacks must run the generated project commands in an environment containing the relevant toolchains. A structural scanner result is never represented as a compiler/analyzer/test pass.
-
-## Network and model limitations
-
-- The deterministic release test does not depend on registry downloads beyond installing the already produced local tarball; the tooling transaction uses a local `file:` dependency.
-- No live paid model is invoked. Alignment automation is covered with deterministic manual/fake/configured command protocols and independent filesystem/verification guards.
-- OpenAI/Codex/OpenCode configuration is validated structurally against the generated role and permission model; provider availability and account entitlements remain environment-specific.
-
-## Honest capability boundary
-
-The JavaScript/TypeScript, Rust, and Dart restructure adapters are conservative location-aware scanners for supported static constructs, not complete compiler frontends. Dynamic imports, generated code, macros, custom loaders, ambiguous aliases, visibility/ownership changes, and other unsupported relationships become conflicts or manual work.
-
-Architecture assessment is source-located heuristic evidence, not an automatic proof of good architecture. Semantic alignment remains one reviewed, test-protected use-case slice at a time and requires executable project evidence for a completion claim.
+The completed `0.6.0` release remains documented in
+[`docs/releases/0.6.0.md`](releases/0.6.0.md); this file tracks the current
+`0.6.1` candidate only.

@@ -95,8 +95,9 @@ const packageRoot = path.join(consumer, "node_modules", "workspace-template");
 const cli = path.join(packageRoot, "bin", "workspace-template.js");
 const invoke = (args, options = {}) => run(process.execPath, [cli, ...args], options);
 const invokeJson = (args, options = {}) => runJson(process.execPath, [cli, ...args], options);
+const packedPackage = JSON.parse(await readFile(path.join(packageRoot, "package.json"), "utf8"));
 
-assert.equal(invoke(["--version"]).stdout.trim(), "0.6.0");
+assert.equal(invoke(["--version"]).stdout.trim(), packedPackage.version);
 
 // The actual packed payload must include the runtime, modular repository skills,
 // operational scripts, and release docs.
@@ -179,7 +180,11 @@ assert.equal(upgradePreview.command, "upgrade");
 assert.equal(upgradePreview.metadata.upgrade.mode, "generated");
 const savedUpgrade = invokeJson(["upgrade", generated, "--plan-out", "--allow-network", "--json"]);
 assert.equal(savedUpgrade.status, "planned");
-assert.match(savedUpgrade.planPath, /[\\/]\.agentic[\\/]plans[\\/]upgrades[\\/]upgrade-0\.6\.0-to-0\.6\.0-[a-f0-9]{12}\.json$/);
+const escapedPackedVersion = packedPackage.version.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+assert.match(
+  path.basename(savedUpgrade.planPath),
+  new RegExp(`^upgrade-${escapedPackedVersion}-to-${escapedPackedVersion}-[a-f0-9]{12}\\.json$`, "u"),
+);
 const generatedUpgradePlanPath = savedUpgrade.planPath;
 const tamperedUpgradePlanPath = path.join(sandbox, "tampered-upgrade.json");
 const tamperedUpgradePlan = JSON.parse(await readFile(generatedUpgradePlanPath, "utf8"));

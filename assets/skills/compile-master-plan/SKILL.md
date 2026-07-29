@@ -3,7 +3,7 @@ name: compile-master-plan
 description: "Use when a resolved Wayfinder map, specification, or clear local goal must be compiled into a Frontier Loop ticket pack with vertical contracts, dependencies, risk lanes, conflict keys, verification policies, architecture budgets, process postconditions, and continuous local execution instructions."
 compatibility: ChatGPT Skills, Codex, OpenCode
 metadata:
-  version: "0.6.0"
+  version: "0.6.1"
 ---
 
 # Compile Master Plan

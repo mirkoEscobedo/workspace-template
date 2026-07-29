@@ -3,7 +3,7 @@ name: execute-frontier
 description: "Continuously execute a local Frontier Loop ticket DAG from the current coordinator conversation. Uses dependency and conflict scheduling, role-isolated subagents when available, independent review, targeted repair, neutral integration, serial landing, and durable local evidence. No external issue tracker or event watcher is required."
 compatibility: ChatGPT Skills, Codex, OpenCode
 metadata:
-  version: "0.6.0"
+  version: "0.6.1"
 ---
 
 # Execute Frontier

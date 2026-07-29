@@ -54,7 +54,7 @@ failures.push(...repositorySkillReport.errors);
 warnings.push(...repositorySkillReport.warnings);
 const actualRepositorySkills = repositorySkillReport.skills.map((item) => item.name).sort();
 if (JSON.stringify(actualRepositorySkills) !== JSON.stringify(expectedRepositorySkills)) {
-  fail(`repository skill catalog differs from the expected 0.6.0 catalog: ${actualRepositorySkills.join(", ")}`);
+  fail(`repository skill catalog differs from the expected ${PACKAGE_VERSION} catalog: ${actualRepositorySkills.join(", ")}`);
 }
 
 async function syntaxCheck(directory) {

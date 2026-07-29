@@ -1,5 +1,6 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
+import { PACKAGE_VERSION } from "./constants.js";
 import { exists, toPosixPath } from "./fs-utils.js";
 
 function quote(value) {
@@ -116,7 +117,7 @@ stop_if:
   - ${quote("The recovered contract conflicts with the original ticket prose.")}
 preflight_required: true
 migration:
-  generated_by: ${quote("workspace-template/0.6.0")}
+  generated_by: ${quote(`workspace-template/${PACKAGE_VERSION}`)}
   inference_status: ${quote("UNREVIEWED")}
 `;
 }

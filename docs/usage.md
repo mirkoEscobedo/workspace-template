@@ -110,11 +110,18 @@ A changed Git HEAD, changed fingerprinted file, changed custom instruction, new 
 | `--pm` | `auto` | infer lockfile/package-manager owner |
 | `--agents` | `codex,opencode` | install the default local harness role split |
 | `--preset` | `sol-only` | select the initial routing while installing the complete preset catalog |
+| `--host-bundles` | `managed` | use `preserve` when Codex/OpenCode host assets are product-owned |
 | `--conflict` | `propose` | preserve custom text and write a reviewable proposal |
 | dirty Git tree | refused | use `--allow-dirty` only for a known, fingerprinted state |
 | project verification | off | use `--verify` explicitly |
 
 `--yes` accepts safe defaults. It does not authorize overwriting unmanaged content, network access, lifecycle scripts, runtime dependencies, semantic scope expansion, commits, pushes, publishing, or deployment.
+
+With `--host-bundles preserve`, adoption and later upgrades do not write
+`.agents/`, `.codex/`, `.opencode/`, or product-owned `opencode.json`.
+Implicit `sync` and `skills update` projection steps then succeed with a
+`no-projection` result and no projection writes. An explicit request for a
+protected target fails before mutation. Managed mode remains unchanged.
 
 ### Instruction conflict modes
 
@@ -305,6 +312,10 @@ npx workspace-template doctor . --json
 
 Custom `CLAUDE.md`, `GEMINI.md`, projected skills, and Cursor rules are preserved unless generator ownership is proven. Unmanaged same-name collisions block synchronization.
 
+When projection mode is disabled, implicit synchronization is a successful
+no-op for projections. Passing an explicit projection target is an error rather
+than an override of that boundary.
+
 ## 7. Verify a workspace
 
 ```bash
@@ -422,6 +433,10 @@ Rules:
 - `--partial` allows only independently conflict-free skills to advance and reports the rest.
 
 Canonical skills, baselines, lock, and selected projections are staged and validated together.
+
+If projections are disabled or host bundles are preserved, the canonical
+skill/baseline/lock transaction can advance while projection files remain
+byte-identical. Explicit protected targets still fail closed.
 
 ## 10. Restructure source paths without semantic change
 
@@ -550,7 +565,7 @@ python .agentic/scripts/retrofit_tickets.py docs/tickets/<track> --apply
 python .agentic/scripts/validate_ticket_pack.py docs/tickets/<track>
 ```
 
-The migration preserves original prompts/validations and adds contracts, track metadata, local frontier data, Wayfinder recovery artifacts, evidence directories, risk lanes, conflict keys, verification policy, and architecture budgets. The Python tools use the bundled dependency-free mini-YAML implementation; PyYAML is not required.
+The migration preserves original prompts/validations and adds contracts, track metadata, local frontier data, Wayfinder recovery artifacts, evidence directories, risk lanes, conflict keys, verification policy, and architecture budgets. Executable contracts require at least one nonblank exact command under `verification.commands`; aggregate-only and historical records remain explicitly non-executable. The Python tools use the bundled dependency-free mini-YAML implementation; PyYAML is not required.
 
 ## 13. Process lifecycle and test topology
 
@@ -564,7 +579,7 @@ python .agentic/scripts/managed_command.py \
   npm test
 ```
 
-Every command records ownership and bounded evidence. Completion gates can reject open leases or surviving descendants. Never replace ownership-aware cleanup with blanket commands such as killing all Node or Python processes.
+Every command records ownership and bounded evidence. Completion gates can reject open leases or surviving descendants. Finalized receipts remain inspectable evidence but do not make upgrade Git-state checks dirty. Never replace ownership-aware cleanup with blanket commands such as killing all Node or Python processes.
 
 Architecture budgets are checked as ratchets. Existing megafiles can be grandfathered but locked against growth; new work must use behavior-oriented modules or a dedicated decomposition task.
 
@@ -586,6 +601,6 @@ npm test
 npm run check
 npm run pack:check
 npm pack
-npm run test:packed -- ./workspace-template-0.6.0.tgz
+npm run test:packed -- ./workspace-template-0.6.1.tgz
 npm publish --dry-run --ignore-scripts
 ```

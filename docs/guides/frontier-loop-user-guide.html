@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
-  <title>Frontier Loop 0.6.0 — User Guide</title>
+  <title>Frontier Loop 0.6.1 — User Guide</title>
   <style>
     :root {
       --bg: #0a0d12;
@@ -123,7 +123,7 @@
 <div class="layout">
   <nav aria-label="Guide navigation">
     <div class="brand">Frontier Loop</div>
-    <div class="version">workspace-template 0.6.0</div>
+    <div class="version">workspace-template 0.6.1</div>
     <ul>
       <li><a href="#overview">Overview</a></li>
       <li><a href="#mental-model">Mental model</a></li>
@@ -175,7 +175,7 @@
       <p>The current chat or harness session remains the coordinator. It reads durable repository files, delegates fresh bounded roles when available, and continues through ordinary tickets. It stops for completion, a real human authority gate, a material contradiction, unsafe scope expansion, or unrecoverable verification—not merely because one subtask ended.</p>
       <div class="grid">
         <div class="card"><h3>Wayfinder</h3><p>Resolves destination, facts, decisions, authority gates, research/prototypes, and remaining fog. It does not freeze detailed tickets while route-changing questions remain open.</p></div>
-        <div class="card"><h3>Compiled contracts</h3><p>Freeze ticket-specific behavior, dependencies, conflict keys, read/write sets, risk, budgets, review axes, verification, evidence, and stop conditions.</p></div>
+        <div class="card"><h3>Compiled contracts</h3><p>Freeze ticket-specific behavior, dependencies, conflict keys, read/write sets, risk, budgets, review axes, non-vacuous verification commands, evidence, and stop conditions.</p></div>
         <div class="card"><h3>Frontier scheduler</h3><p>Selects only unblocked, conflict-free work. Read-only work can overlap. One writer is the default; a second requires proven disjoint scope.</p></div>
         <div class="card"><h3>Independent evidence</h3><p>Specification/authority, code/test, and operations/security reviews are separate lenses. Repairs invalidate only affected evidence.</p></div>
       </div>
@@ -230,6 +230,7 @@ npx workspace-template create inventory-api \
         </tbody>
       </table>
       <p>Default conflict policy is <code>propose</code>. Use <code>managed-block</code> to update one delimited block or <code>fail</code> to require manual integration. Broken/duplicate markers always block.</p>
+      <p>For a repository that owns its Codex/OpenCode host assets, adopt with <code>--host-bundles preserve</code>. Later implicit sync and skill-update projection steps report <code>no-projection</code> and leave those assets byte-identical. An explicit protected target fails before mutation; managed projection mode is unchanged.</p>
     </section>
 
     <section id="wayfinder">
@@ -272,7 +273,7 @@ writer by default, land accepted changes serially, and continue until the goal
 is complete or a real human/contradiction/safety gate is reached.</code></pre>
       <p>Ticket-level correctness remains strict:</p>
       <ol>
-        <li>Implement one frozen contract through vertical public-interface TDD.</li>
+        <li>Require an executable contract to name at least one nonblank exact verification command, then implement it through vertical public-interface TDD.</li>
         <li>Collect fresh verification at the required levels.</li>
         <li>Run independent review axes without relying on the implementer’s narrative.</li>
         <li>Repair only failed findings within the same scope.</li>
@@ -411,7 +412,7 @@ workspace-template align resume . \
       <h2>16. Process lifecycle and test topology</h2>
       <pre><code>python .agentic/scripts/managed_command.py \
   --run-id ticket-031 --timeout 900 -- npm test</code></pre>
-      <p>The wrapper records a durable lease and owns the process tree. POSIX uses a separate process group/session; Windows attempts a Job Object. Shutdown escalates from graceful termination to forced termination and checks for surviving owned descendants.</p>
+      <p>The wrapper records a durable lease and owns the process tree. POSIX uses a separate process group/session; Windows attempts a Job Object. Shutdown escalates from graceful termination to forced termination and checks for surviving owned descendants. Finalized receipts remain evidence but do not dirty later upgrade inspection; open leases still block completion.</p>
       <p>Test topology is a checked budget, not a vague request. Existing megafiles may be grandfathered but locked against growth. Split by stable behavior families and extract reusable fixture/drivers instead of creating ticket-number test files.</p>
       <pre><code>python .agentic/scripts/check_architecture_budgets.py .</code></pre>
     </section>
@@ -460,7 +461,7 @@ python .agentic/scripts/validate_ticket_pack.py docs/tickets/&lt;track&gt;</code
     </section>
 
     <footer>
-      <p><strong>Frontier Loop 0.6.0</strong> — serial authority, parallel evidence, bounded mutation.</p>
+      <p><strong>Frontier Loop 0.6.1</strong> — serial authority, parallel evidence, bounded mutation.</p>
       <p class="small">This guide is self-contained and printable. See the repository Markdown usage, architecture, security, validation, and release documents for implementation-level details.</p>
     </footer>
   </main>

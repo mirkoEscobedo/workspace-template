@@ -3,7 +3,7 @@ name: test-topology
 description: "Use when test or production files need architecture-budget auditing, megafile no-growth locks, behavior-oriented placement, or a behavior-preserving decomposition plan."
 compatibility: ChatGPT Skills, Codex, OpenCode
 metadata:
-  version: "0.6.0"
+  version: "0.6.1"
 ---
 
 # Test Topology

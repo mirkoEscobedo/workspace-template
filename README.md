@@ -2,7 +2,7 @@
 
 `workspace-template` creates a new agent-ready project or safely retrofits an existing repository into the **Frontier Loop** workflow.
 
-Version 0.6.0 combines:
+Version 0.6.1 combines:
 
 - Wayfinder planning and dependency-frontier ticket compilation;
 - one continuous, local-file-based coordinator workflow;
@@ -15,6 +15,12 @@ Version 0.6.0 combines:
 - guarded source-tree restructuring;
 - bounded, one-slice-at-a-time architecture alignment;
 - test-topology and process-lifecycle controls.
+
+The 0.6.1 maintenance release also makes Windows/LF upgrade reconciliation
+portable, preserves product-owned host bundles, makes disabled projections a
+true no-write boundary, rejects executable tickets with vacuous verification,
+and excludes finalized lease receipts from dirty-state checks without ignoring
+open leases.
 
 The Frontier Loop does **not** require GitHub issues, webhooks, a repository watcher, or several independent chats. One coordinator session reads and updates local repository artifacts, delegates bounded roles when the harness supports them, lands approved work serially, and recomputes the next ready frontier.
 
@@ -71,7 +77,7 @@ npx workspace-template adopt . \
 
 Adoption preserves application source, tests, dependency manifests, lockfiles, `README.md`, CI, deployment files, and custom instructions. It adds the agentic substrate, durable planning state, skills, harness configuration, and optional ticket/document retrofits. Existing unmanaged collisions block or become proposals according to the selected policy; they are not silently overwritten.
 
-Use `--host-bundles preserve` when the repository already owns its Codex/OpenCode host assets. The sealed adoption plan then contains no operations or collision checks under `.agents/`, `.codex/`, `.opencode/`, or product-owned `opencode.json`; the default `--host-bundles managed` behavior is unchanged.
+Use `--host-bundles preserve` when the repository already owns its Codex/OpenCode host assets. The sealed adoption plan then contains no operations or collision checks under `.agents/`, `.codex/`, `.opencode/`, or product-owned `opencode.json`; the default `--host-bundles managed` behavior is unchanged. Subsequent implicit `sync` and `skills update` projection steps report a successful `no-projection` result and leave those paths byte-identical. Explicit attempts to target protected projections fail before writing.
 
 ## Frontier Loop
 
@@ -127,7 +133,7 @@ workspace-template upgrade . --allow-network
 workspace-template upgrade . --dry-run
 workspace-template upgrade . --dry-run --json
 workspace-template upgrade . --plan-out --allow-network
-workspace-template upgrade . --apply-plan ".agentic/plans/upgrades/upgrade-0.6.0-to-0.7.0-<id>.json"
+workspace-template upgrade . --apply-plan ".agentic/plans/upgrades/upgrade-0.6.1-to-0.7.0-<id>.json"
 ```
 
 Bare `upgrade` seals the exact plan, runs doctor plus every sealed module/root
@@ -264,7 +270,7 @@ Managed skills retain an exact project-owned baseline. Updates compare baseline,
 
 ### Process ownership
 
-Generated process-lifecycle assets wrap commands with leases, process-tree ownership, deadlines, bounded output, and zero-descendant completion checks. On POSIX they use process groups; on Windows the Python wrapper attempts Job Object ownership and falls back conservatively when unavailable.
+Generated process-lifecycle assets wrap commands with leases, process-tree ownership, deadlines, bounded output, and zero-descendant completion checks. On POSIX they use process groups; on Windows the Python wrapper attempts Job Object ownership and falls back conservatively when unavailable. Finalized receipts remain durable evidence but are excluded from upgrade dirty-state checks; active leases are still blockers.
 
 ## Workspace and monorepo support
 
@@ -290,7 +296,7 @@ python .agentic/scripts/validate_ticket_pack.py docs/tickets/<track>
 python .agentic/scripts/check_architecture_budgets.py .
 ```
 
-The ticket retrofit adds contracts, manifests, evidence directories, risk lanes, conflict keys, architecture budgets, and a protected local frontier. It can recover legacy hierarchy while keeping uncertainty explicit.
+The ticket retrofit adds contracts, manifests, evidence directories, risk lanes, conflict keys, architecture budgets, and a protected local frontier. It can recover legacy hierarchy while keeping uncertainty explicit. Executable contracts must include at least one nonblank exact verification command; aggregate-only and historical records are the explicit non-executable exceptions.
 
 ## Development and release validation
 
@@ -300,7 +306,7 @@ npm test
 npm run check
 npm run pack:check
 npm pack
-npm run test:packed -- ./workspace-template-0.6.0.tgz
+npm run test:packed -- ./workspace-template-0.6.1.tgz
 npm publish --dry-run --ignore-scripts
 ```
 
@@ -317,6 +323,7 @@ See [the validation record](docs/validation.md) for the exact release evidence a
 - [Advanced operation contracts](docs/architecture/advanced-operations.md)
 - [Skill-system architecture](docs/architecture/skill-system.md)
 - [Validation record](docs/validation.md)
+- [0.6.1 release notes](docs/releases/0.6.1.md)
 - [0.6.0 release notes](docs/releases/0.6.0.md)
 - [Versioned retrofit objective](docs/plans/0.6.0-existing-repository-retrofitting-plan.md)
 - [Security policy](SECURITY.md)
