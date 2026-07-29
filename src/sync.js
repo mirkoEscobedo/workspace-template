@@ -10,6 +10,7 @@ import {
   writeJson,
   writeText,
 } from "./fs-utils.js";
+import { preservesHostBundleProjection } from "./host-bundles.js";
 
 const PROJECTIONS = Object.freeze({
   claude: ".claude/skills",
@@ -128,11 +129,37 @@ export async function syncSkills(rootDirectory, requestedAgents, options = {}) {
   const configPath = path.join(root, ".agentic", "config.json");
   if (!(await exists(configPath))) throw new Error(`Missing ${path.relative(process.cwd(), configPath)}. Run create or adopt first.`);
   const config = await readJson(configPath);
+  const explicitAgents = requestedAgents !== undefined && requestedAgents !== null;
   const agents = requestedAgents ?? config.agentTargets ?? [];
   const canonicalRoot = path.resolve(options.canonicalRoot ?? path.join(root, ".agentic", "skills"));
   if (!(await exists(canonicalRoot))) throw new Error(`Missing canonical skill directory: ${canonicalRoot}`);
 
+  const disabledBoundary = config.projections?.mode === "disabled";
+  const projectionBoundaryDisabled = config.hostBundles === "preserve" || disabledBoundary;
+  const protectedAgents = explicitAgents
+    ? agents.filter((agent) => disabledBoundary
+      || (config.hostBundles === "preserve" && preservesHostBundleProjection(agent)))
+    : [];
+  if (protectedAgents.length > 0) {
+    throw new Error(`Protected projection targets are disabled: ${protectedAgents.join(", ")}`);
+  }
+
   const names = await listSkillNames(canonicalRoot);
+  if ((!explicitAgents || agents.length === 0) && projectionBoundaryDisabled) {
+    return {
+      version: 2,
+      generator: "workspace-template",
+      generatedAt: null,
+      canonical: ".agentic/skills",
+      mode: "disabled",
+      status: "no-projection",
+      reason: config.projections?.reason ?? "product-owned host bundles are preserved",
+      agentTargets: config.projections?.agentTargets ?? config.agentTargets ?? [],
+      skillNames: names,
+      projections: {},
+      conflicts: [],
+    };
+  }
   const manifestPath = path.join(root, ".agentic", "managed-projections.json");
   const previous = (await exists(manifestPath)) ? await readJson(manifestPath) : { skillNames: [], projections: {} };
   const plans = [];
