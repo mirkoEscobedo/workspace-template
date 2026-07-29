@@ -6,7 +6,7 @@
 
 ## Outcome
 
-- `public_outcome`: one observable result
+- `public_outcome`: one observable result expressed as a nonblank string
 - `behaviors`: independently testable behaviors
 - `invariants`: properties that must remain true
 - `out_of_scope`: explicit exclusions
@@ -33,6 +33,15 @@
 - `landing_levels`: verification ladder before commit/integration
 - `commands`: exact commands when known
 - `native_checks`: checks that cannot be replaced by mocks
+
+Every executable ticket must include a `verification` object whose `commands`
+contains at least one nonblank exact command. Missing verification, missing
+commands, `commands: []`, and blank command strings are contract errors.
+Non-executable records are limited to `kind` values `tracker`,
+`aggregate-only`, and `historical`, plus `execution_policy` values
+`aggregate-only` and `historical-only`. These exemption markers require exact
+string equality; whitespace-padded or otherwise normalized variants are
+executable.
 
 ## Budgets
 

@@ -3,6 +3,8 @@ id: NNN
 title: <Title>
 legacy_ids: []
 status: ready
+kind: implementation
+execution_policy: implement-and-review
 parent: null
 public_outcome: <Observable result>
 behaviors: []
@@ -27,7 +29,8 @@ verification:
   red: []
   repair_levels: [L0, L1, L2]
   landing_levels: [L0, L1, L2]
-  commands: []
+  commands:
+    - <exact verification command>
   native_checks: []
 budgets:
   locked_files: []

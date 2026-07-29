@@ -45,6 +45,15 @@ docs/tickets/<track-slug>/
 
 Use the templates and schema in `assets/` and `schemas/`.
 
+Every executable ticket must declare a `verification` object with at least one
+nonblank exact command in `verification.commands`. A record is non-executable
+only when its `kind` is `tracker`, `aggregate-only`, or `historical`, or its
+`execution_policy` is `aggregate-only` or `historical-only`. Do not emit an
+executable contract with missing verification, missing commands, `commands: []`,
+or blank command strings. Exemption markers are exact strings: never trim,
+case-fold, or otherwise normalize them. `public_outcome` must be a nonblank
+string.
+
 ## Compile the graph
 
 1. State the goal completion contract and source authority.
@@ -62,7 +71,8 @@ Use the templates and schema in `assets/` and `schemas/`.
    - verification levels;
    - architecture and process budgets;
    - human gates and stop conditions;
-   - `preflight_required` when scope is uncertain.
+   - `preflight_required` when scope is uncertain;
+   - a `verification` object whose `commands` contains at least one nonblank exact command.
 8. Prefer expand-migrate-contract sequencing for wide changes.
 9. Generate the initial `frontier.json` from true dependencies and status.
 10. Validate schema, missing blockers, cycles, duplicate IDs, and executable tracker parents.

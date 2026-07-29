@@ -12,6 +12,8 @@ DONE = {"committed", "closed", "superseded"}
 ACTIVE = {"claimed", "in_progress", "review", "repair", "passed"}
 ALLOWED_STATUS = DONE | ACTIVE | {"planned", "ready", "blocked", "cancelled"}
 IGNORED_PARTS = {"evidence", ".git", "node_modules", "target", "dist", "build"}
+NON_EXECUTABLE_KINDS = {"tracker", "aggregate-only", "historical"}
+NON_EXECUTABLE_POLICIES = {"aggregate-only", "historical-only"}
 
 
 def load_yaml(path: Path) -> dict[str, Any]:
@@ -66,6 +68,26 @@ def expect_list(contract: dict[str, Any], key: str, ticket_id: str, errors: list
     return value
 
 
+def is_executable_ticket(contract: dict[str, Any]) -> bool:
+    kind = contract.get("kind")
+    execution_policy = contract.get("execution_policy")
+    kind_is_exempt = isinstance(kind, str) and kind in NON_EXECUTABLE_KINDS
+    policy_is_exempt = isinstance(execution_policy, str) and execution_policy in NON_EXECUTABLE_POLICIES
+    return not (kind_is_exempt or policy_is_exempt)
+
+
+def has_exact_verification_commands(contract: dict[str, Any]) -> bool:
+    verification = contract.get("verification")
+    if not isinstance(verification, dict):
+        return False
+    commands = verification.get("commands")
+    return (
+        isinstance(commands, list)
+        and bool(commands)
+        and all(isinstance(command, str) and bool(command.strip()) for command in commands)
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("track", type=Path)
@@ -104,8 +126,13 @@ def main() -> int:
         status = str(contract.get("status", "planned"))
         if status not in ALLOWED_STATUS:
             errors.append(f"{ticket_id}: unknown status {status!r}")
-        if not str(contract.get("public_outcome", "")).strip():
-            errors.append(f"{ticket_id}: empty public_outcome")
+        public_outcome = contract.get("public_outcome")
+        if not isinstance(public_outcome, str) or not public_outcome.strip():
+            errors.append(f"{ticket_id}: public_outcome must be a nonblank string")
+        if is_executable_ticket(contract) and not has_exact_verification_commands(contract):
+            errors.append(
+                f"{ticket_id}: executable ticket verification.commands must contain at least one nonblank command"
+            )
 
         dependencies = [str(value) for value in expect_list(contract, "blocked_by", ticket_id, errors)]
         lenses = [str(value) for value in expect_list(contract, "review_lenses", ticket_id, errors)]

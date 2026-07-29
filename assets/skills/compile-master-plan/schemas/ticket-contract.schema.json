@@ -14,7 +14,6 @@
     "write_set",
     "conflict_keys",
     "review_lenses",
-    "verification",
     "budgets"
   ],
   "properties": {
@@ -50,6 +49,12 @@
         "closed"
       ]
     },
+    "kind": {
+      "type": "string"
+    },
+    "execution_policy": {
+      "type": "string"
+    },
     "parent": {
       "type": [
         "string",
@@ -58,7 +63,8 @@
     },
     "public_outcome": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "pattern": "\\S"
     },
     "behaviors": {
       "type": "array",
@@ -226,5 +232,64 @@
       }
     }
   },
+  "allOf": [
+    {
+      "if": {
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "kind"
+              ],
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "tracker",
+                    "aggregate-only",
+                    "historical"
+                  ]
+                }
+              }
+            },
+            {
+              "required": [
+                "execution_policy"
+              ],
+              "properties": {
+                "execution_policy": {
+                  "enum": [
+                    "aggregate-only",
+                    "historical-only"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "then": {
+        "required": [
+          "verification"
+        ],
+        "properties": {
+          "verification": {
+            "required": [
+              "commands"
+            ],
+            "properties": {
+              "commands": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "pattern": "\\S"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
   "additionalProperties": true
 }

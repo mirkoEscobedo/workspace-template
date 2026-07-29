@@ -53,6 +53,9 @@ human_gates: []
 review_lenses:
   - code-test
 preflight_required: true
+verification:
+  commands:
+    - node --test test/example.test.js
 budgets:
   zero_owned_processes_after_run: true
 `.trimStart());
@@ -107,6 +110,9 @@ human_gates: []
 review_lenses:
   - code-test
 preflight_required: true
+verification:
+  commands:
+    - node --test test/example.test.js
 budgets:
   zero_owned_processes_after_run: true
 `.trimStart());
