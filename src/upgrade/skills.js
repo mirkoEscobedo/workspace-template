@@ -15,6 +15,10 @@ import { threeWayMergeText } from "../skills/merge.js";
 import { PACKAGE_VERSION } from "../constants.js";
 import { inspectSkillCatalog, skillRiskDiff } from "../skills/catalog.js";
 import { preservesHostBundleProjection } from "../host-bundles.js";
+import {
+  GENERATED_CACHE_DIRECTORY_NAMES,
+  isGeneratedCachePath,
+} from "../generated-paths.js";
 
 function record(content) {
   const buffer = Buffer.isBuffer(content) ? content : Buffer.from(content);
@@ -23,7 +27,8 @@ function record(content) {
 
 async function tree(directory, options = {}) {
   const result = new Map();
-  for (const file of await listFiles(directory)) {
+  for (const file of await listFiles(directory, { ignoreNames: GENERATED_CACHE_DIRECTORY_NAMES })) {
+    if (isGeneratedCachePath(file)) continue;
     const content = await readFile(file);
     result.set(
       toPosixPath(path.relative(directory, file)),
@@ -272,7 +277,11 @@ export async function planSkillUpgrade(snapshot, options = {}) {
   const incomingSkillsRoot = options.incomingSkillsRoot ?? assetsSkills;
   const incomingCatalog = await inspectSkillCatalog(incomingSkillsRoot);
   const baselineCatalog = await inspectSkillCatalog(path.join(snapshot.root, ".agentic", "skill-baselines"));
-  const incomingNames = new Set((await listFiles(incomingSkillsRoot)).map((file) => path.relative(incomingSkillsRoot, file).split(path.sep)[0]));
+  const incomingNames = new Set(
+    (await listDirectories(incomingSkillsRoot))
+      .map((directory) => path.basename(directory))
+      .filter((name) => !GENERATED_CACHE_DIRECTORY_NAMES.includes(name)),
+  );
   const targets = (snapshot.config.agentTargets ?? snapshot.profile.agentTargets ?? [])
     .filter((agent) => !options.preserveHostBundles || !preservesHostBundleProjection(agent));
   const projectionManifest = await readJsonIfExists(path.join(snapshot.root, ".agentic", "managed-projections.json"));

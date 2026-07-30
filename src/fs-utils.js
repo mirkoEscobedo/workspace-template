@@ -14,6 +14,7 @@ import {
   writeFile,
 } from "node:fs/promises";
 import path from "node:path";
+import { isGeneratedDirectory } from "./generated-paths.js";
 
 export async function exists(filePath) {
   try {
@@ -76,16 +77,34 @@ export async function copyDirectory(source, destination, options = {}) {
 
 export async function copyTree(source, destination, options = {}) {
   const ignored = new Set(options.ignoreNames ?? [".git", "node_modules", ".agentic/transactions"]);
+  const ignoredGeneratedDirectories = options.ignoreGeneratedDirectories ?? false;
   const root = path.resolve(source);
+  const included = options.includePaths ? new Set() : null;
+  if (included) {
+    for (const value of options.includePaths) {
+      const relative = toPosixPath(value).replace(/^\.\//u, "");
+      const components = relative.split("/");
+      for (let index = 1; index <= components.length; index += 1) {
+        included.add(components.slice(0, index).join("/"));
+      }
+    }
+  }
   return copyDirectory(root, destination, {
     ...options,
-    filter(candidate) {
+    async filter(candidate) {
       const relative = toPosixPath(path.relative(root, candidate));
       if (!relative) return true;
+      if (included) {
+        if (!included.has(relative)) return false;
+        return options.filter ? options.filter(candidate, relative) : true;
+      }
       for (const name of ignored) {
         const normalized = toPosixPath(name).replace(/^\.\//, "");
-        if (relative === normalized || relative.startsWith(`${normalized}/`)) return false;
+        if (normalized.includes("/")) {
+          if (relative === normalized || relative.startsWith(`${normalized}/`)) return false;
+        } else if (relative.split("/").includes(normalized)) return false;
       }
+      if (ignoredGeneratedDirectories && await isGeneratedDirectory(candidate)) return false;
       return options.filter ? options.filter(candidate, relative) : true;
     },
   });
@@ -106,6 +125,7 @@ export async function listFiles(directory, options = {}) {
     for (const entry of entries) {
       if (ignored.has(entry.name)) continue;
       const full = path.join(current, entry.name);
+      if (options.filter && !(await options.filter(full, entry))) continue;
       if (entry.isDirectory()) await walk(full);
       else if (entry.isFile()) output.push(full);
       else if (entry.isSymbolicLink() && options.includeSymlinks) output.push(full);
@@ -142,8 +162,8 @@ export async function hashFile(filePath) {
   return hashBuffer(await readFile(filePath));
 }
 
-export async function hashDirectory(directory) {
-  const files = await listFiles(directory, { includeSymlinks: true });
+export async function hashDirectory(directory, options = {}) {
+  const files = await listFiles(directory, { ...options, includeSymlinks: true });
   const hash = createHash("sha256");
   for (const file of files) {
     const relative = toPosixPath(path.relative(directory, file));

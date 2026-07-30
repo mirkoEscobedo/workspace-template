@@ -1,7 +1,17 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { DEPENDENCY_SNAPSHOT, PACKAGE_VERSION } from "./constants.js";
-import { hashBuffer, listFiles, normalizeTextLineEndings, toPosixPath } from "./fs-utils.js";
+import {
+  hashBuffer,
+  hashDirectory,
+  listFiles,
+  normalizeTextLineEndings,
+  toPosixPath,
+} from "./fs-utils.js";
+import {
+  GENERATED_CACHE_DIRECTORY_NAMES,
+  isGeneratedCachePath,
+} from "./generated-paths.js";
 export { assetsRoot, assetsSkills } from "./asset-paths.js";
 import { assetsRoot, assetsSkills } from "./asset-paths.js";
 import { presetCatalogArtifacts } from "./presets/catalog.js";
@@ -146,7 +156,8 @@ export function createAgenticConfig({
 
 export async function readTree(sourceRoot, destinationPrefix) {
   const artifacts = [];
-  for (const source of await listFiles(sourceRoot)) {
+  for (const source of await listFiles(sourceRoot, { ignoreNames: GENERATED_CACHE_DIRECTORY_NAMES })) {
+    if (isGeneratedCachePath(source)) continue;
     const relative = toPosixPath(path.relative(sourceRoot, source));
     artifacts.push({
       path: toPosixPath(path.posix.join(destinationPrefix, relative)),
@@ -155,6 +166,13 @@ export async function readTree(sourceRoot, destinationPrefix) {
     });
   }
   return artifacts;
+}
+
+export async function hashManagedAssetCatalog(sourceRoot = assetsRoot) {
+  return hashDirectory(sourceRoot, {
+    ignoreNames: GENERATED_CACHE_DIRECTORY_NAMES,
+    filter: (file) => !isGeneratedCachePath(file),
+  });
 }
 
 export async function canonicalSkillArtifacts(destinationPrefix = ".agentic/skills") {

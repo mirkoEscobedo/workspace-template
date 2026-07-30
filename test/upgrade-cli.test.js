@@ -53,6 +53,20 @@ async function runCli(args) {
 }
 
 describe("upgrade CLI completion output", () => {
+  it("returns a nonzero exit code when a dry-run plan is blocked", async () => {
+    const root = await fixture();
+
+    await assert.rejects(
+      runCli(["upgrade", root, "--dry-run", "--json"]),
+      (error) => {
+        const plan = JSON.parse(error.stdout);
+        return plan.canApply === false
+          && plan.metadata.upgrade.status === "blocked"
+          && error.code !== 0;
+      },
+    );
+  });
+
   it("completes a bare non-JSON upgrade without treating its report as a plan", {
     skip: process.platform !== "win32",
   }, async () => {

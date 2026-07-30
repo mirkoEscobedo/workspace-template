@@ -15,14 +15,33 @@ describe("checkpoints and bounded rollback", () => {
   it("creates an isolated copy checkpoint and excludes generated transaction state", async () => {
     const root = await temporaryDirectory("caw-checkpoint-");
     await mkdir(path.join(root, "src"), { recursive: true });
+    await mkdir(path.join(root, "src", "build"), { recursive: true });
+    await mkdir(path.join(root, "tools", "source"), { recursive: true });
+    await mkdir(path.join(root, "tools", "ac-dev", "target", "debug"), { recursive: true });
+    await mkdir(path.join(root, "packages", "ui", "node_modules", "dependency"), { recursive: true });
+    await mkdir(path.join(root, ".agent", "leases"), { recursive: true });
     await mkdir(path.join(root, ".agentic", "transactions", "old"), { recursive: true });
     await writeFile(path.join(root, "src", "value.txt"), "source\n");
+    await writeFile(path.join(root, "src", "build", "authority.json"), "{}\n");
+    await writeFile(path.join(root, "tools", "ac-dev", "Cargo.toml"), "[package]\nname = \"ac-dev\"\nversion = \"0.1.0\"\n");
+    await writeFile(path.join(root, "tools", "source", "Cargo.toml"), "[package]\nname = \"source\"\nversion = \"0.1.0\"\n");
+    await writeFile(path.join(root, "tools", "source", "target"), "authoritative file\n");
+    await writeFile(path.join(root, "tools", "ac-dev", "target", "debug", "artifact.bin"), "generated\n");
+    await writeFile(path.join(root, "packages", "ui", "node_modules", "dependency", "index.js"), "generated\n");
+    await writeFile(path.join(root, ".agent", "leases", ".gitkeep"), "");
+    await writeFile(path.join(root, ".agent", "leases", "active.json"), "{}\n");
     await writeFile(path.join(root, ".agentic", "transactions", "old", "journal.jsonl"), "{}\n");
 
     const checkpoint = await createCheckpoint(root, "copy");
     try {
       assert.equal(checkpoint.mode, "copy");
       assert.equal(await readFile(path.join(checkpoint.root, "src", "value.txt"), "utf8"), "source\n");
+      assert.equal(await readFile(path.join(checkpoint.root, "src", "build", "authority.json"), "utf8"), "{}\n");
+      assert.equal(await readFile(path.join(checkpoint.root, "tools", "source", "target"), "utf8"), "authoritative file\n");
+      assert.equal(await exists(path.join(checkpoint.root, "tools", "ac-dev", "target")), false);
+      assert.equal(await exists(path.join(checkpoint.root, "packages", "ui", "node_modules")), false);
+      assert.equal(await exists(path.join(checkpoint.root, ".agent", "leases", ".gitkeep")), true);
+      assert.equal(await exists(path.join(checkpoint.root, ".agent", "leases", "active.json")), false);
       assert.equal(await exists(path.join(checkpoint.root, ".agentic", "transactions")), false);
       await writeFile(path.join(checkpoint.root, "src", "value.txt"), "checkpoint\n");
       assert.equal(await readFile(path.join(root, "src", "value.txt"), "utf8"), "source\n");

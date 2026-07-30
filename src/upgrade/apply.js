@@ -19,7 +19,7 @@ import { assertSafeUpgradePath, assertUpgradeQuiescent } from "./inspect.js";
 import { assertLocalVerificationAuthority, sealVerificationInputs, upgradeVerificationAuthority } from "./plan.js";
 import { UpgradeVerificationRunner, verifyWorkspace } from "../workspace/verify.js";
 import { discoverWorkspace } from "../workspace/discover.js";
-import { assetsRoot } from "../workspace-artifacts.js";
+import { hashManagedAssetCatalog } from "../workspace-artifacts.js";
 import { resolveProcessIdentity } from "../process-utils.js";
 import { loadEffectiveUpgradeWorkspace } from "./workspace.js";
 import {
@@ -38,6 +38,11 @@ import {
   recoverAppliedTransaction,
   recoverInterruptedTransaction,
 } from "./transaction-recovery.js";
+import {
+  existingVerificationInputPaths,
+  hashVerificationInputs,
+  inventoryCopiedVerificationInputs,
+} from "./verification-inputs.js";
 function orderedOperations(operations) {
   const priority = (item) => item.path === ".agentic/managed-files.json" ? 40
     : [".agentic/config.json", ".agentic/profile.json"].includes(item.path) ? 30
@@ -70,10 +75,12 @@ async function assertVerificationInputsUnchanged(root, plan) {
   if (!sealed?.hash || !Array.isArray(sealed.excludedPaths)) {
     throw new Error("Upgrade plan does not contain sealed verification inputs");
   }
-  const current = await sealVerificationInputs(root, sealed.excludedPaths);
-  if (JSON.stringify(current) !== JSON.stringify(sealed)) {
+  const current = await sealVerificationInputs(root, sealed.excludedPaths, { includeInventory: true });
+  const { inventoryPaths, ...comparable } = current;
+  if (JSON.stringify(comparable) !== JSON.stringify(sealed)) {
     throw new Error("Repository-local verification inputs changed after the upgrade plan was sealed");
   }
+  return inventoryPaths;
 }
 function sealedDependencyInstalls(authority) {
   const seen = new Set();
@@ -241,8 +248,23 @@ async function fullVerification(root, options, sealedAuthority, context, frozenW
 
 async function runAtomicVerification(root, options, sealedAuthority, context, frozenWorkspace, runtime) {
   await workspaceWithSealedVerificationAuthority(root, sealedAuthority);
-  const checkpoint = await createCheckpoint(root, "copy");
+  const inventoryPaths = await assertVerificationInputsUnchanged(root, context.plan);
+  await runtime.hooks?.afterVerificationInputSeal?.({ root, plan: context.plan, phaseId: context.phaseId });
+  const copiedPaths = await existingVerificationInputPaths(root, inventoryPaths);
+  const checkpoint = await createCheckpoint(root, "copy", { includePaths: copiedPaths });
   try {
+    const copiedInventory = await inventoryCopiedVerificationInputs(checkpoint.root);
+    if (JSON.stringify(copiedInventory) !== JSON.stringify(copiedPaths)) {
+      throw new Error("Disposable verification copy does not match the sealed verification-input inventory");
+    }
+    const checkpointHash = await hashVerificationInputs(
+      checkpoint.root,
+      inventoryPaths,
+      context.plan.metadata.verificationInputs.excludedPaths,
+    );
+    if (checkpointHash !== context.plan.metadata.verificationInputs.hash) {
+      throw new Error("Disposable verification copy does not match the sealed verification-input hash");
+    }
     return await fullVerification(
       checkpoint.root,
       options,
@@ -417,7 +439,7 @@ async function applyUpgradePlanInternal(plan, options = {}, runtime = {}) {
     ? []
     : (await ensureSafeTransactionDirectory(root, transaction), await assertNotApplied(root, plan.planId));
   assertAutomaticRecoveryAllowed(existingPrior, plan.planId);
-  if (plan.metadata?.incomingCatalogHash !== await hashDirectory(assetsRoot)) {
+  if (plan.metadata?.incomingCatalogHash !== await hashManagedAssetCatalog()) {
     throw new Error("Incoming package catalog changed after the upgrade plan was sealed");
   }
   assertLocalVerificationAuthority(plan.metadata.verificationCommands);
@@ -456,7 +478,7 @@ async function applyUpgradePlanInternal(plan, options = {}, runtime = {}) {
         paths: recovery.restoredPaths,
       });
     }
-    if (plan.metadata?.incomingCatalogHash !== await hashDirectory(assetsRoot)) {
+    if (plan.metadata?.incomingCatalogHash !== await hashManagedAssetCatalog()) {
       throw new Error("Incoming package catalog changed after the upgrade plan was sealed");
     }
     await assertPlanApplicable(plan, { expected: { command: "upgrade" }, allowedDirtyPaths: lockedDirtyPaths });
@@ -479,6 +501,7 @@ async function applyUpgradePlanInternal(plan, options = {}, runtime = {}) {
       options,
       plan.metadata.verificationCommands,
       {
+        plan,
         planId: plan.planId,
         phaseId: "pre-mutation",
         gitRepository,
@@ -527,6 +550,7 @@ async function applyUpgradePlanInternal(plan, options = {}, runtime = {}) {
         options,
         plan.metadata.verificationCommands,
         {
+          plan,
           planId: plan.planId,
           phaseId: "post-apply",
           gitRepository,

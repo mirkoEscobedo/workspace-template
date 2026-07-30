@@ -5,6 +5,7 @@ import { readFile } from "node:fs/promises";
 import { exists, listFiles, toPosixPath } from "./fs-utils.js";
 import { validateSkillTree } from "./doctor.js";
 import { PACKAGE_VERSION } from "./constants.js";
+import { isGeneratedCachePath } from "./generated-paths.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const packageJson = JSON.parse(await readFile(path.join(root, "package.json"), "utf8"));
@@ -17,6 +18,12 @@ function fail(message) {
 
 function warn(message) {
   warnings.push(message);
+}
+
+for (const file of await listFiles(path.join(root, "assets"))) {
+  if (isGeneratedCachePath(file)) {
+    fail(`${toPosixPath(path.relative(root, file))}: generated cache file must not be present in distributable assets`);
+  }
 }
 
 if (packageJson.version !== PACKAGE_VERSION) {

@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { describe, it } from "node:test";
 import { applyUpgradePlan, createProject, refreshPlanId } from "../src/index.js";
+import { exists } from "../src/fs-utils.js";
 import { applyWithVerifier, buildSupportedUpgradePlan } from "./upgrade-internal-harness.js";
 
 async function fixture() {
@@ -100,6 +101,37 @@ describe("upgrade apply rejection boundary", () => {
       /verification inputs changed after.*sealed/iu,
     );
     assert.equal(await readFile(configPath, "utf8"), original);
+  });
+
+  it("never copies or executes a file added after the pre-verification inventory", async () => {
+    const root = await fixture();
+    const lateInput = path.join(root, "late-verification-input.js");
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+    let verifierRan = false;
+    let injected = false;
+
+    await assert.rejects(
+      () => applyWithVerifier(
+        plan,
+        async (checkpointRoot) => {
+          verifierRan = true;
+          assert.equal(await exists(path.join(checkpointRoot, "late-verification-input.js")), false);
+          return { ok: true };
+        },
+        {},
+        {
+          hooks: {
+            async afterVerificationInputSeal() {
+              if (injected) return;
+              injected = true;
+              await writeFile(lateInput, "late\n");
+            },
+          },
+        },
+      ),
+      /verification inputs changed after.*sealed/iu,
+    );
+    assert.equal(verifierRan, true);
   });
 
   it("rejects an edited operation that touches a sealed verification manifest", async () => {

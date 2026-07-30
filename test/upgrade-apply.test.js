@@ -209,8 +209,48 @@ describe("upgrade apply transaction", () => {
     );
   });
 
+  it("applies an authorized dirty plan with a deleted tracked verification input", async () => {
+    const root = await fixture();
+    for (const args of [
+      ["init"],
+      ["config", "user.email", "workspace-template@example.invalid"],
+      ["config", "user.name", "Workspace Template Test"],
+      ["add", "."],
+      ["commit", "-m", "fixture"],
+    ]) {
+      const result = spawnSync("git", args, { cwd: root, encoding: "utf8", shell: false });
+      assert.equal(result.status, 0, result.stderr);
+    }
+    const deleted = path.join(root, "README.md");
+    assert.equal(await exists(deleted), true);
+    await rm(deleted);
+
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true, allowDirty: true });
+    assert.equal(plan.canApply, true, plan.conflicts.join("\n"));
+    let verificationRuns = 0;
+    const report = await applyWithVerifier(plan, async (checkpointRoot) => {
+      verificationRuns += 1;
+      assert.equal(await exists(path.join(checkpointRoot, "README.md")), false);
+      return { ok: true };
+    });
+
+    assert.equal(report.ok, true);
+    assert.equal(verificationRuns, 2);
+    assert.equal(await exists(deleted), false);
+  });
+
   it("runs full verification only in disposable copies isolated from repository-local state", async () => {
     const root = await fixture();
+    for (const args of [
+      ["init"],
+      ["config", "user.email", "workspace-template@example.invalid"],
+      ["config", "user.name", "Workspace Template Test"],
+      ["add", "."],
+      ["commit", "-m", "fixture"],
+    ]) {
+      const result = spawnSync("git", args, { cwd: root, encoding: "utf8", shell: false });
+      assert.equal(result.status, 0, result.stderr);
+    }
     const sourceSentinels = [
       path.join(root, ".git", "source-sentinel"),
       path.join(root, "node_modules", "source-sentinel"),
@@ -225,7 +265,8 @@ describe("upgrade apply transaction", () => {
     const externalSentinel = path.join(external, "sentinel");
     await writeFile(externalSentinel, "external-state\n");
     await symlink(external, path.join(root, "external-link"), process.platform === "win32" ? "junction" : "dir");
-    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+    await writeFile(path.join(root, ".git", "info", "exclude"), "external-link/\n");
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true, allowDirty: true });
     const verificationRoots = [];
 
     const report = await applyWithVerifier(plan, async (verificationRoot) => {

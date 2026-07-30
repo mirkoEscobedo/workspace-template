@@ -121,6 +121,28 @@ describe("upgrade skill reconciliation", () => {
     );
   });
 
+  it("does not plan or lock generated Python cache artifacts from an incoming catalog", async () => {
+    const root = await fixture();
+    const incoming = await mkdtemp(path.join(os.tmpdir(), "workspace-template-incoming-cache-"));
+    await cp(assetsSkills, incoming, { recursive: true });
+    const cacheRoot = path.join(incoming, "verify", "scripts", "__pycache__");
+    await mkdir(cacheRoot, { recursive: true });
+    await mkdir(path.join(incoming, "__pycache__"), { recursive: true });
+    await writeFile(path.join(cacheRoot, "probe.cpython-314.pyc"), "bytecode\n");
+    await writeFile(path.join(incoming, "verify", "scripts", "probe.pyo"), "optimized bytecode\n");
+    await writeFile(path.join(incoming, "__pycache__", "catalog.cpython-314.pyc"), "bytecode\n");
+
+    const result = await planSkillUpgrade(await inspectUpgradeWorkspace(root), {
+      incomingSkillsRoot: incoming,
+    });
+    const plannedPaths = result.operations.map((operation) => operation.path);
+    const lockedPaths = Object.keys(result.lock.skills.verify.files);
+
+    assert.equal(plannedPaths.some((relative) => /__pycache__|\.py[co]$/iu.test(relative)), false);
+    assert.equal(lockedPaths.some((relative) => /__pycache__|\.py[co]$/iu.test(relative)), false);
+    assert.equal(Object.hasOwn(result.lock.skills, "__pycache__"), false);
+  });
+
   it("reports an overlapping three-way merge conflict without writing", async () => {
     const root = await fixture();
     const baseline = path.join(root, ".agentic", "skill-baselines", "verify", "SKILL.md");

@@ -1,64 +1,49 @@
 import path from "node:path";
-import { lstat, readdir, readFile, readlink } from "node:fs/promises";
 import { PACKAGE_VERSION } from "../constants.js";
 import { repositoryPreconditions } from "../plans/fingerprint.js";
 import { createPlanEnvelope } from "../plans/schema.js";
 import { assertSafeUpgradePath, inspectUpgradeWorkspace } from "./inspect.js";
 import { planUpgradeArtifacts } from "./artifacts.js";
-import { assetsRoot } from "../workspace-artifacts.js";
-import { exists, hashDirectory, hashFile, hashText, readJson, toPosixPath } from "../fs-utils.js";
+import { hashManagedAssetCatalog } from "../workspace-artifacts.js";
+import { exists, hashFile, readJson, toPosixPath } from "../fs-utils.js";
 import { discoverWorkspace } from "../workspace/discover.js";
 import { loadEffectiveUpgradeWorkspace } from "./workspace.js";
+import {
+  normalizedVerificationPaths,
+  sealVerificationInputSet,
+} from "./verification-inputs.js";
 
 function versionPart(value) {
   return String(value ?? "legacy").replace(/[^a-zA-Z0-9._-]+/g, "-");
 }
 
 const FORBIDDEN_VERIFICATION_EFFECT = /\b(?:curl|npx|scp|ssh|wget)\b|\bgit\s+(?:clone|fetch|pull|push)\b|\b(?:npm|pnpm|yarn|bun)\s+(?:add|ci|install|publish|remove)\b|\b(?:firebase\s+deploy|helm\s+install|kubectl\s+apply|netlify|vercel)\b/iu;
-const IGNORED_VERIFICATION_INPUTS = [
-  ".git",
-  "node_modules",
-  ".agent/leases",
-  ".agentic/plans",
-  ".agentic/transactions",
-  ".agentic/reports",
-];
-
 function normalizedPaths(paths) {
-  return [...new Set(paths.map((value) => toPosixPath(value).replace(/^\.\//u, "").replace(/\/+$/u, "")))].sort();
+  return normalizedVerificationPaths(paths);
 }
 
 function isAtOrBelow(relative, candidates) {
   return candidates.some((candidate) => relative === candidate || relative.startsWith(`${candidate}/`));
 }
 
-export async function sealVerificationInputs(root, excludedPaths = []) {
+export async function sealVerificationInputs(root, excludedPaths = [], options = {}) {
   const resolvedRoot = path.resolve(root);
   const excluded = normalizedPaths(excludedPaths);
-  const ignored = normalizedPaths(IGNORED_VERIFICATION_INPUTS);
-  const records = [];
-  async function walk(directory) {
-    const entries = await readdir(directory, { withFileTypes: true });
-    entries.sort((left, right) => left.name.localeCompare(right.name));
-    for (const entry of entries) {
-      const target = path.join(directory, entry.name);
-      const relative = toPosixPath(path.relative(resolvedRoot, target));
-      if (isAtOrBelow(relative, ignored) || isAtOrBelow(relative, excluded)) continue;
-      const details = await lstat(target);
-      if (details.isSymbolicLink()) records.push([relative, "symlink", await readlink(target)]);
-      else if (details.isDirectory()) {
-        await walk(target);
-      } else if (details.isFile()) records.push([relative, "file", (await readFile(target)).toString("base64")]);
-      else records.push([relative, "other"]);
-    }
-  }
-  await walk(resolvedRoot);
-  return {
+  const sealed = await sealVerificationInputSet(resolvedRoot, excluded, options);
+  const result = {
     algorithm: "sha256",
-    hash: hashText(JSON.stringify(records)),
+    hash: sealed.hash,
     excludedPaths: excluded,
-    ignoredPaths: ignored,
+    ignoredPaths: sealed.ignoredPaths,
   };
+  if (sealed.unsupportedGitlinks.length > 0) {
+    result.unsupportedGitlinks = sealed.unsupportedGitlinks;
+  }
+  if (sealed.unsupportedEmbeddedRepositories.length > 0) {
+    result.unsupportedEmbeddedRepositories = sealed.unsupportedEmbeddedRepositories;
+  }
+  if (options.includeInventory) result.inventoryPaths = sealed.paths;
+  return result;
 }
 
 async function verificationAuthorityEntry(root, module) {
@@ -160,7 +145,7 @@ export async function buildUpgradePlan(rootDirectory, options = {}) {
       preconditions: [{ kind: "root", value: snapshot.root }],
       conflicts: [snapshot.recoveryRequired],
       metadata: {
-        incomingCatalogHash: await hashDirectory(assetsRoot),
+        incomingCatalogHash: await hashManagedAssetCatalog(),
         upgrade: {
           fromVersion: "interrupted",
           toVersion: PACKAGE_VERSION,
@@ -202,6 +187,12 @@ export async function buildUpgradePlan(rootDirectory, options = {}) {
   const preconditions = await repositoryPreconditions(snapshot.root, [...new Set(fingerprintPaths)], { allowDirty: options.allowDirty });
   const dirty = preconditions.find((item) => item.kind === "git-dirty")?.value ?? [];
   const conflicts = [...desired.conflicts];
+  for (const gitlink of verificationInputs.unsupportedGitlinks ?? []) {
+    conflicts.push(`Git submodule verification input '${gitlink}' cannot be sealed; replace it with ordinary tracked files`);
+  }
+  for (const embedded of verificationInputs.unsupportedEmbeddedRepositories ?? []) {
+    conflicts.push(`Embedded Git repository verification input '${embedded}' cannot be sealed; remove it or track it as ordinary files`);
+  }
   if (!workspace.canUse) conflicts.push(...workspace.conflicts);
   for (const module of verificationCommands.modules) {
     if (module.fullSteps.length === 0) conflicts.push(`Missing full verification command for workspace module '${module.id}'`);
@@ -251,7 +242,7 @@ export async function buildUpgradePlan(rootDirectory, options = {}) {
         operationCount: effective.length,
       },
       preset: desired.presetState,
-      incomingCatalogHash: await hashDirectory(assetsRoot),
+      incomingCatalogHash: await hashManagedAssetCatalog(),
       verificationCommands,
       verificationInputs,
       verificationInputPaths,
