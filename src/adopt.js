@@ -74,7 +74,8 @@ async function revalidateOperation(root, operation) {
 }
 
 function canonicalOperationPath(root, operation) {
-  const supplied = toPosixPath(operation.path);
+  const supplied = operation.path;
+  if (supplied.includes("\\")) throw new Error(`Non-canonical operation path in sealed plan: ${operation.path}`);
   const destination = path.resolve(root, operation.path);
   if (!isPathInside(root, destination)) throw new Error(`Operation escapes repository root: ${operation.path}`);
   const relative = toPosixPath(path.relative(root, destination));

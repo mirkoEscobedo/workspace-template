@@ -485,10 +485,13 @@ describe("upgrade verification-input sealing", () => {
     }
     const result = await execFileAsync(process.execPath, [
       path.resolve("bin", "workspace-template.js"), "upgrade", root, "--dry-run", "--json", "--allow-network",
-    ], { encoding: "utf8", timeout: 110_000, maxBuffer: 4 * 1024 * 1024 });
+    ], { encoding: "utf8", timeout: 110_000, maxBuffer: 4 * 1024 * 1024 }).catch((error) => error);
     const plan = JSON.parse(result.stdout);
+    const posix = process.platform !== "win32";
     assert.equal(plan.command, "upgrade");
-    assert.equal(plan.canApply, true, plan.conflicts.join("\n"));
+    assert.equal(result.code ?? 0, posix ? 1 : 0);
+    assert.equal(plan.canApply, !posix, plan.conflicts.join("\n"));
+    if (posix) assert.match(plan.conflicts.join("\n"), /POSIX.*detached-session.*native process owner/iu);
     assert.match(plan.metadata.verificationInputs.hash, /^[a-f0-9]{64}$/u);
     assert.ok(result.stdout.length < 4 * 1024 * 1024);
     assert.equal((await git(root, "status", "--short")).stdout, "");

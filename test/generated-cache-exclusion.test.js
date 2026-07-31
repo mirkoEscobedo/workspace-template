@@ -27,7 +27,8 @@ describe("generated cache exclusion", () => {
     const nestedIgnore = await readFile(path.resolve("assets", ".npmignore"), "utf8");
     assert.match(nestedIgnore, /\*\*\/__pycache__\/\*\*/u);
     assert.match(nestedIgnore, /\*\*\/\*\.pyc/u);
-    const npmCli = path.join(path.dirname(process.execPath), "node_modules", "npm", "bin", "npm-cli.js");
+    const npmCli = process.env.npm_execpath
+      ?? path.join(path.dirname(process.execPath), "node_modules", "npm", "bin", "npm-cli.js");
     const cache = await temporaryDirectory("workspace-template-npm-cache-");
     const { stdout } = await execFileAsync(process.execPath, [npmCli, "pack", "--dry-run", "--json"], {
       cwd: path.resolve(),
