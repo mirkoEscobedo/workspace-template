@@ -1,5 +1,7 @@
 import path from "node:path";
+import { readFile } from "node:fs/promises";
 import { PACKAGE_VERSION } from "../constants.js";
+import { parseTomlArray } from "../formats.js";
 import { repositoryPreconditions } from "../plans/fingerprint.js";
 import { createPlanEnvelope } from "../plans/schema.js";
 import { assertSafeUpgradePath, inspectUpgradeWorkspace } from "./inspect.js";
@@ -18,12 +20,60 @@ function versionPart(value) {
 }
 
 const FORBIDDEN_VERIFICATION_EFFECT = /\b(?:curl|npx|scp|ssh|wget)\b|\bgit\s+(?:clone|fetch|pull|push)\b|\b(?:npm|pnpm|yarn|bun)\s+(?:add|ci|install|publish|remove)\b|\b(?:firebase\s+deploy|helm\s+install|kubectl\s+apply|netlify|vercel)\b/iu;
+const KNOWN_PYTHON_VERIFICATION_TOOLS = new Set(["black", "mypy", "pyright", "pytest", "ruff"]);
+const UV_RUN_VALUE_OPTIONS = new Set([
+  "--directory",
+  "--env-file",
+  "--group",
+  "--only-group",
+  "--project",
+  "--python",
+  "--with",
+  "--with-requirements",
+]);
 function normalizedPaths(paths) {
   return normalizedVerificationPaths(paths);
 }
 
 function isAtOrBelow(relative, candidates) {
   return candidates.some((candidate) => relative === candidate || relative.startsWith(`${candidate}/`));
+}
+
+function normalizedPythonDependency(specification) {
+  return /^[A-Za-z0-9][A-Za-z0-9._-]*/u.exec(specification.trim())?.[0]
+    ?.toLowerCase()
+    .replace(/[._]+/gu, "-");
+}
+
+function uvRunTool(args = []) {
+  if (args[0] !== "run") return undefined;
+  let index = 1;
+  while (args[index]?.startsWith("-")) {
+    const option = args[index];
+    index += 1;
+    if (!option.includes("=") && UV_RUN_VALUE_OPTIONS.has(option)) index += 1;
+  }
+  return args[index];
+}
+
+function pythonVerificationToolViolations(module, manifestText) {
+  const declared = new Set([
+    ...parseTomlArray(manifestText, "project", "dependencies"),
+    ...parseTomlArray(manifestText, "dependency-groups", "dev"),
+  ].map(normalizedPythonDependency).filter(Boolean));
+  const violations = [];
+  for (const step of module.commands?.fullSteps ?? []) {
+    if (step.command !== "uv") continue;
+    const tool = uvRunTool(step.args);
+    const normalizedTool = tool?.toLowerCase().replace(/[._]+/gu, "-");
+    if (!normalizedTool
+      || !KNOWN_PYTHON_VERIFICATION_TOOLS.has(normalizedTool)
+      || declared.has(normalizedTool)) continue;
+    violations.push(
+      `${module.id} verification command 'uv run ${tool}' is not declared in project dependencies or the default development dependency group`,
+    );
+  }
+  return violations;
 }
 
 export async function sealVerificationInputs(root, excludedPaths = [], options = {}) {
@@ -99,6 +149,15 @@ async function verificationAuthorityEntry(root, module) {
         violations.push(`${module.id} dependency-backed verification uses unsupported package manager '${module.packageManager}' (${evidence})`);
       }
     }
+  }
+  if (manifestPath
+    && module.project === "python"
+    && module.packageManager === "uv"
+    && await exists(manifestPath)) {
+    violations.push(...pythonVerificationToolViolations(
+      module,
+      await readFile(manifestPath, "utf8"),
+    ));
   }
   return {
     id: module.id,

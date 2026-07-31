@@ -6,6 +6,7 @@ import { mkdtemp, mkdir, readFile, readdir, rm, unlink, writeFile } from "node:f
 import { fileURLToPath, pathToFileURL } from "node:url";
 import os from "node:os";
 import path from "node:path";
+import { runPackedDirtyVerificationSmoke } from "./packed-dirty-verification-smoke.js";
 
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, {
@@ -409,6 +410,13 @@ assert.equal(await readFile(alignSource, "utf8"), alignBefore);
 const status = invokeJson(["align", "status", align, "--plan-id", alignPlan.planId, "--json"]);
 assert.equal(status.report.status, "awaiting-manual");
 
+await runPackedDirtyVerificationSmoke({
+  sandbox,
+  packageRoot,
+  invokeJson,
+  run,
+});
+
 console.log(JSON.stringify({
   ok: true,
   tarball,
@@ -428,6 +436,7 @@ console.log(JSON.stringify({
     "offline-native-tooling-transaction",
     "mechanical-restructure-transaction",
     "manual-alignment-plan-and-stop-gate",
+    "dirty-polyglot-full-apply-plan-verification",
   ],
 }, null, 2));
 } finally {

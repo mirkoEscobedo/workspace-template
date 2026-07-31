@@ -1,6 +1,6 @@
 import { spawn, spawnSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { existsSync } from "node:fs";
+import { existsSync, statSync } from "node:fs";
 import { mkdir, mkdtemp, readFile, rm, rmdir, writeFile } from "node:fs/promises";
 import os from "node:os";
 import { fileURLToPath } from "node:url";
@@ -139,9 +139,46 @@ function spawnSpec(command, args, environment = process.env) {
   return { command: process.execPath, args: [npmCli, ...args] };
 }
 
-export function commandExists(command) {
+export function commandExists(command, environment = process.env) {
   const probe = process.platform === "win32" ? "where" : "which";
-  const result = spawnSync(probe, [command], { stdio: "ignore", shell: false });
+  const probeEnvironment = { ...environment };
+  if (process.platform === "win32") {
+    const pathValues = Object.entries(probeEnvironment)
+      .filter(([key, value]) => key.toUpperCase() === "PATH" && typeof value === "string")
+      .flatMap(([, value]) => value.split(path.delimiter))
+      .filter(Boolean);
+    for (const key of Object.keys(probeEnvironment)) {
+      if (key.toUpperCase() === "PATH") delete probeEnvironment[key];
+    }
+    probeEnvironment.PATH = [...new Set(pathValues)].join(path.delimiter);
+    const explicitExtension = path.extname(command) !== "";
+    const pathExtensions = Object.entries(probeEnvironment)
+      .filter(([key, value]) => key.toUpperCase() === "PATHEXT" && typeof value === "string")
+      .flatMap(([, value]) => value.split(path.delimiter))
+      .filter(Boolean);
+    const extensions = explicitExtension
+      ? [""]
+      : ["", ...(pathExtensions.length > 0 ? pathExtensions : [".COM", ".EXE", ".BAT", ".CMD"])];
+    const directories = /[\\/]/u.test(command)
+      ? [""]
+      : probeEnvironment.PATH.split(path.delimiter)
+          .map((directory) => directory.replace(/^"(.*)"$/u, "$1"))
+          .filter(Boolean);
+    if (directories.some((directory) => extensions.some((extension) => {
+      try {
+        return statSync(path.resolve(directory || ".", `${command}${extension}`)).isFile();
+      } catch {
+        return false;
+      }
+    }))) {
+      return true;
+    }
+  }
+  const result = spawnSync(probe, [command], {
+    env: probeEnvironment,
+    stdio: "ignore",
+    shell: false,
+  });
   return result.status === 0;
 }
 

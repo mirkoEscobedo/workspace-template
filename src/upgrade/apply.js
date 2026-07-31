@@ -161,6 +161,61 @@ async function initializeVerificationGit(root, runner, options, context) {
   return results;
 }
 
+export function buildUpgradeVerificationEnvironment(
+  root,
+  phaseId,
+  plan,
+  ambientEnvironment = process.env,
+) {
+  const scratchRoot = path.join(root, ".agentic", "verification-scratch", phaseId);
+  const environment = {
+    ...ambientEnvironment,
+    HOME: path.join(scratchRoot, "home"),
+    USERPROFILE: path.join(scratchRoot, "home"),
+    APPDATA: path.join(scratchRoot, "appdata"),
+    LOCALAPPDATA: path.join(scratchRoot, "localappdata"),
+    TEMP: path.join(scratchRoot, "temp"),
+    TMP: path.join(scratchRoot, "temp"),
+    TMPDIR: path.join(scratchRoot, "temp"),
+  };
+  delete environment.CARGO_HOME;
+  delete environment.RUSTUP_HOME;
+  delete environment.RUSTUP_TOOLCHAIN;
+  if (plan?.approvals?.network) {
+    const originalProfile = ambientEnvironment.USERPROFILE ?? ambientEnvironment.HOME;
+    if (ambientEnvironment.CARGO_HOME ?? originalProfile) {
+      environment.CARGO_HOME = ambientEnvironment.CARGO_HOME ?? path.join(originalProfile, ".cargo");
+    }
+    if (ambientEnvironment.RUSTUP_HOME ?? originalProfile) {
+      environment.RUSTUP_HOME = ambientEnvironment.RUSTUP_HOME ?? path.join(originalProfile, ".rustup");
+    }
+    if (ambientEnvironment.RUSTUP_TOOLCHAIN) {
+      environment.RUSTUP_TOOLCHAIN = ambientEnvironment.RUSTUP_TOOLCHAIN;
+    }
+  }
+  return environment;
+}
+
+function verificationFailure(report) {
+  const nonPassing = report.results.filter((item) => item.state !== "passed");
+  const summary = nonPassing.map((item) => `${item.module}: ${item.state}`).join(", ");
+  const moduleWithStep = nonPassing.find((item) => item.results.some((step) =>
+    step.state === "failed" || step.state === "unknown" || step.status !== 0));
+  const step = moduleWithStep?.results.find((item) =>
+    item.state === "failed" || item.state === "unknown" || item.status !== 0);
+  const command = step ? [step.command, ...(step.args ?? [])].join(" ") : undefined;
+  const rawExcerpt = step?.stderr?.trim() || step?.reason?.trim();
+  const excerpt = rawExcerpt
+    ? rawExcerpt.replace(/\s+/gu, " ").slice(0, 240)
+    : undefined;
+  const detail = command
+    ? `; first failing command: ${command}${step.cwd ? ` (cwd: ${step.cwd})` : ""}${excerpt ? `; stderr: ${excerpt}` : ""}`
+    : "";
+  const error = new Error(`Full workspace verification failed: ${summary}${detail}`);
+  error.verificationReport = report;
+  return error;
+}
+
 async function fullVerification(root, options, sealedAuthority, context, frozenWorkspace, runtime) {
   const checkpointAuthority = await upgradeVerificationAuthority(root, frozenWorkspace);
   assertLocalVerificationAuthority(checkpointAuthority);
@@ -171,16 +226,11 @@ async function fullVerification(root, options, sealedAuthority, context, frozenW
   let runner = runtime.runner;
   if (dependencyInstalls.length > 0 || !runtime.verifier) {
     const scratchRoot = path.join(root, ".agentic", "verification-scratch", context.phaseId);
-    const scratchEnvironment = {
-      ...process.env,
-      HOME: path.join(scratchRoot, "home"),
-      USERPROFILE: path.join(scratchRoot, "home"),
-      APPDATA: path.join(scratchRoot, "appdata"),
-      LOCALAPPDATA: path.join(scratchRoot, "localappdata"),
-      TEMP: path.join(scratchRoot, "temp"),
-      TMP: path.join(scratchRoot, "temp"),
-      TMPDIR: path.join(scratchRoot, "temp"),
-    };
+    const scratchEnvironment = buildUpgradeVerificationEnvironment(
+      root,
+      context.phaseId,
+      context.plan,
+    );
     for (const directory of new Set(Object.values(scratchEnvironment)
       .filter((value) => typeof value === "string" && value.startsWith(scratchRoot)))) {
       await ensureDirectory(directory);
@@ -222,9 +272,10 @@ async function fullVerification(root, options, sealedAuthority, context, frozenW
     phaseId: context.phaseId,
     runner,
   });
+  report.gitCheckpoint = gitCheckpointResults;
+  report.dependencyInstalls = dependencyInstallResults;
   if (!report.ok || report.results.some((item) => item.state !== "passed")) {
-    const failed = report.results.filter((item) => item.state !== "passed").map((item) => `${item.module}: ${item.state}`).join(", ");
-    throw new Error(`Full workspace verification failed: ${failed}`);
+    throw verificationFailure(report);
   }
   if (frozenWorkspace.rootModule) {
     const rootReport = await verifyWorkspace(root, frozenWorkspace, {
@@ -236,13 +287,15 @@ async function fullVerification(root, options, sealedAuthority, context, frozenW
       phaseId: context.phaseId,
       runner,
     });
-    if (!rootReport.ok || rootReport.results.some((item) => item.state !== "passed")) {
-      throw new Error("Full workspace root verification failed");
-    }
     report.rootAggregate = rootReport;
+    if (!rootReport.ok || rootReport.results.some((item) => item.state !== "passed")) {
+      throw verificationFailure({
+        ...rootReport,
+        gitCheckpoint: gitCheckpointResults,
+        dependencyInstalls: dependencyInstallResults,
+      });
+    }
   }
-  report.gitCheckpoint = gitCheckpointResults;
-  report.dependencyInstalls = dependencyInstallResults;
   return report;
 }
 
@@ -496,19 +549,38 @@ async function applyUpgradePlanInternal(plan, options = {}, runtime = {}) {
       validatePlannedState(writeOperations);
       await validateStagedState(root, writeOperations);
     }
-    const preVerification = await runAtomicVerification(
-      root,
-      options,
-      plan.metadata.verificationCommands,
-      {
-        plan,
+    let preVerification;
+    try {
+      preVerification = await runAtomicVerification(
+        root,
+        options,
+        plan.metadata.verificationCommands,
+        {
+          plan,
+          planId: plan.planId,
+          phaseId: "pre-mutation",
+          gitRepository,
+        },
+        frozenWorkspace,
+        runtime,
+      );
+    } catch (error) {
+      await writeReport(root, plan.planId, {
+        ok: false,
+        command: "upgrade",
         planId: plan.planId,
-        phaseId: "pre-mutation",
-        gitRepository,
-      },
-      frozenWorkspace,
-      runtime,
-    );
+        root,
+        status: "verification-failed",
+        phase: "pre-mutation",
+        applied: [],
+        preVerification: error.verificationReport ?? null,
+        error: {
+          name: error.name,
+          message: error.message,
+        },
+      }, "upgrade");
+      throw error;
+    }
     await assertVerificationInputsUnchanged(root, plan);
     await assertUpgradeQuiescent(root, plan.planId);
     await assertPlanApplicable(plan, { expected: { command: "upgrade" }, allowedDirtyPaths: lockedDirtyPaths });

@@ -252,3 +252,192 @@ the seal cannot reproduce.
 - Ultima's latest review is green. Agent CAD requires only re-review of this
   repaired boundary. Repair I did not apply or mutate either downstream
   workspace.
+
+## Repair J - isolated verification authority and failure evidence
+
+Agent CAD's first real 0.6.1 apply attempt stopped before product mutation and
+produced the downstream failure report at
+`docs/agent/evidence/workspace-template-0.6.1-upgrade-failure-report.md`.
+The report's three claims were reproduced at their public seams:
+
+1. scratch-profile construction discarded ambient Rustup/Cargo homes;
+2. pre-mutation verification threw a module summary without persisting the
+   bounded command evidence already present in the verifier report; and
+3. the add-on declared `uv run ruff check .` without declaring Ruff.
+
+### Root cause and repair
+
+- Upgrade verification now builds its scratch environment through one exported
+  policy function. `CARGO_HOME`, `RUSTUP_HOME`, and `RUSTUP_TOOLCHAIN` are
+  removed by default and restored from the original profile only when the
+  reviewed plan sealed network/external-toolchain authority. Verification
+  sanitization admits those three non-secret authority variables while
+  retaining the existing secret-key rejection.
+- Failed pre-mutation verification now writes the durable upgrade report before
+  rethrowing. It contains exact argv/cwd, status, timeout, bounded/redacted
+  output, dependency blocking, Git/dependency-install evidence, and the owned
+  process receipt. The CLI error includes the first failing command plus a
+  bounded stderr/reason excerpt. No managed/product operation has run at this
+  point.
+- Planning now fails closed for known `uv run` verification tools that are
+  absent from `[project].dependencies` and the default
+  `[dependency-groups].dev`.
+- Agent CAD's add-on now declares `ruff>=0.8`, locks it with `uv`, and owns an
+  explicit Python 3.11 Ruff policy. The explicit rule selection prevents the
+  command from inheriting unrelated user-level Ruff configuration.
+
+### RED/GREEN evidence
+
+- Rust authority RED: the scratch environment had no supported Rust authority
+  export. A second RED proved ambient Rust variables leaked when authority was
+  not sealed.
+- Rust authority GREEN: authorized plans retain the original Cargo/Rustup
+  homes and toolchain; unauthorized plans expose none of those variables.
+- Failure-evidence RED: apply returned only
+  `Full workspace verification failed: repo: failed` and no durable actionable
+  failure report.
+- Failure-evidence GREEN: the report records the exact failed command,
+  disposable cwd, exit/timeout state, bounded stderr, and zero-descendant
+  receipt; the error includes `Failed to spawn: ruff`; managed bytes remain
+  unchanged.
+- Dependency-contract RED: an add-on manifest with pytest only did not report
+  its missing Ruff command authority.
+- Dependency-contract GREEN: planning emits the precise blocking conflict.
+  The corrected real Agent CAD manifest removes that conflict.
+- A full-gate RED also found an older synthetic Python-worker fixture whose
+  `uv run pytest` contract omitted pytest. The fixture now declares its
+  dependency, and its artifact-reconciliation suite is 7/7 green.
+
+### Fresh landing evidence
+
+- Affected suite: 63 tests, 62 passed, 1 platform skip, 0 failed.
+- `npm run check`: self-check passed; 248 tests, 246 passed, 2 platform
+  skips, 0 failed.
+- Packed inventory: 315 entries; zero Python cache artifacts.
+- `npm run test:packed`: all 13 packed-consumer scenarios passed.
+- Architecture-budget audit: 0 violations.
+- Agent CAD add-on: `uv run ruff check .` passed; `uv run pytest` reported
+  295 passed and 1 skipped under an isolated task-owned temp profile.
+- Final real Agent CAD dry-run: exit 0, `canApply: true`, 41 effective
+  operations, no conflicts.
+- Agent CAD doctor: clean; Codex and OpenCode projections synchronized.
+- Every Python-backed command ran through `uv`.
+
+### Reconciled verdict
+
+- Spec/authority: PASS - external Rust authority is conditional and sealed;
+  missing Python verification tools block at planning.
+- Code/test: PASS - the public environment, apply/report, planner, and real
+  downstream seams all have fresh regression evidence.
+- Operations/security: PASS - command evidence remains bounded/redacted, the
+  failure report precedes product mutation, and owned verification commands
+  finish with no descendants.
+- The upgrade itself was not applied. Agent CAD is ready for an exact-plan
+  re-review/apply after these workspace-template and add-on manifest changes
+  are landed.
+
+## Repair K - version-independent and commit-bound downstream verification
+
+Agent CAD's next exact-plan apply again stopped before mutation. The actionable
+report proved two repository verification contracts were not portable to the
+sealed disposable checkpoint: one Python test depended on Python 3.14's
+Windows FIFO behavior, and two Cargo integration tests treated the intentionally
+dirty synthetic checkpoint as Ticket 002's locked candidate.
+
+### Root cause and repair
+
+- The Python test now controls `Path.is_file()` at the executable classifier
+  seam. The same expectation passes under uv-managed CPython 3.12.13 and
+  3.14.5 without changing the declared `requires-python = ">=3.11"` support.
+- `ac-dev` accepts and strictly validates `AC_DEV_REPOSITORY_ROOT`. Its public
+  Ticket 002 integration tests create a pristine checkout of the locked
+  evidence commit, retain the locked candidate identity, and execute against
+  that checkout instead of the unrelated dirty upgrade checkpoint.
+- Windows executable discovery combines duplicate `PATH`/`Path` values before
+  probing, preserving uv discovery in the sanitized verifier environment.
+- The packed dirty-polyglot scenario now runs the real uv Python 3.14 and Cargo
+  commands through the complete pre- and post-mutation `--apply-plan`
+  transaction. It asserts sealed dirty bytes, a clean synthetic Git checkpoint,
+  and a checkpoint commit distinct from the dirty source repository.
+
+### Fresh landing evidence
+
+- Worker focused seam: passed under uv-managed CPython 3.12.13 and 3.14.5.
+- Worker full CPython 3.14.5 gate: 699 passed, 23 skipped.
+- `ac-dev`: 35 unit and 3 public integration tests passed.
+- `npm run check`: self-check passed; 261 tests, 259 passed, 2 platform
+  skips, 0 failed.
+- `npm run test:packed`: all 14 scenarios passed with real uv/Cargo execution.
+- Packed inventory: 316 entries; zero Python cache artifacts.
+- Architecture audits: zero violations in workspace-template and Agent CAD.
+- Fresh Agent CAD plan `ae542e5bd01da82f0d099bdac1a6ba39`: 41 effective
+  updates, 357 no-ops, no warnings or conflicts.
+- Agent CAD doctor: clean; Codex and OpenCode projections synchronized.
+- Every Python-backed command ran through `uv`.
+
+### Reconciled verdict
+
+- Spec/authority: PASS - the Python support claim and locked Ticket 002 commit
+  identities remain authoritative in a dirty sealed checkpoint.
+- Code/test: PASS - focused, full downstream, packed real-tool, and complete
+  upstream gates pass against the exact repaired diff.
+- Operations/security: PASS - repository-root override validation fails closed,
+  checkpoint Git cleanliness is asserted, and process receipts report zero
+  descendants.
+- No downstream upgrade was applied. Agent CAD remains at generator version
+  0.6.0 with a fresh applicable plan ready for review.
+
+## Repair L - bounded downstream checkout and deterministic handoff clock
+
+The next real Agent CAD apply remained atomic and stopped before mutation. Its
+receipt exposed a Windows path-length failure in `ac-dev`'s nested pristine
+checkout and one load-sensitive MCP ownership-handoff test.
+
+### Root cause and repair
+
+- `ac-dev` inherited the verifier's already long redirected `TEMP`, then added
+  its own clone and Cargo target paths. The public Ticket 002 checks now place
+  their temporary clone under the repository-local ignored
+  `tools/ac-dev/target/pristine-checkouts` root, bounding Git and native-tool
+  paths without changing the locked candidate/evidence identities.
+- The MCP test used a real 100 ms age deadline while ownership publication and
+  queued admission raced under full-suite load. It now uses the existing
+  controllable lifecycle clock and advances only after explicit dispatched-hang
+  and queue-depth barriers. Production locking behavior is unchanged, and the
+  locked test megafile shrank by one line.
+
+### Fresh landing evidence
+
+- `ac-dev` focused Windows long-path regression: passed with a 128-character
+  redirected temporary root; full gate: 35 unit and 3 public integration tests
+  passed.
+- MCP focused handoff: 7 passes including 6 consecutive managed stress runs;
+  lint passed; full gate: 23 files, 603 passed, 7 skipped, 0 failed.
+- A disposable exact dirty Agent CAD clone completed the entire pre-mutation,
+  mutation, and post-mutation `--apply-plan` transaction for plan
+  `e33b5c2473a2e200f81409abef3ffcf5` (digest
+  `e33b5c2473a2e200f81409abef3ffcf5bb6fb6c41b1a85e9986c6c7ba753984c`).
+  It applied 41 managed updates with 357 no-ops, no warnings, and no conflicts.
+- Both disposable verification cycles passed the worker (699 passed, 23
+  skipped), add-on (295 passed, 1 skipped), MCP (603 passed, 7 skipped),
+  `ac-dev` format/check/test, and 92-test root aggregate gates. The clone's
+  generator advanced to 0.6.1 and doctor returned clean.
+- `npm run check`: self-check passed; 261 tests, 259 passed, 2 platform skips,
+  0 failed.
+- `npm run test:packed`: all 14 scenarios passed. Packed inventory: 316 entries
+  and zero Python cache artifacts.
+- Agent CAD architecture-budget audit: 0 violations.
+- Every Python-backed command ran through `uv`; every managed command receipt
+  reports a closed lease and zero descendants.
+
+### Reconciled verdict
+
+- Spec/authority: PASS - locked Ticket 002 history and ownership-publication
+  ordering remain authoritative.
+- Code/test: PASS - focused, repeated, full-module, packed, full upstream, and
+  exact dirty pre/post apply evidence pass against the repaired diff.
+- Operations/security: PASS - paths remain inside an ignored disposable target,
+  the real downstream worktree was not mutated, and all Job Objects closed with
+  zero descendants.
+- Agent CAD itself remains at generator version 0.6.0 pending explicit apply
+  authority.

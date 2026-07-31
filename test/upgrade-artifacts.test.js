@@ -190,7 +190,10 @@ describe("upgrade artifact reconciliation", () => {
     const workerCommandsText = `${JSON.stringify(workerCommands, null, 2)}\n`;
     await writeFile(workerCommandsPath, workerCommandsText);
     await mkdir(path.join(root, "backend", "worker"), { recursive: true });
-    await writeFile(path.join(root, "backend", "worker", "pyproject.toml"), "[project]\nname = \"python-worker\"\nversion = \"0.1.0\"\n");
+    await writeFile(
+      path.join(root, "backend", "worker", "pyproject.toml"),
+      "[project]\nname = \"python-worker\"\nversion = \"0.1.0\"\n\n[dependency-groups]\ndev = [\"pytest>=8\"]\n",
+    );
     const expandedWorkspaceText = `${JSON.stringify(workspace, null, 2)}\n`;
     await writeFile(workspacePath, expandedWorkspaceText);
 

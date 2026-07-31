@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 import { runCommandAsync } from "../src/process-utils.js";
 import * as processUtils from "../src/process-utils.js";
 import * as workspaceVerify from "../src/workspace/verify.js";
-import { mkdtemp, readdir, readFile } from "node:fs/promises";
+import { mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { exists } from "../src/fs-utils.js";
@@ -69,6 +69,24 @@ describe("bounded command evidence", () => {
     assert.match(output, /\[REDACTED\]/u);
     assert.doesNotMatch(output, new RegExp(secret.slice(-32), "u"));
     assert.doesNotMatch(output, /fedcba9876543210/u);
+  });
+});
+
+describe("command capability probes", () => {
+  it("combines duplicate Windows PATH casings before probing", {
+    skip: process.platform !== "win32",
+  }, async (context) => {
+    const root = await mkdtemp(path.join(os.tmpdir(), "workspace-template-command-probe-"));
+    context.after(() => rm(root, { recursive: true, force: true }));
+    const command = "uv";
+    await writeFile(path.join(root, `${command}.cmd`), "@exit /b 0\r\n", "utf8");
+    const environment = {
+      ...process.env,
+      PATH: path.join(root, "missing"),
+      Path: `${root}${path.delimiter}${process.env.Path ?? ""}`,
+    };
+
+    assert.equal(processUtils.commandExists(command, environment), true);
   });
 });
 
