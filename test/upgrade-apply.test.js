@@ -333,7 +333,8 @@ describe("upgrade apply transaction", () => {
         for (const result of module.results) {
           assert.equal(Buffer.byteLength(result.stdout, "utf8") <= 64, true);
           assert.equal(Buffer.byteLength(result.stderr, "utf8") <= 64, true);
-          assert.equal(result.lease.final.zeroDescendants, true);
+          assert.equal(result.lease.final.zeroDescendants, null);
+          assert.equal(result.lease.final.processExited, true);
         }
       }
     }

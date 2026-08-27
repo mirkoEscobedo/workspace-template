@@ -246,10 +246,10 @@ The disposable checkpoint never copies or exposes source `node_modules`.
 Consequently, JavaScript/TypeScript modules whose verified manifests declare
 dependencies, devDependencies, optionalDependencies, or peerDependencies—and
 selected scripts that explicitly use `node_modules/.bin`—receive a precise
-plan conflict. Dependency-free modules remain eligible. Windows uses a
-native Job Object for whole-tree ownership; POSIX upgrade verification is
-temporarily unavailable and fails before payload or lease creation until
-a native owner for detached sessions is available.
+plan conflict. Dependency-free modules remain eligible. Ordinary checks use
+bounded foreground execution. Native whole-tree ownership is admitted only as
+an optional Governed capability for commands that may detach or outlive their
+host; if unavailable, it becomes an explicit blocker before execution.
 
 Upgrade uses the installed CLI package as the incoming offline catalog. It
 preserves workspace origin and timestamps, active/local presets, structured

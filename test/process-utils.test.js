@@ -91,6 +91,28 @@ describe("command capability probes", () => {
 });
 
 describe("upgrade verification process ownership", () => {
+  it("uses bounded foreground execution without native ownership by default", async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), "workspace-template-runner-foreground-"));
+    const runner = new workspaceVerify.UpgradeVerificationRunner({
+      root,
+      runId: "run-foreground",
+      planId: "plan-foreground",
+      phaseId: "pre-mutation",
+    });
+
+    const result = await runner.run(process.execPath, ["-e", "process.stdout.write('ok')"], {
+      cwd: root,
+      stepId: "ordinary-check",
+    });
+
+    assert.equal(result.status, 0);
+    assert.equal(result.stdout, "ok");
+    assert.equal(result.lease.platformOwnership.kind, "foreground-process");
+    assert.equal(result.lease.final.processExited, true);
+    assert.equal(result.lease.final.zeroDescendants, null);
+    assert.deepEqual(await readdir(path.join(root, ".agent", "leases")), []);
+  });
+
   it("fails closed before payload or lease creation when native ownership is unavailable", async () => {
     const root = await mkdtemp(path.join(os.tmpdir(), "workspace-template-runner-posix-"));
     const sentinel = path.join(root, "payload-ran");
@@ -100,6 +122,7 @@ describe("upgrade verification process ownership", () => {
       planId: "plan-posix-capability",
       phaseId: "pre-mutation",
       platform: "linux",
+      requireNativeOwnership: true,
     });
 
     await assert.rejects(
@@ -134,6 +157,7 @@ describe("upgrade verification process ownership", () => {
         phaseId: "post-apply",
         timeoutMs: 2_000,
         terminationGraceMs: 100,
+        requireNativeOwnership: true,
       });
       const result = await runner.run(process.execPath, ["-e", script], {
         cwd: root,
@@ -180,6 +204,7 @@ describe("upgrade verification process ownership", () => {
         timeoutMs: 15_000,
         terminationGraceMs: 100,
         signal: controller.signal,
+        requireNativeOwnership: true,
       });
       const running = runner.run(process.execPath, ["-e", script], {
         cwd: root,
@@ -221,6 +246,7 @@ describe("upgrade verification process ownership", () => {
         phaseId: "pre-mutation",
         timeoutMs: 5_000,
         terminationGraceMs: 100,
+        requireNativeOwnership: true,
         identityResolver: failure === "identity"
           ? async () => ({ state: "unknown", reason: "injected identity failure" })
           : undefined,

@@ -47,10 +47,12 @@ export class UpgradeVerificationRunner {
     this.leaseWriter = options.leaseWriter ?? writeJson;
     this.environment = options.environment;
     this.platform = options.platform ?? process.platform;
+    this.requireNativeOwnership = options.requireNativeOwnership === true;
   }
 
   async run(command, args, options = {}) {
-    if (this.platform !== "win32") {
+    const requireNativeOwnership = options.requireNativeOwnership ?? this.requireNativeOwnership;
+    if (requireNativeOwnership && this.platform !== "win32") {
       throw new Error("POSIX upgrade verification cannot contain detached-session descendants without a native process owner");
     }
     const leaseDirectory = path.join(this.root, ".agent", "leases");
@@ -66,12 +68,13 @@ export class UpgradeVerificationRunner {
       maxOutputBytes: options.maxOutputBytes ?? this.maxOutputBytes,
       terminationGraceMs: options.terminationGraceMs ?? this.terminationGraceMs,
       ownershipTimeoutMs: options.ownershipTimeoutMs ?? this.ownershipTimeoutMs,
-      ownDescendants: true,
+      ownDescendants: requireNativeOwnership,
+      startBarrier: true,
       signal: options.signal ?? this.signal,
       redactValues: sanitized.redactValues,
       barrierDirectory: path.join(leaseDirectory, ".barriers"),
       onSpawn: async (spawned) => {
-        if (!spawned.ownershipEstablished) {
+        if (requireNativeOwnership && !spawned.ownershipEstablished) {
           throw new Error("Native verification process ownership was not established");
         }
         const identity = await (options.identityResolver ?? this.identityResolver)(spawned.pid);
@@ -97,20 +100,31 @@ export class UpgradeVerificationRunner {
         await this.leaseWriter(leasePath, lease);
       },
     });
+    const completedIdentity = lease
+      ? await (options.identityResolver ?? this.identityResolver)(lease.pid)
+      : { state: "unknown", reason: "verification lease was not created" };
+    const processExited = completedIdentity.state === "absent"
+      || (completedIdentity.state === "alive" && completedIdentity.identity !== lease?.processStartIdentity);
     const final = {
       completedAt: new Date().toISOString(),
       status: result.status,
       signal: result.signal,
       timedOut: result.timedOut,
       aborted: result.aborted,
-      zeroDescendants: result.ownership?.zeroDescendants === true,
-      platformOwnership: result.ownership,
+      processExited,
+      zeroDescendants: requireNativeOwnership ? result.ownership?.zeroDescendants === true : null,
+      platformOwnership: requireNativeOwnership
+        ? result.ownership
+        : { ...lease?.platformOwnership, state: processExited ? "closed" : "unknown" },
     };
     if (lease) {
       lease.final = final;
       await this.leaseWriter(leasePath, lease);
-      if (!final.zeroDescendants) {
+      if (requireNativeOwnership && !final.zeroDescendants) {
         throw new Error(`Verification process cleanup left descendants for PID ${lease.pid}; lease retained at ${leasePath}`);
+      }
+      if (!requireNativeOwnership && !final.processExited) {
+        throw new Error(`Foreground verification process exit could not be established for PID ${lease.pid}; lease retained at ${leasePath}`);
       }
       await rm(leasePath);
     }

@@ -474,10 +474,10 @@ export async function closeOwnedDescendants(rootPid, options = {}) {
 }
 
 export async function runCommandAsync(command, args, options = {}) {
-  if (options.ownDescendants && options.barrierDirectory) {
+  if ((options.ownDescendants || options.startBarrier) && options.barrierDirectory) {
     await mkdir(options.barrierDirectory, { recursive: true });
   }
-  const barrierRoot = options.ownDescendants
+  const barrierRoot = options.ownDescendants || options.startBarrier
     ? await mkdtemp(path.join(options.barrierDirectory ?? os.tmpdir(), "workspace-template-owned-"))
     : undefined;
   const barrier = barrierRoot ? {
@@ -492,7 +492,7 @@ export async function runCommandAsync(command, args, options = {}) {
     const redactValues = options.redactValues ?? [];
     const environment = options.inheritEnv === false ? { ...(options.env ?? {}) } : { ...process.env, ...options.env };
     const executable = spawnSpec(command, args, environment);
-    const wrappedSpec = options.ownDescendants
+    const wrappedSpec = barrier
       ? {
           ...executable,
           barrier,
@@ -515,7 +515,7 @@ export async function runCommandAsync(command, args, options = {}) {
           command: "powershell.exe",
           args: ["-NoProfile", "-NonInteractive", "-Command", WINDOWS_JOB_WRAPPER],
         }
-      : options.ownDescendants
+      : barrier
         ? { command: process.execPath, args: [spawnWrapper, encodedWrappedSpec] }
         : executable;
     const child = spawn(owned.command, owned.args, {
@@ -635,15 +635,17 @@ export async function runCommandAsync(command, args, options = {}) {
     spawnRegistration = (async () => {
       if (barrier) {
         await waitForFile(barrier.nativeReadyPath, child, options.ownershipTimeoutMs ?? 5_000);
-        ownershipEstablished = true;
+        ownershipEstablished = options.ownDescendants === true;
       }
       if (options.onSpawn) {
         await options.onSpawn({
           pid: child.pid,
           ownershipEstablished,
-          platformOwnership: process.platform === "win32"
-            ? { kind: "windows-job-object", ownerPid: child.pid, state: "established" }
-            : { kind: "posix-process-group", groupId: child.pid, state: "established" },
+          platformOwnership: options.ownDescendants
+            ? process.platform === "win32"
+              ? { kind: "windows-job-object", ownerPid: child.pid, state: "established" }
+              : { kind: "posix-process-group", groupId: child.pid, state: "established" }
+            : { kind: "foreground-process", ownerPid: child.pid, state: "running" },
         });
       }
       await capturePosixMembers();

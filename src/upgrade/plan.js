@@ -183,10 +183,10 @@ export function assertLocalVerificationAuthority(authority) {
   if (violations.length > 0) throw new Error(`Upgrade verification exceeds local authority:\n- ${violations.join("\n- ")}`);
 }
 
-export function upgradeVerificationPlatformConflict(platform = process.platform) {
-  return platform === "win32"
-    ? null
-    : "POSIX upgrade verification cannot contain detached-session descendants without a native process owner";
+export function upgradeVerificationPlatformConflict(platform = process.platform, requiresNativeOwnership = false) {
+  return requiresNativeOwnership && platform !== "win32"
+    ? "POSIX governed verification cannot contain detached-session descendants without a native process owner"
+    : null;
 }
 
 export function defaultUpgradePlanPath(plan) {

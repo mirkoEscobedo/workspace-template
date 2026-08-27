@@ -17,6 +17,9 @@ All notable changes to this package are documented here.
   one-release deprecation shims.
 - Made runtime debugging and interactive GUI inspection conditional read-only
   reviewer capabilities, with `INSUFFICIENT_EVIDENCE` when unavailable.
+- Replaced universal native process ownership for ordinary verification with a
+  bounded foreground path; native whole-tree containment is now an optional
+  Governed capability.
 - Introduced configuration version 4 and profile version 3. Upgrades map older
   Frontier configurations to `execution.method: adaptive` and
   `execution.defaultMode: direct` through the sealed plan/apply transaction.

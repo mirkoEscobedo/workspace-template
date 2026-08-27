@@ -163,9 +163,11 @@ The isolated upgrade checkpoint deliberately excludes source `node_modules`.
 For this baseline, a verified JavaScript/TypeScript manifest with any declared
 dependency section, or a selected verification script that names
 `node_modules/.bin`, blocks planning instead of running an
-incomplete check. Native whole-tree upgrade verification is currently supported
-only by the Windows Job Object owner; POSIX upgrade verification fails before
-payload or lease creation when detached-session containment is unavailable.
+incomplete check. Ordinary upgrade checks use bounded foreground processes on
+every supported host. Native whole-tree ownership is an optional Governed
+capability only for commands declared capable of detaching or outliving their
+host. When that capability is required but unavailable, verification fails
+before execution and records an explicit manual requirement.
 
 For fair A/B experiments, create sibling branches or worktrees from the same
 feature baseline, activate a different preset on each, and run equivalent

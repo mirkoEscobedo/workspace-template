@@ -143,10 +143,11 @@ describe("workspace upgrade", () => {
     assert.equal(await exists(path.join(root, "node_modules")), false);
   });
 
-  it("reports the fail-closed POSIX upgrade verification capability conflict", () => {
+  it("uses foreground verification cross-platform and fails closed only for governed native ownership", () => {
+    assert.equal(upgradePlan.upgradeVerificationPlatformConflict("linux"), null);
     assert.match(
-      upgradePlan.upgradeVerificationPlatformConflict("linux"),
-      /POSIX.*detached-session.*native process owner/iu,
+      upgradePlan.upgradeVerificationPlatformConflict("linux", true),
+      /POSIX.*governed.*native process owner/iu,
     );
     assert.equal(upgradePlan.upgradeVerificationPlatformConflict("win32"), null);
   });
@@ -156,9 +157,7 @@ describe("workspace upgrade", () => {
     const posix = await upgradePlan.buildUpgradePlan(root, { allowNetwork: true, platform: "linux" });
     const windows = await upgradePlan.buildUpgradePlan(root, { allowNetwork: true, platform: "win32" });
 
-    assert.equal(posix.canApply, false);
-    assert.equal(posix.conflicts.some((item) =>
-      /POSIX.*detached-session.*native process owner/iu.test(item)), true);
+    assert.equal(posix.canApply, true, posix.conflicts.join("\n"));
     assert.equal(windows.canApply, true);
   });
 
