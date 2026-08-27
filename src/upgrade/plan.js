@@ -159,6 +159,16 @@ async function verificationAuthorityEntry(root, module) {
       await readFile(manifestPath, "utf8"),
     ));
   }
+  if (manifestPath
+    && ["dart", "flutter"].includes(module.project)
+    && ["dart", "flutter"].includes(module.packageManager)
+    && await exists(manifestPath)) {
+    dependencyInstall = {
+      command: module.packageManager,
+      args: ["pub", "get"],
+      cwd: module.path,
+    };
+  }
   return {
     id: module.id,
     path: module.path,

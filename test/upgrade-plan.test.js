@@ -143,6 +143,27 @@ describe("workspace upgrade", () => {
     assert.equal(await exists(path.join(root, "node_modules")), false);
   });
 
+  it("seals dependency resolution for disposable Flutter verification", async (context) => {
+    const root = await temporaryDirectory(context, "workspace-template-flutter-authority-");
+    await writeFile(path.join(root, "pubspec.yaml"), "name: canary\ndependencies:\n  flutter:\n    sdk: flutter\n");
+    const authority = await upgradePlan.upgradeVerificationAuthority(root, {
+      modules: [{
+        id: "canary",
+        path: ".",
+        manifest: "pubspec.yaml",
+        project: "flutter",
+        packageManager: "flutter",
+        commands: { fullSteps: [{ command: "flutter", args: ["analyze"] }] },
+      }],
+      rootModule: null,
+    });
+    assert.deepEqual(authority.modules[0].dependencyInstall, {
+      command: "flutter",
+      args: ["pub", "get"],
+      cwd: ".",
+    });
+  });
+
   it("uses foreground verification cross-platform and fails closed only for governed native ownership", () => {
     assert.equal(upgradePlan.upgradeVerificationPlatformConflict("linux"), null);
     assert.match(
