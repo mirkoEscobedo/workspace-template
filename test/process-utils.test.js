@@ -73,6 +73,20 @@ describe("bounded command evidence", () => {
 });
 
 describe("command capability probes", () => {
+  it("launches the known Dart batch shim without a PowerShell wrapper", {
+    skip: process.platform !== "win32",
+  }, async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), "workspace-template-dart-shim-"));
+    await writeFile(path.join(root, "dart.bat"), "@echo off\r\necho dart-shim:%1\r\n");
+    const result = await runCommandAsync("dart", ["checked"], {
+      inheritEnv: false,
+      env: { Path: root, ComSpec: process.env.ComSpec ?? process.env.COMSPEC ?? "cmd.exe" },
+      timeout: 5_000,
+    });
+    assert.equal(result.status, 0, result.stderr || result.error?.message);
+    assert.match(result.stdout, /dart-shim:checked/u);
+  });
+
   it("combines duplicate Windows PATH casings before probing", {
     skip: process.platform !== "win32",
   }, async (context) => {

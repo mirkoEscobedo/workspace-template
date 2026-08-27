@@ -126,7 +126,7 @@ exit $ownedExitCode
 
 function spawnSpec(command, args, environment = process.env) {
   if (process.platform !== "win32") return { command, args };
-  const base = path.basename(command).toLowerCase().replace(/\.(?:cmd|exe)$/u, "");
+  const base = path.basename(command).toLowerCase().replace(/\.(?:bat|cmd|exe)$/u, "");
   const nodeRoot = path.dirname(process.execPath);
   const npmCli = base === "npm"
     ? environment.npm_execpath ?? path.join(nodeRoot, "node_modules", "npm", "bin", "npm-cli.js")
@@ -135,8 +135,27 @@ function spawnSpec(command, args, environment = process.env) {
       : ["pnpm", "pnpx", "yarn", "yarnpkg"].includes(base)
         ? path.join(nodeRoot, "node_modules", "corepack", "dist", `${base}.js`)
         : null;
-  if (!npmCli || !existsSync(npmCli)) return { command, args };
-  return { command: process.execPath, args: [npmCli, ...args] };
+  if (npmCli && existsSync(npmCli)) return { command: process.execPath, args: [npmCli, ...args] };
+  if (["dart", "flutter"].includes(base)) {
+    const pathValue = Object.entries(environment)
+      .find(([key, value]) => key.toUpperCase() === "PATH" && typeof value === "string")?.[1] ?? "";
+    const explicit = /[\\/]/u.test(command) ? [path.resolve(command)] : [];
+    const candidates = [
+      ...explicit,
+      ...pathValue.split(path.delimiter).filter(Boolean).flatMap((directory) => [
+        path.join(directory.replace(/^"(.*)"$/u, "$1"), `${base}.bat`),
+        path.join(directory.replace(/^"(.*)"$/u, "$1"), `${base}.cmd`),
+      ]),
+    ];
+    const batch = candidates.find((candidate) => existsSync(candidate));
+    if (batch) {
+      const commandInterpreter = Object.entries(environment)
+        .find(([key, value]) => key.toUpperCase() === "COMSPEC" && typeof value === "string")?.[1]
+        ?? "cmd.exe";
+      return { command: commandInterpreter, args: ["/d", "/s", "/c", batch, ...args] };
+    }
+  }
+  return { command, args };
 }
 
 export function commandExists(command, environment = process.env) {
