@@ -1,6 +1,6 @@
 # Usage guide
 
-This guide covers new-project creation, safe repository adoption, swappable agent presets, local Frontier execution, workspace verification, explicit tooling changes, skill upgrades, source restructuring, and bounded architecture alignment.
+This guide covers new-project creation, safe repository adoption, Adaptive Delivery, swappable agent presets, workspace verification, explicit tooling changes, skill upgrades, source restructuring, and bounded architecture alignment.
 
 ## 1. Choose `create` or `adopt`
 
@@ -150,50 +150,44 @@ npx workspace-template adopt . \
 
 Use `--trust-current-dependencies` only when the live checkout/evidence proves the active ticket’s transitive dependencies already passed. Otherwise the generated frontier remains conservative.
 
-## 4. Use Wayfinder and the local Frontier
+## 4. Use Adaptive Delivery
 
 The standard local flow is:
 
 ```text
-Wayfinder map
-  → compiled ticket contracts
-  → ready frontier
-  → read-only preflight
-  → implementation
-  → independent review axes
-  → targeted repair
-  → serial integration
-  → next frontier
+intake → route → plan → implement → verify → review → accept
+                              ↘ diagnose/inspect → repair → verify
+                              ↘ replan → alternate/reduce/defer/abort
 ```
 
 ### Repository planning prompt
 
 ```text
-Use the repository Wayfinder skill for this goal.
-Write the durable planning map under docs/agent/wayfinding/<effort>/.
-Keep source-backed facts, user decisions, inferences, unresolved decisions,
-authority gates, evidence, and fog distinct. Do not compile tickets until
-route-changing decisions are resolved.
+Use the repository delivery-loop skill for this goal. Select Direct unless the
+work genuinely needs several durable vertical slices or an enumerated Governed
+condition. State acceptance checks and minimum sufficient evidence before
+implementation.
 ```
 
 Then:
 
 ```text
-Use Compile Master Plan on the approved Wayfinder map. Produce vertical local
-tickets with dependencies, conflict keys, risk lanes, expected write sets,
-verification levels, review axes, architecture budgets, and stop conditions.
+For Ticketed or Governed work only, use Compile Master Plan to record compact
+tracer-bullet outcomes and one current ticket. Do not generate a dependency
+graph or executable validators.
 ```
 
 Then:
 
 ```text
-Use Execute Frontier. Continue from local files in this coordinator session.
-Parallelize read-only investigation and independent review; keep one writer by
-default and land accepted work serially. Continue until completion or a real
-human/contradiction/safety gate.
+Use Execute Delivery. Enforce at most two semantic repairs and one explicitly
+classified flaky rerun. A repeated failure without new causal evidence goes to
+replanning, which must choose alternate route, reduced scope, defer, or abort.
 ```
 
-Frontier does not require an issue tracker. A repository may mirror contracts into issues later, but local files remain sufficient.
+Wayfinder is exceptional: use it only when a material product or architecture
+choice cannot be derived from repository evidence. It writes one decision memo
+and stops; it does not compile tickets or automatically resume execution.
 
 ## 5. Configure Codex and OpenCode
 
@@ -601,6 +595,6 @@ npm test
 npm run check
 npm run pack:check
 npm pack
-npm run test:packed -- ./workspace-template-0.6.1.tgz
+npm run test:packed -- ./workspace-template-0.7.0.tgz
 npm publish --dry-run --ignore-scripts
 ```

@@ -154,9 +154,23 @@ export async function planUpgradeArtifacts(snapshot, options = {}) {
     ...presetConfig,
   };
   config.hostBundles = preserveHostBundles ? "preserve" : "managed";
-  config.version = 3;
+  const adaptiveConfig = createAgenticConfig({
+    mode: snapshot.mode,
+    project: config.project,
+    style: config.style,
+    tdd: config.tdd,
+    packageManager: config.packageManager,
+    agents: config.agentTargets ?? [],
+    originalTimestamp: originTimestamp,
+    docs: config.features?.durableAgentDocs ?? true,
+    tickets: config.features?.ticketContracts ?? true,
+    presetState,
+    hostBundles: config.hostBundles,
+  });
+  config.version = 4;
   config.generatorVersion = PACKAGE_VERSION;
   config.mode = snapshot.mode;
+  config.execution = adaptiveConfig.execution;
   const presetProfile = presetProfileOperation
     ? JSON.parse(Buffer.from(presetProfileOperation.content, "base64").toString("utf8"))
     : structuredClone(snapshot.profile);
@@ -175,8 +189,9 @@ export async function planUpgradeArtifacts(snapshot, options = {}) {
   if (snapshot.profile.version < 2 || typeof profile.architecture !== "object" || profile.architecture === null) {
     profile.architecture = profileBase.architecture;
   }
-  profile.version = 2;
+  profile.version = 3;
   profile.mode = snapshot.mode;
+  profile.execution = profileBase.execution;
   const baseArtifacts = [
     { path: ".agentic/README.md", content: agenticReadme(snapshot.mode) },
     { path: ".agentic/dependency-snapshot.md", content: dependencyNote(config.project) },

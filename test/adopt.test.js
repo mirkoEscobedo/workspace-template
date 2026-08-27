@@ -90,7 +90,7 @@ function emptyBase64Hash() {
 }
 
 describe("adoptProject", () => {
-  it("plans a safe Frontier retrofit without touching application files", async () => {
+  it("plans a safe adaptive-delivery retrofit without touching application files", async () => {
     const root = await existingTypeScriptRepo();
     const result = await adoptProject({ ...adoptOptions(root), dryRun: true });
     const { plan } = result;
@@ -98,6 +98,8 @@ describe("adoptProject", () => {
     assert.equal(plan.canApply, true, plan.conflicts.join("\n"));
     const paths = new Set(plan.operations.map((operation) => operation.path));
     assert.equal(paths.has(".agentic/skills/wayfinder/SKILL.md"), true);
+    assert.equal(paths.has(".agentic/skills/delivery-loop/SKILL.md"), true);
+    assert.equal(paths.has(".agentic/skills/review-change/SKILL.md"), true);
     assert.equal(paths.has(".agentic/skills/compile-master-plan/SKILL.md"), true);
     assert.equal(paths.has(".codex/config.toml"), true);
     assert.equal(paths.has("opencode.json"), true);
@@ -122,6 +124,10 @@ describe("adoptProject", () => {
     }
     assert.equal(await exists(path.join(root, ".agentic", "proposals", "AGENTS.md")), true);
     assert.equal(await exists(path.join(root, ".agentic", "skills", "execute-frontier", "SKILL.md")), true);
+    assert.equal(await exists(path.join(root, ".agentic", "skills", "execute-delivery", "SKILL.md")), true);
+    const adaptiveConfig = JSON.parse(await readFile(path.join(root, ".agentic", "config.json"), "utf8"));
+    assert.equal(adaptiveConfig.execution.method, "adaptive");
+    assert.equal(adaptiveConfig.execution.defaultMode, "direct");
     assert.equal(await exists(path.join(root, ".agents", "skills", "wayfinder", "SKILL.md")), true);
     assert.equal(await exists(path.join(root, ".opencode", "skills", "wayfinder", "SKILL.md")), true);
     assert.equal(await exists(path.join(root, "docs", "tickets", "current-push", "frontier.json")), true);

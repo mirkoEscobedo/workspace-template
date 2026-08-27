@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Adaptive Delivery Review Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "verdict", "evidence_level", "inspection_capability", "findings", "evidence_checked", "unresolved_items", "next_transition"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "verdict": {"enum": ["PASS", "FAIL", "INSUFFICIENT_EVIDENCE"]},
+    "evidence_level": {"enum": ["R0", "R1", "R2", "R3"]},
+    "inspection_capability": {"type": ["string", "null"], "enum": [null, "runtime-debug", "interactive-gui"]},
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["severity", "summary", "pass_condition"],
+        "properties": {
+          "severity": {"enum": ["BLOCKING", "IMPORTANT", "MINOR"]},
+          "summary": {"type": "string", "minLength": 1},
+          "reference": {"type": "string"},
+          "location": {"type": "string"},
+          "consequence": {"type": "string"},
+          "pass_condition": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "evidence_checked": {"type": "array", "items": {"type": "string"}},
+    "unresolved_items": {"type": "array", "items": {"type": "string"}},
+    "next_transition": {"enum": ["ACCEPTED", "DIAGNOSING", "INSPECTING", "REPLANNING"]}
+  }
+}

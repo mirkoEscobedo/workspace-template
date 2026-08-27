@@ -1,11 +1,14 @@
 # workspace-template
 
-`workspace-template` creates a new agent-ready project or safely retrofits an existing repository into the **Frontier Loop** workflow.
+`workspace-template` creates a new agent-ready project or safely retrofits an existing repository into an **Adaptive Delivery** workflow.
 
-Version 0.6.1 combines:
+Version 0.7.0 is a methodology-rescue release. It combines:
 
-- Wayfinder planning and dependency-frontier ticket compilation;
-- one continuous, local-file-based coordinator workflow;
+- Direct delivery by default, with Ticketed and Governed modes admitted only by explicit risk or durability signals;
+- a bounded execution state machine with two semantic repairs, one classified flaky rerun, and explicit replanning outcomes;
+- independent read-only review with a static-to-runtime evidence ladder;
+- conditional runtime-debug and interactive-GUI inspection when deterministic evidence cannot establish correctness;
+- one compact current ticket for durable work instead of generated ticket or validator graphs;
 - project-owned Agent Skills and conflict-safe harness projections;
 - a default `sol-only` route using GPT-5.6 Sol high for every role, plus the historical `sol-codex` split using GPT-5.3 Codex high natively and the matching GPT-5.3 Codex Spark model through OpenCode for delegated engineering roles;
 - immutable inspect → plan → approve → apply → verify transactions;
@@ -14,15 +17,14 @@ Version 0.6.1 combines:
 - three-way upgrades for locally editable skills;
 - guarded source-tree restructuring;
 - bounded, one-slice-at-a-time architecture alignment;
-- test-topology and process-lifecycle controls.
+- test-topology controls and optional process-lifecycle/integration specialists.
 
-The 0.6.1 maintenance release also makes Windows/LF upgrade reconciliation
-portable, preserves product-owned host bundles, makes disabled projections a
-true no-write boundary, rejects executable tickets with vacuous verification,
-and excludes finalized lease receipts from dirty-state checks without ignoring
-open leases.
-
-The Frontier Loop does **not** require GitHub issues, webhooks, a repository watcher, or several independent chats. One coordinator session reads and updates local repository artifacts, delegates bounded roles when the harness supports them, lands approved work serially, and recomputes the next ready frontier.
+Frontier/Wayfinder execution is no longer the default. The legacy `frontier-loop`,
+`execute-frontier`, `ticket-review`, and `repair-ticket` skills remain for one
+release as compatibility shims that route into Adaptive Delivery and emit
+deprecation guidance. Historical ticket graphs remain history; failed checks do
+not generate successor tickets, decision files, validation scripts, or evidence
+trees.
 
 ## Requirements
 
@@ -79,29 +81,32 @@ Adoption preserves application source, tests, dependency manifests, lockfiles, `
 
 Use `--host-bundles preserve` when the repository already owns its Codex/OpenCode host assets. The sealed adoption plan then contains no operations or collision checks under `.agents/`, `.codex/`, `.opencode/`, or product-owned `opencode.json`; the default `--host-bundles managed` behavior is unchanged. Subsequent implicit `sync` and `skills update` projection steps report a successful `no-projection` result and leave those paths byte-identical. Explicit attempts to target protected projections fail before writing.
 
-## Frontier Loop
+## Adaptive Delivery
 
 The generated workflow is:
 
 ```text
-Wayfinder
-  → Compile Master Plan
-  → compute local dependency frontier
-  → parallel read-only preflight
-  → one writer by default
-  → independent review lenses
-  → targeted repair
-  → serial integration
-  → recompute frontier
+INTAKE → ROUTED → PLANNED → IMPLEMENTING → VERIFYING → REVIEWING → ACCEPTED
+                                          ↘ DIAGNOSING / INSPECTING
+                                             → REPAIRING → VERIFYING
+                                             → REPLANNING → redirect/defer/abort
 ```
 
-The coordinator may continue through all ordinary local tickets in one conversation. It stops at completion, a human authority gate, a material contradiction, unsafe scope expansion, or unrecoverable verification.
+`delivery-loop` is the normal entry point. Ordinary features, fixes, refactors,
+and bounded investigations select Direct mode and create no process artifacts.
+Multi-session work or several independently useful vertical slices select
+Ticketed mode. Governed mode is reserved for irreversible operations,
+credentials/security boundaries, financial authority, destructive migrations,
+native process ownership, or production external side effects. Ambiguity alone
+does not select Governed.
 
 ### Planning roles
 
-- **Wayfinder** resolves the destination, completion proof, decisions, constraints, authority gates, evidence, and remaining fog.
-- **Compile Master Plan** converts a stable route into vertical ticket contracts with dependencies, conflict keys, risk lanes, verification levels, architecture budgets, and stop conditions.
-- **Execute Frontier** runs the ready local frontier. Read-only investigation and independent reviews may be parallel; overlapping mutation and authority transitions remain serialized.
+- **Delivery Loop** selects the least-governed safe mode and defines acceptance evidence.
+- **Execute Delivery** coordinates the bounded state machine; it cannot mint extra work to obtain retries.
+- **Review Change** returns `PASS`, `FAIL`, or `INSUFFICIENT_EVIDENCE` and the permitted transition. It never repairs source or expands scope.
+- **Repair Change** requires a new falsifiable hypothesis and stops after two semantic repair rounds.
+- **Wayfinder** is admitted only for a material product or architecture decision that repository evidence cannot resolve. It produces one decision memo and does not resume execution automatically.
 
 ### Swappable agent presets
 
@@ -167,11 +172,11 @@ feature baseline, activate a different preset on each, and run equivalent
 tasks and verification. Switching a preset never resets code or commits from a
 previous attempt.
 
-Generated Codex roles are under `.codex/agents/`; generated OpenCode role prompts are under `.opencode/prompts/frontier-loop/`. Planners and reviewers are read-only. Write access is limited to implementation, repair, and integration roles. The default child-agent cap is three.
+Generated Codex roles are under `.codex/agents/`; generated OpenCode role prompts remain under `.opencode/prompts/frontier-loop/` for host compatibility. Planners and reviewers are read-only. Write access is limited to implementation, repair, and integration roles. The default child-agent cap is three.
 
 ## Wayfinder
 
-- `assets/skills/wayfinder/SKILL.md` is the modular repository edition. It writes durable planning artifacts and delegates ticket compilation to `compile-master-plan`.
+- `assets/skills/wayfinder/SKILL.md` contains a strict admission test. If admitted, it writes one concise decision memo. It does not compile a ticket pack, create validation code, or automatically continue execution.
 
 ## Generated project shape
 
@@ -306,7 +311,7 @@ npm test
 npm run check
 npm run pack:check
 npm pack
-npm run test:packed -- ./workspace-template-0.6.1.tgz
+npm run test:packed -- ./workspace-template-0.7.0.tgz
 npm publish --dry-run --ignore-scripts
 ```
 
@@ -317,12 +322,14 @@ See [the validation record](docs/validation.md) for the exact release evidence a
 ## Documentation
 
 - [Usage guide](docs/usage.md)
+- [Adaptive Delivery guide](docs/guides/adaptive-delivery.md)
 - [HTML user guide](docs/guides/frontier-loop-user-guide.html)
 - [CLI architecture](docs/architecture/cli-design.md)
 - [Frontier operating model](docs/architecture/frontier-loop.md)
 - [Advanced operation contracts](docs/architecture/advanced-operations.md)
 - [Skill-system architecture](docs/architecture/skill-system.md)
 - [Validation record](docs/validation.md)
+- [0.7.0 release notes](docs/releases/0.7.0.md)
 - [0.6.1 release notes](docs/releases/0.6.1.md)
 - [0.6.0 release notes](docs/releases/0.6.0.md)
 - [Versioned retrofit objective](docs/plans/0.6.0-existing-repository-retrofitting-plan.md)

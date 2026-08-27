@@ -1,0 +1,10 @@
+[
+  {"query":"Review this completed diff and its test evidence","should_trigger":true},
+  {"query":"Check whether this runtime fix is actually correct","should_trigger":true},
+  {"query":"Validate this native GUI behavior after implementation","should_trigger":true},
+  {"query":"Independently check this lifecycle fix and use runtime inspection if needed","should_trigger":true},
+  {"query":"Implement the feature","should_trigger":false},
+  {"query":"Fix the review findings","should_trigger":false},
+  {"query":"Plan a large product redesign","should_trigger":false},
+  {"query":"Run the existing test suite and report the result","should_trigger":false}
+]

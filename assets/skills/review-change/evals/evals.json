@@ -1,0 +1,20 @@
+{
+  "skill_name": "review-change",
+  "evals": [
+    {
+      "id": "ordinary-static",
+      "prompt": "Review a small pure parsing change with focused tests and a clean full suite.",
+      "expected_output": "Stop at deterministic and independent static review without requesting debugger or computer-use capability, then return a schema-compatible verdict."
+    },
+    {
+      "id": "runtime-state",
+      "prompt": "Review a concurrency fix whose tests pass but whose lifecycle state cannot be established from the diff.",
+      "expected_output": "Return INSUFFICIENT_EVIDENCE and request the runtime-debug capability with a bounded reproducer; do not edit source or grant approval."
+    },
+    {
+      "id": "native-gui",
+      "prompt": "Review a game dialog interaction that has no automation or structured accessibility seam.",
+      "expected_output": "Request interactive-gui inspection, capture reproducible actions and visual evidence, and report any remaining manual obligation without treating GUI control as repair authority."
+    }
+  ]
+}

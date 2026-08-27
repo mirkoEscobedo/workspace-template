@@ -38,15 +38,19 @@ for (const required of ["assets", "bin", "docs", "scripts", "src"]) {
 
 const expectedRepositorySkills = [
   "compile-master-plan",
+  "delivery-loop",
   "diagnose",
+  "execute-delivery",
   "execute-frontier",
   "frontier-loop",
   "implementation-style",
   "integrate-wave",
   "process-lifecycle",
+  "repair-change",
   "repair-ticket",
   "retrofit-agent-docs",
   "retrofit-ticket-pack",
+  "review-change",
   "tdd",
   "test-topology",
   "ticket-implementer",
@@ -156,7 +160,9 @@ for (const [relative, requiredFragments] of Object.entries({
 }
 
 for (const relative of [
+  "docs/guides/adaptive-delivery.md",
   "docs/guides/frontier-loop-user-guide.html",
+  "docs/releases/0.7.0.md",
   "docs/plans/0.6.0-existing-repository-retrofitting-plan.md",
   "scripts/packed-smoke.js",
 ]) {
@@ -180,5 +186,5 @@ if (failures.length > 0) {
   console.error(failures.map((failure) => `- ${failure}`).join("\n"));
   process.exitCode = 1;
 } else {
-  console.log(`Self-check passed: ${repositorySkillReport.skills.length} repository skills, source/script syntax, imports, harness defaults, release assets, and Python fallbacks validated.`);
+  console.log(`Self-check passed: ${repositorySkillReport.skills.length} repository skills, adaptive delivery assets, source/script syntax, imports, harness defaults, release assets, and Python fallbacks validated.`);
 }

@@ -120,6 +120,17 @@ describe("upgrade legacy compatibility", () => {
       assert.equal(plan.canApply, true, plan.conflicts.join("\n"));
       await applyWithVerifier(plan, async () => ({ ok: true }));
       assert.equal((await doctorProject(root)).ok, true);
+      const upgradedConfig = JSON.parse(await readFile(files.config, "utf8"));
+      const upgradedProfile = JSON.parse(await readFile(files.profile, "utf8"));
+      assert.equal(upgradedConfig.version, 4);
+      assert.equal(upgradedConfig.execution.method, "adaptive");
+      assert.equal(upgradedConfig.execution.defaultMode, "direct");
+      assert.deepEqual(upgradedConfig.execution.limits, {
+        semanticRepairs: 2,
+        flakyReruns: 1,
+      });
+      assert.equal(upgradedProfile.version, 3);
+      assert.equal(upgradedProfile.execution.method, "adaptive");
       assert.deepEqual(await readFile(path.join(root, "package.json")), productBefore);
       assert.equal(await hashDirectory(path.join(root, "docs", "agent")), memoryBefore);
       const second = await buildSupportedUpgradePlan(root, {

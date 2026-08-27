@@ -76,11 +76,11 @@ describe("workspace upgrade", () => {
     assert.equal(first.command, "upgrade");
     assert.equal(first.planId, second.planId);
     assert.equal(first.metadata.upgrade.mode, "generated");
-    assert.equal(first.metadata.upgrade.fromVersion, "0.6.1");
-    assert.equal(first.metadata.upgrade.toVersion, "0.6.1");
+    assert.equal(first.metadata.upgrade.fromVersion, "0.7.0");
+    assert.equal(first.metadata.upgrade.toVersion, "0.7.0");
     assert.equal(first.metadata.upgrade.status, "current");
     assert.equal(first.metadata.upgrade.operationCount, 0);
-    assert.match(defaultUpgradePlanPath(first), /^\.agentic\/plans\/upgrades\/upgrade-0\.6\.1-to-0\.6\.1-[a-f0-9]{12}\.json$/);
+    assert.match(defaultUpgradePlanPath(first), /^\.agentic\/plans\/upgrades\/upgrade-0\.7\.0-to-0\.7\.0-[a-f0-9]{12}\.json$/);
   });
 
   it("seals explicit unconfined verification approval in the reviewed plan", async (context) => {

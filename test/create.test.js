@@ -46,6 +46,17 @@ describe("createProject", () => {
         await exists(path.join(target, ".agentic", "skills", "implementation-style", "SKILL.md")),
         true,
       );
+      assert.equal(await exists(path.join(target, ".agentic", "skills", "delivery-loop", "SKILL.md")), true);
+      assert.equal(await exists(path.join(target, ".agentic", "skills", "review-change", "SKILL.md")), true);
+
+      const config = JSON.parse(await readFile(path.join(target, ".agentic", "config.json"), "utf8"));
+      const profile = JSON.parse(await readFile(path.join(target, ".agentic", "profile.json"), "utf8"));
+      assert.equal(config.version, 4);
+      assert.equal(profile.version, 3);
+      assert.equal(config.execution.method, "adaptive");
+      assert.equal(config.execution.defaultMode, "direct");
+      assert.equal(config.execution.limits.semanticRepairs, 2);
+      assert.equal(config.execution.limits.flakyReruns, 1);
 
       const report = await doctorProject(target);
       assert.deepEqual(report.errors, [], report.errors.join("\n"));

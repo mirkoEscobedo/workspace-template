@@ -1,7 +1,7 @@
 {
   "name": "workspace-template",
-  "version": "0.6.1",
-  "description": "Create or safely retrofit agentic software workspaces with Frontier Loop planning, project-owned skills, Codex/OpenCode roles, immutable plans, and guarded migration tools.",
+  "version": "0.7.0",
+  "description": "Create or safely retrofit agentic software workspaces with adaptive delivery, bounded review and repair, project-owned skills, and guarded migrations.",
   "type": "module",
   "bin": {
     "workspace-template": "bin/workspace-template.js"
@@ -42,6 +42,7 @@
     "architecture-migration",
     "codex",
     "loop",
+    "adaptive-delivery",
     "frontier-loop",
     "monorepo",
     "skills",

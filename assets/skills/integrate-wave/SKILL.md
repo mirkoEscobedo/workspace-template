@@ -1,14 +1,14 @@
 ---
 name: integrate-wave
-description: "Use when passed Frontier Loop ticket candidates must be neutrally integrated in dependency order with actual-scope checks, landing verification, mechanical conflict handling, and serial commits or cherry-picks."
+description: "Integrate two or more independently produced, already reviewed candidates in dependency order with mechanical conflict handling and composed verification. Use only for an actual multi-branch Ticketed or Governed wave."
 compatibility: ChatGPT Skills, Codex, OpenCode
 metadata:
-  version: "0.6.0"
+  version: "0.7.0"
 ---
 
 # Integrate Wave
 
-The integrator owns landing mechanics, not product redesign.
+This is an optional specialist skill. Direct delivery and serial work on one branch do not need an integration wave. The integrator owns landing mechanics, not product redesign.
 
 1. Pin the target branch and wave base commit.
 2. For each candidate in dependency order, verify:
@@ -22,5 +22,5 @@ The integrator owns landing mechanics, not product redesign.
 5. Run wave L3 checks after related candidates are composed.
 6. Run L4 where policy requires it, especially Lane 3 landing.
 7. Commit/record each ticket separately unless a predeclared integration branch requires a final integrate ticket.
-8. Update ledger, frontier, and minor-finding rollup.
+8. Update the compact current-work record when one exists; never create or extend a legacy frontier.
 9. Finish with a clean worktree and zero owned processes.

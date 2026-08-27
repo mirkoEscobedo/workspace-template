@@ -1,0 +1,10 @@
+[
+  {"query":"Implement this ordinary bug fix and verify it","should_trigger":true},
+  {"query":"Resume this multi-session repository migration","should_trigger":true},
+  {"query":"Apply this destructive production database migration","should_trigger":true},
+  {"query":"Implement these three independently useful vertical slices over several sessions","should_trigger":true},
+  {"query":"Review this diff without changing it","should_trigger":false},
+  {"query":"Explain how this parser works","should_trigger":false},
+  {"query":"Create a product decision map before implementation","should_trigger":false},
+  {"query":"Only diagnose this failing test; do not fix it","should_trigger":false}
+]

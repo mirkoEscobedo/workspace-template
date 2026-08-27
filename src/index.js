@@ -4,6 +4,15 @@ export { parseArgs } from "./args.js";
 export { createProject } from "./create.js";
 export { doctorProject, validateSkillTree } from "./doctor.js";
 export { inspectRepository } from "./inspection.js";
+export {
+  DELIVERY_MODES,
+  DELIVERY_POLICY,
+  DELIVERY_STATES,
+  createDeliveryRun,
+  selectDeliveryMode,
+  transitionDelivery,
+  validateReviewReport,
+} from "./delivery.js";
 export { syncSkills } from "./sync.js";
 export { discoverWorkspace } from "./workspace/discover.js";
 export { verifyWorkspace } from "./workspace/verify.js";

@@ -1,0 +1,20 @@
+version: 1
+method: adaptive
+default_mode: direct
+modes:
+  direct:
+    durable_artifacts: none
+  ticketed:
+    durable_artifacts: compact-plan-and-current-ticket
+  governed:
+    durable_artifacts: contract-state-review-and-authority-receipts
+limits:
+  semantic_repairs: 2
+  flaky_reruns: 1
+review:
+  inspection: adaptive
+  capabilities:
+    - runtime-debug
+    - interactive-gui
+  source_mutation: forbidden
+history: preserve

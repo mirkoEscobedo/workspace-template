@@ -43,12 +43,12 @@ describe("project-owned skill upgrades", () => {
     const localFile = path.join(root, ".agentic", "skills", "wayfinder", "SKILL.md");
     const incomingFile = path.join(incoming, "wayfinder", "SKILL.md");
     await writeFile(localFile, (await readFile(localFile, "utf8")).replace(
-      "- One decision per file.",
-      "- One decision per file; retain this local project convention.",
+      "Otherwise return to `delivery-loop`; ambiguity, unfamiliar code, or a failed implementation is not sufficient admission.",
+      "Otherwise return to `delivery-loop`; ambiguity, unfamiliar code, or a failed implementation is not sufficient admission. Retain this local project convention.",
     ));
     await writeFile(incomingFile, (await readFile(incomingFile, "utf8")).replace(
-      "- Stable flat decision IDs only; hierarchy belongs in metadata.",
-      "- Stable flat decision IDs only; hierarchy belongs in metadata and incoming catalogs must preserve it.",
+      "Wayfinder never implements, repairs, approves authority gates, or automatically invokes plan compilation.",
+      "Wayfinder never implements, repairs, approves authority gates, or automatically invokes plan compilation. Incoming catalogs must preserve this boundary.",
     ));
 
     const plan = await planSkillUpdate(root, { incomingRoot: incoming, skills: ["wayfinder"] });
@@ -61,8 +61,8 @@ describe("project-owned skill upgrades", () => {
     const report = await applySkillUpdatePlan(plan);
     assert.equal(report.ok, true);
     const merged = await readFile(localFile, "utf8");
-    assert.match(merged, /retain this local project convention/);
-    assert.match(merged, /incoming catalogs must preserve it/);
+    assert.match(merged, /Retain this local project convention/);
+    assert.match(merged, /Incoming catalogs must preserve this boundary/);
     const baseline = path.join(root, ".agentic", "skill-baselines", "wayfinder");
     assert.equal(await hashDirectory(baseline), await hashDirectory(path.dirname(incomingFile)));
     assert.notEqual(await hashDirectory(baseline), await hashDirectory(path.dirname(localFile)));

@@ -369,12 +369,12 @@ async function validateProfileAndConfig(root, report) {
   const profile = await readJsonForDoctor(profilePath, report, "implementation profile");
   if (!config || !profile) return { config, profile };
 
-  if (![1, 2, 3].includes(config.version)) report.errors.push(`unsupported config version ${config.version}`);
+  if (![1, 2, 3, 4].includes(config.version)) report.errors.push(`unsupported config version ${config.version}`);
   if (config.generator !== "workspace-template") report.errors.push("config generator identity is invalid");
   if (!["generated", "adopted", undefined].includes(config.mode)) report.errors.push(`invalid config mode '${config.mode}'`);
   if (!["managed", "preserve", undefined].includes(config.hostBundles)) report.errors.push(`invalid hostBundles mode '${config.hostBundles}'`);
-  if (![1, 2].includes(profile.version)) report.errors.push(`unsupported profile version ${profile.version}`);
-  if (profile.version === 2 && !["generated", "adopted"].includes(profile.mode)) report.errors.push(`invalid profile mode '${profile.mode}'`);
+  if (![1, 2, 3].includes(profile.version)) report.errors.push(`unsupported profile version ${profile.version}`);
+  if (profile.version >= 2 && !["generated", "adopted"].includes(profile.mode)) report.errors.push(`invalid profile mode '${profile.mode}'`);
   if (config.mode !== undefined && profile.mode !== undefined && config.mode !== profile.mode) {
     report.errors.push(`config/profile mode mismatch: ${config.mode} != ${profile.mode}`);
   }
@@ -384,8 +384,16 @@ async function validateProfileAndConfig(root, report) {
       report.errors.push(`config/profile ${key} mismatch: ${config[key]} != ${profile[key]}`);
     }
   }
-  if (profile.version === 2 && typeof profile.architecture !== "object") {
-    report.errors.push("profile version 2 requires an architecture object");
+  if (profile.version >= 2 && typeof profile.architecture !== "object") {
+    report.errors.push(`profile version ${profile.version} requires an architecture object`);
+  }
+  if (config.version >= 4 || profile.version >= 3) {
+    if (config.execution?.method !== "adaptive") report.errors.push("config version 4 requires adaptive execution");
+    if (profile.execution?.method !== "adaptive") report.errors.push("profile version 3 requires adaptive execution");
+    if (config.execution?.defaultMode !== "direct") report.errors.push("adaptive execution must default to direct mode");
+    if (config.execution?.limits?.semanticRepairs !== 2) report.errors.push("adaptive execution must cap semantic repairs at 2");
+    if (config.execution?.limits?.flakyReruns !== 1) report.errors.push("adaptive execution must cap flaky reruns at 1");
+    if (config.execution?.review?.inspection !== "adaptive") report.errors.push("adaptive review inspection policy is missing");
   }
   if (config.execution?.preset) {
     const roles = config.execution.preset.roles;

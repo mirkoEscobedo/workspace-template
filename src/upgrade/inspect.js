@@ -9,8 +9,8 @@ import {
 } from "../fs-utils.js";
 
 const SUPPORTED = Object.freeze({
-  config: new Set([1, 2, 3]),
-  profile: new Set([1, 2]),
+  config: new Set([1, 2, 3, 4]),
+  profile: new Set([1, 2, 3]),
   managed: new Set([1, 2, 3]),
   skills: new Set([1, 2]),
 });

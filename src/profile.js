@@ -1,3 +1,5 @@
+import { DELIVERY_POLICY } from "./delivery.js";
+
 const STYLE_SETTINGS = Object.freeze({
   simple: {
     architecture: "simple-modular",
@@ -64,7 +66,7 @@ export function createProfile({ project, style, tdd, agents, mode = "generated",
 
   return {
     $schema: "./profile.schema.json",
-    version: 2,
+    version: 3,
     mode,
     project,
     style,
@@ -89,7 +91,7 @@ export function createProfile({ project, style, tdd, agents, mode = "generated",
     refactoring: "micro-refactor-after-green-structural-refactor-as-separate-change",
     complexityBudget: "minimum-architecture-that-protects-the-current-change",
     execution: {
-      method: "frontier-loop",
+      ...DELIVERY_POLICY,
       preset: presetState,
       coordinator: summary(presetState.roles.coordinator),
       planner: summary(presetState.roles.planner),
@@ -106,13 +108,13 @@ export function createProfile({ project, style, tdd, agents, mode = "generated",
 export function profileSchema() {
   return {
     $schema: "https://json-schema.org/draft/2020-12/schema",
-    $id: "urn:workspace-template:profile:2",
+    $id: "urn:workspace-template:profile:3",
     title: "Agentic implementation profile",
     type: "object",
     additionalProperties: true,
     required: ["version", "mode", "project", "style", "architecture", "tdd", "execution"],
     properties: {
-      version: { enum: [1, 2] },
+      version: { enum: [1, 2, 3] },
       mode: { enum: ["generated", "adopted"] },
       project: { enum: ["typescript", "javascript", "react", "rust", "flutter", "dart", "workspace"] },
       style: { enum: ["preserve", "simple", "functional-core", "clean"] },
@@ -139,8 +141,20 @@ export function profileSchema() {
       },
       execution: {
         type: "object",
-        required: ["method", "coordinator", "workers", "landing"],
+        required: ["method", "defaultMode", "limits", "review", "coordinator", "workers", "landing"],
         additionalProperties: true,
+        properties: {
+          method: { const: "adaptive" },
+          defaultMode: { enum: ["direct", "ticketed", "governed"] },
+          limits: {
+            type: "object",
+            required: ["semanticRepairs", "flakyReruns"],
+            properties: {
+              semanticRepairs: { type: "integer", minimum: 0, maximum: 2 },
+              flakyReruns: { type: "integer", minimum: 0, maximum: 1 },
+            },
+          },
+        },
       },
     },
   };

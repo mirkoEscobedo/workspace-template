@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { DEPENDENCY_SNAPSHOT, PACKAGE_VERSION } from "./constants.js";
+import { DELIVERY_POLICY } from "./delivery.js";
 import {
   hashBuffer,
   hashDirectory,
@@ -28,7 +29,7 @@ export function agenticReadme(mode = "generated") {
 
 This ${mode} repository owns its installed agent behavior.
 
-- \`profile.json\` records implementation, testing, and Frontier execution policy.
+- \`profile.json\` records implementation, testing, and Adaptive Delivery policy.
 - \`skills/\` is the canonical project-local skill catalog.
 - \`skills.lock.json\` records the packaged baseline.
 - \`managed-files.json\` records generator ownership and drift boundaries.
@@ -44,7 +45,7 @@ npx workspace-template sync .
 npx workspace-template doctor .
 \`\`\`
 
-Frontier Loop is local-file based. GitHub issues, webhooks, and repository watchers are optional integrations, not prerequisites.
+Adaptive Delivery is local-file based. Direct mode is the default; durable ticket and governed artifacts are created only when their admission criteria apply.
 `;
 }
 
@@ -59,7 +60,7 @@ Machine-readable policy: \`.agentic/profile.json\`.
 - Stack: \`${project}\`
 - Style: \`${style}\`
 - TDD mode: \`${tdd}\`
-- Execution: Frontier Loop
+- Execution: Adaptive Delivery (Direct by default)
 - Active agent preset: \`${presetState?.id ?? "unresolved"}\` (${presetState?.status ?? "unresolved"})
 - Coordinator: \`${coordinator?.targets?.codex ?? coordinator?.targets?.opencode ?? "unresolved"}\`, ${coordinator?.reasoningEffort ?? "unresolved"}
 - Implementer: \`${implementer?.targets?.codex ?? implementer?.targets?.opencode ?? "unresolved"}\`, ${implementer?.reasoningEffort ?? "unresolved"}
@@ -120,7 +121,7 @@ export function createAgenticConfig({
   });
   const timestampKey = mode === "adopted" ? "adoptedAt" : "createdAt";
   return {
-    version: 3,
+    version: 4,
     generator: "workspace-template",
     generatorVersion: PACKAGE_VERSION,
     mode,
@@ -134,7 +135,7 @@ export function createAgenticConfig({
     managedFiles: ".agentic/managed-files.json",
     hostBundles,
     execution: {
-      method: "frontier",
+      ...DELIVERY_POLICY,
       preset: presetState,
       coordinator: summary(presetState.roles.coordinator),
       planner: summary(presetState.roles.planner),
@@ -204,16 +205,18 @@ export async function harnessArtifacts(agents, resolvedPreset, roleIds) {
 
 export async function policyArtifacts(resolvedPreset, presetState = activePresetState(resolvedPreset, {})) {
   const compileAssets = path.join(assetsSkills, "compile-master-plan", "assets");
+  const deliveryAssets = path.join(assetsSkills, "delivery-loop", "assets");
   const names = [
-    ["architecture-budgets.yaml", "architecture-budgets.yaml"],
-    ["verification-policy.yaml", "verification.yaml"],
-    ["process-policy.yaml", "process.yaml"],
+    [deliveryAssets, "delivery-policy.yaml", "delivery.yaml"],
+    [compileAssets, "architecture-budgets.yaml", "architecture-budgets.yaml"],
+    [compileAssets, "verification-policy.yaml", "verification.yaml"],
+    [compileAssets, "process-policy.yaml", "process.yaml"],
   ];
   const artifacts = [];
-  for (const [sourceName, targetName] of names) {
+  for (const [sourceRoot, sourceName, targetName] of names) {
     artifacts.push({
       path: `.agentic/policies/${targetName}`,
-      content: normalizeTextLineEndings(await readFile(path.join(compileAssets, sourceName))),
+      content: normalizeTextLineEndings(await readFile(path.join(sourceRoot, sourceName))),
     });
   }
   artifacts.push({ path: ".agentic/policies/model-routing.yaml", content: Buffer.from(renderModelRoutingYaml(resolvedPreset, presetState)) });

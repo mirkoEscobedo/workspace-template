@@ -1,14 +1,14 @@
 ---
 name: process-lifecycle
-description: "Own every spawned command with a durable process lease, whole-tree cancellation, bounded timeouts, resource limits, and a zero-descendant completion gate. Use for tests, servers, native tools, MCP processes, or harness cleanup."
+description: "Own long-lived, detached, native, server, MCP, or otherwise risky process trees with bounded cancellation and cleanup. Use only when an ordinary foreground command cannot provide sufficient lifecycle ownership."
 compatibility: ChatGPT Skills, Codex, OpenCode
 metadata:
-  version: "0.6.0"
+  version: "0.7.0"
 ---
 
 # Process Lifecycle
 
-Prompt instructions are not process isolation. Every command that may outlive its shell must have an owner.
+This is an optional Governed specialist skill, not a default wrapper for ordinary foreground tests and builds. Use normal command execution when the host already provides bounded ownership and the command cannot outlive it. When a process may detach, survive cancellation, or control native descendants, prompt instructions are not process isolation and explicit ownership is required.
 
 ## Lease contract
 

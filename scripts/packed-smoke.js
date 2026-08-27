@@ -108,11 +108,14 @@ for (const relative of [
   "src/restructure/apply.js",
   "src/align/orchestrate.js",
   "src/upgrade/index.js",
+  "assets/skills/delivery-loop/SKILL.md",
+  "assets/skills/execute-delivery/SKILL.md",
+  "assets/skills/review-change/assets/review-report.schema.json",
   "assets/skills/wayfinder/SKILL.md",
-  "assets/skills/execute-frontier/SKILL.md",
   "assets/scripts/managed_command.py",
   "docs/usage.md",
-  "docs/guides/frontier-loop-user-guide.html",
+  "docs/guides/adaptive-delivery.md",
+  "docs/releases/0.7.0.md",
 ]) {
   assert.equal(await readable(path.join(packageRoot, relative)), true, `packed file missing: ${relative}`);
 }
@@ -122,6 +125,13 @@ const generated = path.join(sandbox, "generated");
 invoke(["create", generated, "--project", "typescript", "--no-install", "--no-git", "--yes", "--json"]);
 const generatedDoctor = invokeJson(["doctor", generated, "--json"]);
 assert.equal(generatedDoctor.ok, true, JSON.stringify(generatedDoctor.errors));
+const generatedConfig = JSON.parse(await readFile(path.join(generated, ".agentic", "config.json"), "utf8"));
+const generatedProfile = JSON.parse(await readFile(path.join(generated, ".agentic", "profile.json"), "utf8"));
+assert.equal(generatedConfig.version, 4);
+assert.equal(generatedConfig.execution.method, "adaptive");
+assert.equal(generatedConfig.execution.defaultMode, "direct");
+assert.equal(generatedConfig.execution.limits.semanticRepairs, 2);
+assert.equal(generatedProfile.version, 3);
 const codexConfig = await readFile(path.join(generated, ".codex", "config.toml"), "utf8");
 assert.match(codexConfig, /model\s*=\s*"gpt-5\.6-sol"/);
 assert.match(codexConfig, /default_subagent_model\s*=\s*"gpt-5\.6-sol"/);
@@ -256,6 +266,11 @@ assert.throws(
 await writeFile(adoptedConfigPath, adoptedConfigBefore, "utf8");
 const adoptedUpgrade = invokeJson(["upgrade", existing, "--apply-plan", adoptedUpgradePlanPath, "--json"]);
 assert.equal(adoptedUpgrade.ok, true);
+const upgradedAdoptedConfig = JSON.parse(await readFile(adoptedConfigPath, "utf8"));
+assert.equal(upgradedAdoptedConfig.version, 4);
+assert.equal(upgradedAdoptedConfig.execution.method, "adaptive");
+assert.equal(upgradedAdoptedConfig.execution.defaultMode, "direct");
+assert.equal(await readable(path.join(existing, ".agentic", "skills", "delivery-loop", "SKILL.md")), true);
 assert.equal(await readFile(path.join(existing, "src", "index.js"), "utf8"), adoptedSourceBeforeUpgrade);
 assert.equal(invokeJson(["upgrade", existing, "--allow-network", "--json"]).status, "current");
 assert.equal(await treeDigest(path.join(existing, "src")), adoptedProductHash);

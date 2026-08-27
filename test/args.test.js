@@ -55,7 +55,7 @@ describe("parseArgs", () => {
     assert.equal(parsed.options.agentsExplicit, false);
   });
 
-  it("parses retrofit as safe adoption with Frontier defaults", () => {
+  it("parses retrofit as safe adoption with adaptive defaults", () => {
     const parsed = parseArgs([
       "retrofit",
       ".",

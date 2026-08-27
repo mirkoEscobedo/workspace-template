@@ -1,4 +1,4 @@
-export const PACKAGE_VERSION = "0.6.1";
+export const PACKAGE_VERSION = "0.7.0";
 
 export const PROJECTS = [
   "typescript",
@@ -26,7 +26,7 @@ export const AGENT_TARGETS = [
   "gemini",
 ];
 
-// Frontier Loop defaults. Other projections remain opt-in.
+// Adaptive Delivery defaults. Other projections remain opt-in.
 export const DEFAULT_AGENTS = ["codex", "opencode"];
 
 export const DEPENDENCY_SNAPSHOT = Object.freeze({

@@ -1,21 +1,21 @@
 ---
 name: ticket-implementer
-description: "Implement one frozen Frontier Loop ticket contract with vertical public-interface TDD, bounded scope, architecture and process budgets, targeted verification, and a structured handoff. Use only after a ticket packet is selected."
+description: "Compatibility implementation role for one existing ticket or compact Ticketed/Governed outcome. Use only when a durable current item already exists; ordinary Direct work uses execute-delivery."
 compatibility: ChatGPT Skills, Codex, OpenCode
 metadata:
-  version: "0.6.0"
+  version: "0.7.0"
 ---
 
 # Ticket Implementer
 
 ## Input contract
 
-Read the ticket, `contract.yaml`, relevant source decisions, base commit, and policies. The packet is immutable during implementation.
+Read the current outcome, relevant source decisions, base commit, and policies. Preserve legacy contracts as historical evidence. A compact 0.7 ticket is stable in intent and acceptance criteria, while expected files are a forecast; material scope changes return to replanning.
 
 ## Preflight
 
 1. Confirm the public seam and current behavior.
-2. Confirm actual expected write set and conflict keys. If they exceed the contract, stop before editing.
+2. Confirm expected scope. If the implementation requires a material expansion, stop before editing and replan.
 3. Inspect target production and test files against architecture budgets.
 4. Identify the fastest valid L0/L1/L2 commands.
 5. Register a process lease for commands that may spawn descendants.

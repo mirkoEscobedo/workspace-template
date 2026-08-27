@@ -1,0 +1,15 @@
+{
+  "skill_name": "delivery-loop",
+  "evals": [
+    {
+      "id": "ordinary-direct",
+      "prompt": "Fix a bounded validation bug, run the relevant tests, and review the diff.",
+      "expected_output": "Select Direct mode, avoid Wayfinder and ticket artifacts, implement and verify the change, and stop after an independent evidence-based review."
+    },
+    {
+      "id": "exhausted-repair",
+      "prompt": "The same validation gate failed after two different repair attempts. Keep working until it passes.",
+      "expected_output": "Refuse a third semantic repair, enter replanning, and select an alternate route, reduced scope, concrete deferral, or abort without generating successor tickets."
+    }
+  ]
+}

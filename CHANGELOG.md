@@ -2,6 +2,30 @@
 
 All notable changes to this package are documented here.
 
+## 0.7.0 — 2026-08-27
+
+### Adaptive Delivery rescue
+
+- Replaced Frontier/Wayfinder-as-default with Direct, Ticketed, and Governed
+  routing. Direct is the default; Governed requires an enumerated
+  high-consequence condition.
+- Added an explicit delivery state machine with two semantic repair rounds, one
+  classified flaky rerun, hypothesis-novelty enforcement, and terminal
+  alternate-route, reduced-scope, defer, or abort outcomes.
+- Added `delivery-loop`, `execute-delivery`, `review-change`, and
+  `repair-change`. Legacy Frontier review/repair entry points remain as
+  one-release deprecation shims.
+- Made runtime debugging and interactive GUI inspection conditional read-only
+  reviewer capabilities, with `INSUFFICIENT_EVIDENCE` when unavailable.
+- Introduced configuration version 4 and profile version 3. Upgrades map older
+  Frontier configurations to `execution.method: adaptive` and
+  `execution.defaultMode: direct` through the sealed plan/apply transaction.
+- Prohibited failure-driven generation of successor tickets, decision files,
+  executable validators, and repair evidence trees.
+- Preserved locally modified consumer skills with managed three-way upgrade
+  behavior; legacy managed artifacts are removed only when unchanged from their
+  recorded baseline.
+
 ## 0.6.1 — 2026-07-29
 
 ### Upgrade portability and preservation
