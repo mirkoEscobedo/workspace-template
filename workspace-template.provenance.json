@@ -1,0 +1,30 @@
+{
+    "version":  1,
+    "source":  {
+                   "commit":  "34eaf5423d999d8cdaaa3e64bda9ce36f63dba2d",
+                   "repository":  "https://github.com/mirkoEscobedo/workspace-template"
+               },
+    "toolchain":  {
+                      "rustc":  "rustc 1.91.1 (ed61e7d7e 2025-11-07)\nbinary: rustc\ncommit-hash: ed61e7d7e242494fb7057f2657300d9e77bb4fcb\ncommit-date: 2025-11-07\nhost: x86_64-pc-windows-msvc\nrelease: 1.91.1\nLLVM version: 21.1.2",
+                      "cargo":  "cargo 1.91.1 (ea2d97820 2025-10-10)",
+                      "linkerDeterminism":  "/Brepro",
+                      "pathRemapping":  "--remap-path-prefix=\u003crepository\u003e=."
+                  },
+    "embeddedAssets":  {
+                           "manifestSha256":  "15c29f708a1041661a5b7a9479421acead7ac25eadbe4955036ed12634e8cbd4"
+                       },
+    "executable":  {
+                       "path":  "bin/workspace-template.exe",
+                       "target":  "x86_64-pc-windows-msvc",
+                       "sha256":  "a6665ebc9e8d61fcc6c6cb2805c7fd1d3d1453dbee66e36f9cb8a4344eab70a8",
+                       "size":  487936
+                   },
+    "reproducibleBuild":  {
+                              "byteIdentical":  true,
+                              "buildCount":  2,
+                              "hashes":  [
+                                             "a6665ebc9e8d61fcc6c6cb2805c7fd1d3d1453dbee66e36f9cb8a4344eab70a8",
+                                             "a6665ebc9e8d61fcc6c6cb2805c7fd1d3d1453dbee66e36f9cb8a4344eab70a8"
+                                         ]
+                          }
+}
