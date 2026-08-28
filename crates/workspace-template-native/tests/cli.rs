@@ -224,7 +224,7 @@ fn sealed_adopt_plan_applies_thin_state_and_converges() {
     fs::write(root.join(".gitignore"), ".agentic\n").expect("legacy ignore rule");
     fs::write(
         root.join("AGENTS.md"),
-        "# Product instructions\n\nKeep this text.\n",
+        "# Product instructions\n\nKeep this text.\n\n<!-- workspace-template:begin workspace-template version=2 -->\n## Frontier Loop\n\nUse execute-frontier and successor validators.\n<!-- workspace-template:end workspace-template -->\n",
     )
     .expect("instructions");
     let plan = root.join(".agentic/plans/adopt.json");
@@ -280,6 +280,9 @@ fn sealed_adopt_plan_applies_thin_state_and_converges() {
     );
     let agents = fs::read_to_string(root.join("AGENTS.md")).expect("AGENTS");
     assert!(agents.contains("# Product instructions"));
+    assert!(!agents.contains("workspace-template:begin workspace-template"));
+    assert!(!agents.contains("Frontier Loop"));
+    assert!(!agents.contains("execute-frontier"));
     assert!(agents.contains("npm exec --prefix .agentic/tooling -- workspace-template"));
     let tooling: serde_json::Value = serde_json::from_slice(
         &fs::read(root.join(".agentic/tooling/package.json")).expect("tooling manifest"),

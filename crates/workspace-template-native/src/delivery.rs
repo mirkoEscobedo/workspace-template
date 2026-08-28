@@ -10,6 +10,8 @@ const START: &str = "<!-- workspace-template:adaptive-delivery:start -->";
 const END: &str = "<!-- workspace-template:adaptive-delivery:end -->";
 const IGNORE_START: &str = "# workspace-template:thin-state:start";
 const IGNORE_END: &str = "# workspace-template:thin-state:end";
+const LEGACY_START: &str = "<!-- workspace-template:begin workspace-template";
+const LEGACY_END: &str = "<!-- workspace-template:end workspace-template -->";
 
 #[derive(Debug)]
 pub struct DeliveryError {
@@ -175,12 +177,24 @@ fn fingerprint(root: &Path) -> Result<String, DeliveryError> {
 }
 
 fn managed_agents(existing: &str, invocation: &str) -> String {
+    let mut existing = existing.to_owned();
+    while let Some(start) = existing.find(LEGACY_START) {
+        let Some(end) = existing[start..].find(LEGACY_END) else {
+            break;
+        };
+        let tail = start + end + LEGACY_END.len();
+        existing.replace_range(start..tail, "");
+    }
+    let existing = existing.trim_end();
     let block = format!(
         "{START}\n## Adaptive Delivery\n\nUse `{invocation}` as this repository's workspace-template entry point. Direct is the default; Ticketed is for multi-session slices; Governed is reserved for enumerated high-consequence authority. Review is read-only, allows at most two semantic repair rounds, and returns `INSUFFICIENT_EVIDENCE` when required inspection is unavailable.\n{END}"
     );
     if let (Some(start), Some(end)) = (existing.find(START), existing.find(END)) {
         let tail = end + END.len();
-        format!("{}{}{}", &existing[..start], block, &existing[tail..])
+        format!(
+            "{}\n",
+            format!("{}{}{}", &existing[..start], block, &existing[tail..]).trim_end()
+        )
     } else if existing.trim().is_empty() {
         format!("{block}\n")
     } else {
