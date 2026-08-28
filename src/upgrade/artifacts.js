@@ -22,7 +22,6 @@ import { planSkillUpgrade } from "./skills.js";
 import { commandsFor, generateAgentsMd, generateManagedAgentsBlock } from "../agents-md.js";
 import { isHostBundlePath } from "../host-bundles.js";
 import { inspectManagedBlock, upsertManagedBlock } from "../managed-sections.js";
-import { loadEffectiveUpgradeWorkspace } from "./workspace.js";
 
 function jsonBuffer(value) {
   return Buffer.from(`${JSON.stringify(value, null, 2)}\n`);
@@ -76,8 +75,7 @@ function rootCommands(workspace, project, packageManager) {
   };
 }
 
-async function managedWorkspaceArtifacts(snapshot, config, discoveredWorkspace) {
-  const effectiveWorkspace = await loadEffectiveUpgradeWorkspace(snapshot.root, discoveredWorkspace);
+async function managedWorkspaceArtifacts(snapshot, config, effectiveWorkspace) {
   if (!effectiveWorkspace?.modules?.length) return [];
   const context = {
     projectName: path.basename(snapshot.root),

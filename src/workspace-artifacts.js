@@ -376,7 +376,50 @@ function serializedWorkspace(workspace) {
   };
 }
 
-export function generatedWorkspace(context) {
+function generatedCommands(context, manifestContent) {
+  if (["javascript", "typescript", "react"].includes(context.project)) {
+    let scripts = [];
+    try {
+      const manifest = JSON.parse(Buffer.isBuffer(manifestContent)
+        ? manifestContent.toString("utf8")
+        : String(manifestContent ?? "{}"));
+      scripts = Object.keys(manifest.scripts ?? {}).sort();
+    } catch {}
+    const aggregate = ["check", "verify", "validate", "ci"].find((name) => scripts.includes(name));
+    const manager = context.packageManager;
+    const run = aggregate
+      ? { command: manager === "yarn" ? "yarn" : manager, args: manager === "yarn" ? [aggregate] : ["run", aggregate] }
+      : undefined;
+    return {
+      scripts,
+      fullSteps: run ? [run] : [],
+      full: run ? `${manager === "yarn" ? "yarn" : `${manager} run`} ${aggregate}` : context.commands?.full,
+    };
+  }
+  if (context.project === "rust") {
+    return {
+      full: "cargo fmt --all -- --check && cargo check --all-targets && cargo test",
+      fullSteps: [
+        { command: "cargo", args: ["fmt", "--all", "--", "--check"] },
+        { command: "cargo", args: ["check", "--all-targets"] },
+        { command: "cargo", args: ["test"] },
+      ],
+    };
+  }
+  if (context.project === "flutter") {
+    return {
+      full: "dart format --output=none --set-exit-if-changed . && flutter analyze && flutter test",
+      fullSteps: [
+        { command: "dart", args: ["format", "--output=none", "--set-exit-if-changed", "."] },
+        { command: "flutter", args: ["analyze"] },
+        { command: "flutter", args: ["test"] },
+      ],
+    };
+  }
+  return { full: context.commands?.full, fullSteps: [] };
+}
+
+export function generatedWorkspace(context, manifestContent) {
   return {
     version: 1,
     root: ".",
@@ -392,7 +435,7 @@ export function generatedWorkspace(context) {
       manifest: context.project === "rust" ? "Cargo.toml" : context.project === "flutter" ? "pubspec.yaml" : "package.json",
       lockOwner: ".",
       dependencies: [],
-      commands: { full: context.commands?.full, fullSteps: [] },
+      commands: generatedCommands(context, manifestContent),
       opaque: false,
     }],
     warnings: [],

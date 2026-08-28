@@ -57,6 +57,8 @@ describe("createProject", () => {
       assert.equal(config.execution.defaultMode, "direct");
       assert.equal(config.execution.limits.semanticRepairs, 2);
       assert.equal(config.execution.limits.flakyReruns, 1);
+      const workspace = JSON.parse(await readFile(path.join(target, ".agentic", "workspace.json"), "utf8"));
+      assert.equal(workspace.modules[0].commands.fullSteps.length > 0, true, `${project} must persist executable verification steps`);
 
       const report = await doctorProject(target);
       assert.deepEqual(report.errors, [], report.errors.join("\n"));

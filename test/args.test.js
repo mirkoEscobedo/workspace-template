@@ -219,6 +219,8 @@ describe("parseArgs", () => {
     const help = output.join("\n");
     assert.match(help, /upgrade .*--allow-network/iu);
     assert.match(help, /sealed.*external filesystem.*network.*unavailable/isu);
+    assert.match(help, /Adaptive Delivery.*Direct.*default/isu);
+    assert.doesNotMatch(help, /one continuous local Frontier Loop/iu);
   });
 
 });

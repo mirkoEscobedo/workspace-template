@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { describe, it } from "node:test";
 import { applyUpgradePlan, createProject, readJournal, refreshPlanId } from "../src/index.js";
-import { exists } from "../src/fs-utils.js";
+import { exists, hashBuffer } from "../src/fs-utils.js";
 import { runCommandAsync } from "../src/process-utils.js";
 import { applyWithVerifier, buildSupportedUpgradePlan } from "./upgrade-internal-harness.js";
 
@@ -153,14 +153,17 @@ describe("upgrade apply transaction", () => {
       assert.ok(applicableOwnershipPaths.includes(relative), `missing ${relative}`);
     }
     const selected = new Set([payload.path, ...applicableOwnershipPaths]);
-    const operations = await Promise.all(plan.operations.map(async (item) => selected.has(item.path)
-      ? {
-          ...item,
-          kind: "update-upgrade-managed",
-          contentEncoding: "base64",
-          content: (await readFile(path.join(root, ...item.path.split("/")))).toString("base64"),
-        }
-      : item));
+    const operations = await Promise.all(plan.operations.map(async (item) => {
+      if (!selected.has(item.path)) return item;
+      const content = await readFile(path.join(root, ...item.path.split("/")));
+      return {
+        ...item,
+        kind: "update-upgrade-managed",
+        contentEncoding: "base64",
+        content: content.toString("base64"),
+        proposedHash: hashBuffer(content),
+      };
+    }));
     const ordered = refreshPlanId({
       ...plan,
       operations,

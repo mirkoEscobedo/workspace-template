@@ -114,6 +114,10 @@ function workspaceTable(workspace) {
   return `\n### Workspace modules\n\n| Module | Path | Stack | Tool | Internal dependencies |\n|---|---|---|---|---|\n${rows}\n\nUse \`workspace-template verify . --scope affected --affected-from <ref>\` for dependency-aware module verification.\n`;
 }
 export function generateManagedAgentsBlock({ project, style, tdd, packageManager, commands, workspace }) {
+  const effectiveCommands = {
+    ...commandsFor(project, packageManager),
+    ...(commands ?? {}),
+  };
   return `## Agentic workspace
 
 - Stack: **${project}**
@@ -126,7 +130,7 @@ export function generateManagedAgentsBlock({ project, style, tdd, packageManager
 
 ### Commands
 
-${commandTable(commands)}
+${commandTable(effectiveCommands)}
 ${workspaceTable(workspace)}
 ### Adaptive Delivery
 

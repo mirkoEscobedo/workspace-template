@@ -70,10 +70,10 @@ async function applyUpgradeWithSignalBridge(plan, options = {}) {
 function helpText() {
   return `workspace-template ${PACKAGE_VERSION}
 
-Create or safely retrofit agentic projects with one continuous local Frontier Loop, local plans,
-project-owned skills, monorepo verification, explicit tooling transactions,
-three-way skill upgrades, parser-aware source restructuring, and bounded
-architecture-alignment slices.
+Create or safely retrofit agentic projects with Adaptive Delivery, a Direct default,
+bounded Ticketed and Governed modes, project-owned skills, monorepo verification,
+sealed tooling transactions, three-way skill upgrades, parser-aware restructuring,
+and bounded architecture-alignment slices.
 
 Core commands:
   create [directory] --project <type>
@@ -156,7 +156,7 @@ Alignment authority:
   --max-files <n> --max-diff-lines <n> --allowed-path <path>
   --executor manual|command:<executable>
 
-Frontier uses local repository files and one coordinator session; it does not require GitHub issues, webhooks, or a repository watcher.
+Adaptive Delivery uses local repository evidence, explicit stopping rules, and minimum sufficient verification. Legacy Frontier skills are compatibility readers, not the default execution method.
 
 Default agent preset: sol-only. Every workspace receives the complete built-in
 preset catalog; --preset selects which routing is materialized.
@@ -176,7 +176,7 @@ function printCreateResult(result) {
   }
   console.log(`\nCreated ${result.context.project} project at ${result.root}`);
   console.log(`Style: ${result.context.style}; TDD: ${result.context.tdd}`);
-  console.log("Execution: local Frontier Loop");
+  console.log("Execution: Adaptive Delivery (Direct default)");
   console.log(`Active agent preset: ${result.context.preset ?? "sol-only"}`);
   for (const warning of result.warnings) console.warn(`Warning: ${warning}`);
 }

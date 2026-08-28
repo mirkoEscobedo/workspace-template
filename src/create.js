@@ -194,7 +194,7 @@ function managedFilesFor(artifacts) {
   };
 }
 
-async function generatedArtifacts(context, options) {
+async function generatedArtifacts(context, options, scaffoldFiles) {
   const selection = await selectPreset(context.root, options.preset ?? DEFAULT_PRESET_ID, context.agents, { allowEmpty: true });
   const roleIds = await resolveRoleIds(context.root, context.agents);
   const presetState = activePresetState(selection.resolved, roleIds);
@@ -234,7 +234,10 @@ async function generatedArtifacts(context, options) {
     ...(await scriptArtifacts()),
     ...memory,
     ...(await harnessArtifacts(context.agents, selection.resolved, roleIds)),
-    ...(await workspaceStateArtifacts(generatedWorkspace(context), context, { nestedInstructions: "never" })),
+    ...(await workspaceStateArtifacts(generatedWorkspace(
+      context,
+      scaffoldFiles[context.project === "rust" ? "Cargo.toml" : context.project === "flutter" ? "pubspec.yaml" : "package.json"],
+    ), context, { nestedInstructions: "never" })),
   ].map((artifact) => ({
     ...artifact,
     content: normalizeTextLineEndings(
@@ -298,7 +301,7 @@ export async function createProject(options) {
     }),
     ".editorconfig": editorConfig(),
   };
-  const artifacts = await generatedArtifacts(context, options);
+  const artifacts = await generatedArtifacts(context, options, files);
   const plannedFiles = [...Object.keys(files), ...Object.keys(generatedCommon), ...artifacts.map((artifact) => artifact.path), ".agentic/managed-projections.json"]
     .filter((value, index, array) => array.indexOf(value) === index)
     .sort();

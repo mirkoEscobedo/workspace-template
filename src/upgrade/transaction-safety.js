@@ -236,7 +236,12 @@ export async function commitStagedOperation(root, transaction, operation, staged
   await assertOperationCurrentState(root, operation);
   const target = path.join(root, ...operation.path.split("/"));
   if (operation.kind === "delete-upgrade-managed") await removePath(target);
-  else await rename(stagedPath, target);
+  else {
+    await ensureDirectory(path.dirname(target));
+    await assertSafeUpgradePath(root, operation.path);
+    await assertOperationCurrentState(root, operation);
+    await rename(stagedPath, target);
+  }
 }
 async function removeEmptyBackupAncestors(root, ancestors) {
   for (const relative of [...ancestors].sort((left, right) => right.length - left.length)) {
@@ -376,7 +381,11 @@ export async function restoreAppliedOperations(root, backup, operations, hooks =
       ownershipLost.push(item.path);
       continue;
     }
-    if (stagedPath) await rename(stagedPath, target);
+    if (stagedPath) {
+      await ensureDirectory(path.dirname(target));
+      await assertSafeUpgradePath(root, item.path);
+      await rename(stagedPath, target);
+    }
     else {
       await rm(target, { force: true });
       cleanupPaths.add(item.path);

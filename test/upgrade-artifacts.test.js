@@ -225,6 +225,74 @@ describe("upgrade artifact reconciliation", () => {
     assert.equal(upgradedWorker.commands.full, workerCommands.full);
   });
 
+  it("preserves discovered modules that are absent from the persisted workspace", async () => {
+    const root = await fixture();
+    const manifestPath = path.join(root, ".agentic", "managed-files.json");
+    const workspace = JSON.parse(await readFile(path.join(root, ".agentic", "workspace.json"), "utf8"));
+    const rootCommandsRelative = `.agentic/modules/${workspace.modules[0].id}/commands.json`;
+    const rootCommandsPath = path.join(root, ...rootCommandsRelative.split("/"));
+    const rootCommandsText = `${JSON.stringify({
+      fullSteps: [{ command: "node", args: ["--test"] }],
+      full: "node --test",
+    }, null, 2)}\n`;
+    await writeFile(rootCommandsPath, rootCommandsText);
+    const worker = {
+      id: "js-worker",
+      name: "js-worker",
+      path: "packages/worker",
+      project: "javascript",
+      packageManager: "npm",
+      manifest: "packages/worker/package.json",
+      lockOwner: ".",
+      dependencies: [],
+      opaque: false,
+    };
+    const workerCommands = {
+      fullSteps: [{ command: "node", args: ["--test", "packages/worker/custom.test.js"] }],
+      full: "node --test packages/worker/custom.test.js",
+    };
+    const workerCommandsRelative = `.agentic/modules/${worker.id}/commands.json`;
+    const workerCommandsPath = path.join(root, ...workerCommandsRelative.split("/"));
+    const workerCommandsText = `${JSON.stringify(workerCommands, null, 2)}\n`;
+    await mkdir(path.dirname(workerCommandsPath), { recursive: true });
+    await writeFile(workerCommandsPath, workerCommandsText);
+    const rootPackagePath = path.join(root, "package.json");
+    const rootPackage = JSON.parse(await readFile(rootPackagePath, "utf8"));
+    rootPackage.workspaces = ["packages/*"];
+    rootPackage.scripts = { ...rootPackage.scripts, test: "node --test" };
+    await writeFile(rootPackagePath, `${JSON.stringify(rootPackage, null, 2)}\n`);
+    await mkdir(path.join(root, "packages", "worker"), { recursive: true });
+    await writeFile(
+      path.join(root, "packages", "worker", "package.json"),
+      `${JSON.stringify({ name: "js-worker", version: "0.1.0", scripts: { test: "node --test" } }, null, 2)}\n`,
+    );
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+    manifest.files[rootCommandsRelative].hash = hashBuffer(Buffer.from(rootCommandsText));
+    manifest.files[workerCommandsRelative] = {
+      mode: "managed",
+      hash: hashBuffer(Buffer.from(workerCommandsText)),
+    };
+    await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+
+    const plan = await buildSupportedUpgradePlan(root, { allowNetwork: true });
+    assert.equal(plan.canApply, true, plan.conflicts.join("\n"));
+    assert.notEqual(
+      plan.operations.find((item) => item.path === workerCommandsRelative)?.kind,
+      "delete-upgrade-managed",
+    );
+    await applyWithVerifier(plan, async () => ({ ok: true }));
+
+    const upgradedWorkspace = JSON.parse(await readFile(path.join(root, ".agentic", "workspace.json"), "utf8"));
+    assert.deepEqual(
+      upgradedWorkspace.modules.find((item) => item.id === worker.id)?.commands.fullSteps,
+      workerCommands.fullSteps,
+    );
+    assert.deepEqual(
+      JSON.parse(await readFile(workerCommandsPath, "utf8")).fullSteps,
+      workerCommands.fullSteps,
+    );
+  });
+
   it("updates only the managed AGENTS block and preserves adopted ownership", async () => {
     const root = await fixture();
     const agentsPath = path.join(root, "AGENTS.md");

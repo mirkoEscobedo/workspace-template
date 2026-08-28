@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, it } from "node:test";
@@ -7,6 +7,10 @@ import { createProject, doctorProject, readJournal } from "../src/index.js";
 import { hashBuffer, hashDirectory } from "../src/fs-utils.js";
 import { refreshPlanId } from "../src/plans/schema.js";
 import { applyWithVerifier, buildSupportedUpgradePlan } from "./upgrade-internal-harness.js";
+import {
+  commitStagedOperation,
+  stageUpgradeOperation,
+} from "../src/upgrade/transaction-safety.js";
 
 async function fixture() {
   const parent = await mkdtemp(path.join(os.tmpdir(), "workspace-template-upgrade-staged-safety-"));
@@ -79,6 +83,29 @@ async function convergedRepairPlan() {
 }
 
 describe("upgrade staged transaction safety", () => {
+  it("creates absent parent directories before committing a new managed file", async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), "workspace-template-upgrade-new-parent-"));
+    await mkdir(path.join(root, ".agentic"));
+    const transaction = path.join(root, ".agentic", "transactions", "new-parent");
+    const content = Buffer.from("mode: direct\n");
+    const operation = {
+      kind: "write-upgrade-managed",
+      path: ".agentic/skills/delivery-loop/assets/delivery-policy.yaml",
+      currentHash: null,
+      proposedHash: hashBuffer(content),
+      content: content.toString("base64"),
+      contentEncoding: "base64",
+    };
+
+    const stagedPath = await stageUpgradeOperation(root, transaction, operation);
+    await commitStagedOperation(root, transaction, operation, stagedPath);
+
+    assert.deepEqual(
+      await readFile(path.join(root, ...operation.path.split("/"))),
+      content,
+    );
+  });
+
   it("applies a converged stale-hash repair and becomes current", async () => {
     const { root, plan } = await convergedRepairPlan();
     let verifierCalls = 0;
