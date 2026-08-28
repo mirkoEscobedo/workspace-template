@@ -289,8 +289,52 @@ fn package_with_dependency(
     )))
 }
 
-fn project_json(binary_sha256: &str, migration_index: bool, package_commit: &str) -> String {
-    format!(
+fn project_json(
+    root: &Path,
+    binary_sha256: &str,
+    migration_index: bool,
+    package_commit: &str,
+) -> Result<String, DeliveryError> {
+    let defaults = json!({
+        "capabilities": {
+            "runtime-debug": "optional",
+            "interactive-gui": "optional"
+        },
+        "overrides": {},
+        "history": {
+            "migrationIndex": null,
+            "resumption": null
+        }
+    });
+    let existing_path = root.join(".agentic/project.json");
+    let existing = if existing_path.is_file() {
+        let bytes = fs::read(&existing_path)
+            .map_err(|error| DeliveryError::io("read .agentic/project.json", error))?;
+        let value: Value = serde_json::from_slice(&bytes).map_err(|error| DeliveryError {
+            code: "INVALID_MIGRATION_INPUT",
+            message: format!(".agentic/project.json: {error}"),
+            exit_code: 3,
+        })?;
+        if value["version"] != 1
+            || !value["capabilities"].is_object()
+            || !value["overrides"].is_object()
+            || !value["history"].is_object()
+        {
+            return Err(DeliveryError {
+                code: "INVALID_MIGRATION_INPUT",
+                message: ".agentic/project.json is not valid thin state v1".to_owned(),
+                exit_code: 3,
+            });
+        }
+        value
+    } else {
+        defaults.clone()
+    };
+    let mut history = existing["history"].clone();
+    if migration_index {
+        history["migrationIndex"] = json!(".agentic/history/migration-index.json");
+    }
+    Ok(format!(
         "{}\n",
         serde_json::to_string_pretty(&json!({
             "version": 1,
@@ -304,18 +348,12 @@ fn project_json(binary_sha256: &str, migration_index: bool, package_commit: &str
                 "defaultMode": "direct",
                 "limits": { "semanticRepairs": 2, "flakyReruns": 1 }
             },
-            "capabilities": {
-                "runtime-debug": "optional",
-                "interactive-gui": "optional"
-            },
-            "overrides": {},
-            "history": {
-                "migrationIndex": if migration_index { Some(".agentic/history/migration-index.json") } else { None },
-                "resumption": null
-            }
+            "capabilities": existing["capabilities"],
+            "overrides": existing["overrides"],
+            "history": history
         }))
         .expect("project state")
-    )
+    ))
 }
 
 fn current_binary_sha() -> Result<String, DeliveryError> {
@@ -462,10 +500,11 @@ fn build_plan(
         &root,
         ".agentic/project.json",
         project_json(
+            &root,
             &current_binary_sha()?,
             migration_index.is_some(),
             package_commit,
-        ),
+        )?,
     )? {
         operations.push(item);
     }

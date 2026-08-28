@@ -589,6 +589,29 @@ fn upgrade_retires_only_hash_matching_generic_assets() {
         .unwrap()["history"]["migrationIndex"],
         ".agentic/history/migration-index.json"
     );
+
+    let project_path = root.join(".agentic/project.json");
+    let mut project: serde_json::Value =
+        serde_json::from_slice(&fs::read(&project_path).unwrap()).unwrap();
+    project["capabilities"]["runtime-debug"] = serde_json::json!("required");
+    project["overrides"] = serde_json::json!({ "health": { "policy": "keep" } });
+    project["history"]["resumption"] = serde_json::json!(".agentic/resumption/current.json");
+    fs::write(
+        &project_path,
+        format!("{}\n", serde_json::to_string_pretty(&project).unwrap()),
+    )
+    .unwrap();
+    let second_plan = root.join("upgrade-second.json");
+    let second = run_owned(&[
+        "upgrade".to_owned(),
+        "plan".to_owned(),
+        root.to_string_lossy().into_owned(),
+        "--plan-out".to_owned(),
+        second_plan.to_string_lossy().into_owned(),
+        "--json".to_owned(),
+    ]);
+    assert!(second.status.success());
+    assert_eq!(json(&second)["result"]["operations"], serde_json::json!([]));
     fs::remove_dir_all(root).expect("fixture cleanup");
 }
 
