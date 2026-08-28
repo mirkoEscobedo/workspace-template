@@ -221,6 +221,7 @@ fn doctor_verifies_readable_sources_match_embedded_assets() {
 fn sealed_adopt_plan_applies_thin_state_and_converges() {
     let root = fixture("adopt-flutter");
     fs::write(root.join("pubspec.yaml"), "name: health_canary\n").expect("manifest");
+    fs::write(root.join(".gitignore"), ".agentic\n").expect("legacy ignore rule");
     fs::write(
         root.join("AGENTS.md"),
         "# Product instructions\n\nKeep this text.\n",
@@ -288,6 +289,12 @@ fn sealed_adopt_plan_applies_thin_state_and_converges() {
         .as_str()
         .unwrap()
         .starts_with("github:mirkoEscobedo/workspace-template#"));
+    let gitignore = fs::read_to_string(root.join(".gitignore")).expect("managed ignore rules");
+    assert!(gitignore.contains(".agentic\n"));
+    assert!(gitignore.contains("!.agentic/project.json"));
+    assert!(gitignore.contains("!.agentic/tooling/package-lock.json"));
+    assert!(gitignore.contains("!.agentic/history/migration-index.json"));
+    assert!(gitignore.contains("!.agentic/resumption/**"));
 
     let second_plan = root.join(".agentic/plans/adopt-second.json");
     let second = run_owned(&[

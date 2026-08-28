@@ -8,6 +8,8 @@ use sha2::{Digest, Sha256};
 
 const START: &str = "<!-- workspace-template:adaptive-delivery:start -->";
 const END: &str = "<!-- workspace-template:adaptive-delivery:end -->";
+const IGNORE_START: &str = "# workspace-template:thin-state:start";
+const IGNORE_END: &str = "# workspace-template:thin-state:end";
 
 #[derive(Debug)]
 pub struct DeliveryError {
@@ -144,6 +146,7 @@ fn fingerprint(root: &Path) -> Result<String, DeliveryError> {
         "pnpm-lock.yaml",
         "Cargo.toml",
         "pubspec.yaml",
+        ".gitignore",
     ] {
         let path = root.join(name);
         if path.is_file() {
@@ -177,6 +180,20 @@ fn managed_agents(existing: &str, invocation: &str) -> String {
     );
     if let (Some(start), Some(end)) = (existing.find(START), existing.find(END)) {
         let tail = end + END.len();
+        format!("{}{}{}", &existing[..start], block, &existing[tail..])
+    } else if existing.trim().is_empty() {
+        format!("{block}\n")
+    } else {
+        format!("{}\n\n{block}\n", existing.trim_end())
+    }
+}
+
+fn managed_gitignore(existing: &str) -> String {
+    let block = format!(
+        "{IGNORE_START}\n!.agentic/\n.agentic/*\n!.agentic/project.json\n!.agentic/tooling/\n.agentic/tooling/*\n!.agentic/tooling/package.json\n!.agentic/tooling/package-lock.json\n!.agentic/tooling/pnpm-lock.yaml\n!.agentic/history/\n.agentic/history/*\n!.agentic/history/migration-index.json\n!.agentic/resumption/\n!.agentic/resumption/**\n{IGNORE_END}"
+    );
+    if let (Some(start), Some(end)) = (existing.find(IGNORE_START), existing.find(IGNORE_END)) {
+        let tail = end + IGNORE_END.len();
         format!("{}{}{}", &existing[..start], block, &existing[tail..])
     } else if existing.trim().is_empty() {
         format!("{block}\n")
@@ -449,6 +466,10 @@ fn build_plan(
         "AGENTS.md",
         managed_agents(&agents, invocation(&root)),
     )? {
+        operations.push(item);
+    }
+    let gitignore = fs::read_to_string(root.join(".gitignore")).unwrap_or_default();
+    if let Some(item) = operation(&root, ".gitignore", managed_gitignore(&gitignore))? {
         operations.push(item);
     }
     if !root.join("package.json").is_file() {
