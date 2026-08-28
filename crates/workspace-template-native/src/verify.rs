@@ -5,11 +5,21 @@ use serde_json::{json, Value};
 
 use crate::runner;
 
+#[cfg(windows)]
+fn flutter_program() -> &'static str {
+    "flutter.bat"
+}
+
+#[cfg(not(windows))]
+fn flutter_program() -> &'static str {
+    "flutter"
+}
+
 fn steps(root: &Path) -> Result<Vec<(String, Vec<String>)>, String> {
     if root.join("pubspec.yaml").is_file() {
         return Ok(vec![
-            ("flutter".to_owned(), vec!["analyze".to_owned()]),
-            ("flutter".to_owned(), vec!["test".to_owned()]),
+            (flutter_program().to_owned(), vec!["analyze".to_owned()]),
+            (flutter_program().to_owned(), vec!["test".to_owned()]),
         ]);
     }
     if root.join("Cargo.toml").is_file() {
@@ -97,4 +107,13 @@ pub fn verify(root: &Path, timeout_ms: u64) -> (Value, bool) {
         }),
         ok,
     )
+}
+
+#[cfg(test)]
+mod tests {
+    #[cfg(windows)]
+    #[test]
+    fn windows_flutter_topology_uses_the_batch_entrypoint() {
+        assert_eq!(super::flutter_program(), "flutter.bat");
+    }
 }
