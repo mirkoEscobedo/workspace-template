@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "scannedAt": "2026-08-28T08:24:52.6378149Z",
+  "provider": "Kaspersky 21.26",
+  "databaseRelease": "2026-08-28T05:51:00",
+  "mode": "report-only",
+  "objects": [
+    {
+      "name": "workspace-template.exe",
+      "sha256": "07fe9fd76ff25abf652b88e85d5e48f54c293b43ef474c12fcbdca0f94eefab7",
+      "verdict": "ok"
+    },
+    {
+      "name": "workspace-template-0.8.0.tgz",
+      "sha256": "e11fca310f073d0bf515bb713b98320ca7f99f83a0f6eddd055f1127f48cd36a",
+      "verdict": "ok",
+      "archiveContentsScanned": true
+    }
+  ],
+  "statistics": {
+    "processed": 61,
+    "ok": 61,
+    "detected": 0,
+    "suspicions": 0,
+    "skipped": 0,
+    "errors": 0
+  },
+  "restoredOrWhitelisted": false,
+  "verdict": "PASS"
+}
