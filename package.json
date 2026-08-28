@@ -37,7 +37,7 @@
     "test": "cargo test --workspace --all-targets",
     "lint": "cargo fmt --all -- --check && cargo clippy --workspace --all-targets -- -D warnings",
     "check": "npm run lint && npm test",
-    "pack:check": "npm pack --dry-run --json",
+    "pack:check": "npm pack --dry-run --json --cache .tmp/npm-cache",
     "test:packed": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-native-packed.ps1"
   },
   "os": ["win32"],
