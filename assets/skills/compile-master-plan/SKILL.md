@@ -3,7 +3,7 @@ name: compile-master-plan
 description: Compile a stable multi-session goal into a compact Ticketed or Governed plan of independently valuable vertical outcomes. Use only after delivery-loop selects Ticketed or Governed mode; do not use for Direct work.
 compatibility: ChatGPT Skills, Codex, OpenCode
 metadata:
-  version: "0.7.0"
+  version: "0.8.0"
 ---
 
 # Compile a compact delivery plan

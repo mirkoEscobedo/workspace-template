@@ -69,10 +69,13 @@ Every review emits exactly one of `PASS`, `FAIL`, or
 `INSUFFICIENT_EVIDENCE`, plus the permitted next transition. Review never
 repairs source or expands scope.
 
-## Compatibility
+## Native 0.8 packaging
 
-`frontier-loop`, `execute-frontier`, `ticket-review`, and `repair-ticket` are
-version-0.7 compatibility shims. They archive or read existing history, select
-one current outcome, route to the adaptive skills, and emit deprecation
-guidance. They do not continue a historical dependency graph.
+Version 0.8 removes the one-release Frontier compatibility shims from the
+canonical package. The native upgrade command treats old graphs and decisions
+as immutable history and retires only hash-matching managed files. A diverged
+managed file is preserved as an override or reported conflict.
 
+Consumer repositories do not receive copied generic skill, schema, baseline,
+or validator trees. They retain product policy, overrides, history pointers,
+and one compact resumption item when unfinished historical work remains.

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mirkoEscobedo/workspace-template/schemas/provenance-v1.json",
+  "title": "workspace-template native executable provenance",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "source", "toolchain", "embeddedAssets", "executable", "reproducibleBuild"],
+  "properties": {
+    "version": { "const": 1 },
+    "source": {
+      "type": "object",
+      "required": ["commit", "repository"],
+      "properties": {
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "repository": { "const": "https://github.com/mirkoEscobedo/workspace-template" }
+      }
+    },
+    "toolchain": { "type": "object" },
+    "embeddedAssets": {
+      "type": "object",
+      "required": ["manifestSha256"],
+      "properties": { "manifestSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" } }
+    },
+    "executable": {
+      "type": "object",
+      "required": ["path", "target", "sha256"],
+      "properties": {
+        "path": { "const": "bin/workspace-template.exe" },
+        "target": { "const": "x86_64-pc-windows-msvc" },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "reproducibleBuild": {
+      "type": "object",
+      "required": ["byteIdentical", "buildCount"],
+      "properties": {
+        "byteIdentical": { "const": true },
+        "buildCount": { "const": 2 }
+      }
+    }
+  }
+}

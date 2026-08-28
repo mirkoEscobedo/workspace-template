@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "qualifiedAt": "2026-08-28T07:42:28.9810044Z",
+  "capability": "runtime-debug",
+  "provider": "microsoft-cdb",
+  "providerVersion": "10.0.26100.9169 (WinBuild.160101.0800)",
+  "providerPath": "G:\\Windows Kits\\10\\Debuggers\\x64\\cdb.exe",
+  "providerSha256": "b27beeab332294d3b043095d727dc5aca2a53ae609eec9223bc4276531595b6e",
+  "authenticode": {
+    "status": "Valid",
+    "signer": "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US"
+  },
+  "fixture": {
+    "language": "Rust",
+    "compiler": "rustc 1.91.1 (ed61e7d7e 2025-11-07)",
+    "host": "x86_64-pc-windows-msvc",
+    "profile": "dev with debuginfo"
+  },
+  "checks": {
+    "launch": "PASS",
+    "attach": "PASS",
+    "privateSymbolBreakpoint": "PASS",
+    "continue": "PASS",
+    "step": "PASS",
+    "threads": "PASS",
+    "stack": "PASS",
+    "namedArgument": "PASS",
+    "localStorage": "PASS",
+    "controlledDetach": "PASS",
+    "processCleanup": "PASS"
+  },
+  "observations": {
+    "namedArgument": "input = 21",
+    "localStorageValues": [21, 42, 43],
+    "threadCount": 4,
+    "limitations": [
+      "Rust PDBs may identify a local by name while CDB reports its optimized or transient value as unavailable.",
+      "Qualification permits inspection and execution control only; memory writes and side-effecting function calls remain prohibited."
+    ]
+  },
+  "postmortemDebuggerRegistered": false,
+  "verdict": "PASS"
+}

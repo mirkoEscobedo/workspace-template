@@ -3,7 +3,7 @@ name: wayfinder
 description: Resolve a genuine product or architecture fork whose answer cannot be derived from current evidence and would materially change the destination or implementation route. Use only after its admission test passes; do not use for ordinary planning or implementation uncertainty.
 compatibility: Codex, OpenCode, repository Agent Skills
 metadata:
-  version: "0.7.0"
+  version: "0.8.0"
   edition: "repository-modular"
 ---
 

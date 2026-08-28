@@ -3,7 +3,7 @@ name: review-change
 description: Independently review a completed code change with a static-to-runtime evidence ladder and a read-only PASS, FAIL, or INSUFFICIENT_EVIDENCE verdict. Use after implementation and verification; do not use to repair the change.
 compatibility: ChatGPT Skills, Codex, OpenCode
 metadata:
-  version: "0.7.0"
+  version: "0.8.0"
 ---
 
 # Review Change

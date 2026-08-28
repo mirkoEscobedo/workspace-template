@@ -1,20 +1,31 @@
 {
   "name": "workspace-template",
-  "version": "0.7.0",
-  "description": "Create or safely retrofit agentic software workspaces with adaptive delivery, bounded review and repair, project-owned skills, and guarded migrations.",
-  "type": "module",
+  "version": "0.8.0",
+  "description": "Windows-native Adaptive Delivery workspace routing, inspection, verification, and sealed repository migration.",
   "bin": {
-    "workspace-template": "bin/workspace-template.js"
-  },
-  "exports": {
-    ".": "./src/index.js"
+    "workspace-template": "bin/workspace-template.exe"
   },
   "files": [
-    "assets",
-    "bin",
-    "docs",
-    "scripts",
-    "src",
+    "assets/schemas",
+    "assets/skills/delivery-loop",
+    "assets/skills/execute-delivery/SKILL.md",
+    "assets/skills/review-change",
+    "assets/skills/repair-change/SKILL.md",
+    "assets/skills/diagnose/SKILL.md",
+    "assets/skills/compile-master-plan/SKILL.md",
+    "assets/skills/wayfinder/SKILL.md",
+    "assets/skills/wayfinder/assets/decision-template.md",
+    "assets/skills/verify/SKILL.md",
+    "assets/skills/tdd",
+    "assets/skills/implementation-style",
+    "assets/skills/test-topology",
+    "assets/skills/process-lifecycle/SKILL.md",
+    "assets/skills/process-lifecycle/references/windows-job-object.md",
+    "assets/skills/integrate-wave",
+    "bin/workspace-template.exe",
+    "docs/guides/adaptive-delivery.md",
+    "docs/qualification/cdb-windows-x64.json",
+    "workspace-template.provenance.json",
     "README.md",
     "LICENSE",
     "THIRD_PARTY_NOTICES.md",
@@ -23,15 +34,14 @@
     "SECURITY.md"
   ],
   "scripts": {
-    "test": "node --test",
-    "lint": "node ./src/self-check.js",
+    "test": "cargo test --workspace --all-targets",
+    "lint": "cargo fmt --all -- --check && cargo clippy --workspace --all-targets -- -D warnings",
     "check": "npm run lint && npm test",
     "pack:check": "npm pack --dry-run --json",
-    "test:packed": "node ./scripts/packed-smoke.js"
+    "test:packed": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-native-packed.ps1"
   },
-  "engines": {
-    "node": ">=24"
-  },
+  "os": ["win32"],
+  "cpu": ["x64"],
   "keywords": [
     "workspace-template",
     "agentic",
@@ -43,7 +53,7 @@
     "codex",
     "loop",
     "adaptive-delivery",
-    "frontier-loop",
+    "native-cli",
     "monorepo",
     "skills",
     "template",

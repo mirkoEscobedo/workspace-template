@@ -10,6 +10,66 @@
       "id": "exhausted-repair",
       "prompt": "The same validation gate failed after two different repair attempts. Keep working until it passes.",
       "expected_output": "Refuse a third semantic repair, enter replanning, and select an alternate route, reduced scope, concrete deferral, or abort without generating successor tickets."
+    },
+    {
+      "id": "diagnostic-repair",
+      "prompt": "Verification found a concrete parser defect and the first diagnosis produced a new falsifiable hypothesis.",
+      "expected_output": "Enter DIAGNOSING, record the hypothesis and evidence, allow one bounded REPAIRING round, add a regression test when practical, and return to VERIFYING."
+    },
+    {
+      "id": "classified-flaky-rerun",
+      "prompt": "A deterministic-looking test failed once, but the repository documents a specific intermittent infrastructure race and the implementation did not change.",
+      "expected_output": "Classify the gate explicitly as potentially flaky, allow exactly one unchanged rerun, and replan immediately if the same failure repeats."
+    },
+    {
+      "id": "alternate-route",
+      "prompt": "The selected API cannot support the required behavior, but a repository-owned alternate implementation seam can.",
+      "expected_output": "Enter REPLANNING and select exactly the alternate implementation route without creating a successor ticket to reset repair attempts."
+    },
+    {
+      "id": "reduced-scope",
+      "prompt": "The full outcome is infeasible under current platform limits, while a smaller independently valuable behavior remains verifiable.",
+      "expected_output": "Enter REPLANNING, explicitly select reduced scope, restate acceptance and exclusions, and do not silently claim the original outcome."
+    },
+    {
+      "id": "defer-blocker",
+      "prompt": "Correctness requires an unavailable external authority and there is no safe alternate check.",
+      "expected_output": "Enter REPLANNING, defer with the concrete blocker and resumption condition, and stop without generating repair work."
+    },
+    {
+      "id": "abort",
+      "prompt": "Repository evidence disproves the outcome assumptions and no valuable reduced or alternate route exists.",
+      "expected_output": "Enter REPLANNING, select abort, preserve the evidence, and terminate the outcome."
+    },
+    {
+      "id": "workspace-002-spiral",
+      "prompt": "Ticket 002 has repeated the same managed-substrate failure through successor decisions and validators without new causal evidence.",
+      "expected_output": "Stop the successor-ticket spiral immediately, classify the repeated failure, preserve history, and select one alternate route, reduced scope, defer, or abort."
+    },
+    {
+      "id": "trading-validator-cycle",
+      "prompt": "Trading's inventory validator keeps generating repair work for its own generated artifacts rather than proving product behavior.",
+      "expected_output": "Classify the validator cycle as methodology/infrastructure rather than a product defect, archive it, and resume current product truth without generating another validator."
+    },
+    {
+      "id": "ultima-review-cycle",
+      "prompt": "Ultima has repeated review and repair attempts for the same outcome across graph nodes.",
+      "expected_output": "Count semantic attempts across historical nodes, refuse a third attempt, archive the graph, and create at most one compact resumption truth item."
+    },
+    {
+      "id": "health-low-overhead",
+      "prompt": "Health needs an ordinary bounded Flutter change with deterministic analyzer and test coverage.",
+      "expected_output": "Use Direct mode, run focused Flutter evidence, request no Wayfinder or debugger, and create no copied skill, graph, validator, or repair tree."
+    },
+    {
+      "id": "agent-cad-recovery",
+      "prompt": "Agent CAD has a historical Frontier graph, but the current ordinary CAD behavior can be resumed from one compact statement.",
+      "expected_output": "Archive the graph through one migration index, preserve FreeCAD-native product policy, select Direct or Ticketed unless native process ownership changes, and create no successor graph."
+    },
+    {
+      "id": "pandora-fresh-adoption",
+      "prompt": "Pandora has no agentic substrate and needs a fresh adoption that preserves its design-system and Storybook policy.",
+      "expected_output": "Use thin Direct adoption, preserve product documents, use structured browser evidence before interactive GUI, and copy no generic methodology tree."
     }
   ]
 }

@@ -3,7 +3,7 @@ name: delivery-loop
 description: Route and coordinate software delivery through Direct, Ticketed, or Governed mode with bounded repair and explicit redirection. Use when implementing, fixing, or resuming repository work; do not use for read-only explanation or review alone.
 compatibility: ChatGPT Skills, Codex, OpenCode
 metadata:
-  version: "0.7.0"
+  version: "0.8.0"
 ---
 
 # Adaptive Delivery

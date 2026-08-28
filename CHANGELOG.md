@@ -2,6 +2,29 @@
 
 All notable changes to this package are documented here.
 
+## 0.8.0 — 2026-08-28
+
+### Native package and thin consumers
+
+- Replaced the published command boundary with a tracked Windows x64 Rust
+  executable. Normal routing, inspection, verification, adoption, upgrades,
+  and skill identity updates no longer invoke project-authored Node scripts.
+- Added sealed native plan/apply transactions with stale-plan rejection,
+  hash-preserving managed retirement, rollback journals, and interrupted-run
+  recovery.
+- Added thin `.agentic/project.json` state that records distribution commit,
+  compiled source commit, executable checksum, Adaptive Delivery limits,
+  capability requirements, overrides, and history/resumption pointers.
+- Moved canonical skills and schemas into an explicit package allowlist. Legacy
+  Frontier compatibility shims, graph generators, executable validators, and
+  retrofit writers are no longer embedded or distributed.
+- Added Windows Job Object containment for deterministic verification, including
+  detached descendant cleanup, and qualified Microsoft CDB as the terminal
+  `runtime-debug` provider without IDE or postmortem-debugger registration.
+- Added local `.tgz` plus exact Git commit dependency support, native provenance,
+  reproducible double-build gates, lifecycle-disabled npm/pnpm canaries, and
+  direct execution with Node removed from `PATH`.
+
 ## 0.7.0 — 2026-08-27
 
 ### Adaptive Delivery rescue

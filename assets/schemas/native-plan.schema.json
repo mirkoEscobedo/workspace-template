@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mirkoEscobedo/workspace-template/schemas/native-plan-v1.json",
+  "title": "Sealed native workspace operation plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "planId", "command", "root", "sourceFingerprint", "operations"],
+  "properties": {
+    "version": { "const": 1 },
+    "planId": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "command": { "enum": ["adopt", "upgrade", "skills-update"] },
+    "root": { "type": "string" },
+    "sourceFingerprint": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "operations": { "type": "array" }
+  }
+}

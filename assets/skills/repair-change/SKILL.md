@@ -3,7 +3,7 @@ name: repair-change
 description: Apply one bounded repair for a diagnosed implementation defect with a new falsifiable hypothesis and remaining repair budget. Use after review or verification fails; do not use for infrastructure failures, scope changes, or a third semantic attempt.
 compatibility: ChatGPT Skills, Codex, OpenCode
 metadata:
-  version: "0.7.0"
+  version: "0.8.0"
 ---
 
 # Repair Change

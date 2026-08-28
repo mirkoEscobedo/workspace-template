@@ -3,7 +3,7 @@ name: integrate-wave
 description: "Integrate two or more independently produced, already reviewed candidates in dependency order with mechanical conflict handling and composed verification. Use only for an actual multi-branch Ticketed or Governed wave."
 compatibility: ChatGPT Skills, Codex, OpenCode
 metadata:
-  version: "0.7.0"
+  version: "0.8.0"
 ---
 
 # Integrate Wave

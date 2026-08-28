@@ -3,7 +3,7 @@ name: execute-delivery
 description: Execute one selected Adaptive Delivery outcome through implementation, verification, independent review, bounded diagnosis, and explicit termination. Use after delivery-loop has selected Direct, Ticketed, or Governed mode.
 compatibility: ChatGPT Skills, Codex, OpenCode
 metadata:
-  version: "0.7.0"
+  version: "0.8.0"
 ---
 
 # Execute Delivery

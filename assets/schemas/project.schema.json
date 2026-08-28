@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mirkoEscobedo/workspace-template/schemas/project-v1.json",
+  "title": "Adaptive Delivery thin project state",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "workspaceTemplate", "execution", "capabilities", "overrides", "history"],
+  "properties": {
+    "version": { "const": 1 },
+    "workspaceTemplate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commit", "sourceCommit", "binarySha256"],
+      "properties": {
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "sourceCommit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "binarySha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "defaultMode", "limits"],
+      "properties": {
+        "method": { "const": "adaptive" },
+        "defaultMode": { "const": "direct" },
+        "limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["semanticRepairs", "flakyReruns"],
+          "properties": {
+            "semanticRepairs": { "const": 2 },
+            "flakyReruns": { "const": 1 }
+          }
+        }
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runtime-debug", "interactive-gui"],
+      "properties": {
+        "runtime-debug": { "enum": ["optional", "required", "unavailable"] },
+        "interactive-gui": { "enum": ["optional", "required", "unavailable"] }
+      }
+    },
+    "overrides": { "type": "object" },
+    "history": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "migrationIndex": { "type": ["string", "null"] },
+        "resumption": { "type": ["string", "null"] }
+      }
+    }
+  }
+}
