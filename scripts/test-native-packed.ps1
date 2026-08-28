@@ -23,7 +23,12 @@ try {
         if (-not (Get-Command ($manager + '.cmd') -ErrorAction SilentlyContinue)) { throw "$manager is required for packed qualification." }
         $consumer = Join-Path $temporary $manager
         New-Item -ItemType Directory -Path $consumer -Force | Out-Null
-        '{"name":"workspace-template-packed-canary","private":true}' | Set-Content -LiteralPath (Join-Path $consumer 'package.json') -Encoding utf8NoBOM
+        $utf8WithoutBom = New-Object System.Text.UTF8Encoding($false)
+        [System.IO.File]::WriteAllText(
+            (Join-Path $consumer 'package.json'),
+            '{"name":"workspace-template-packed-canary","private":true}',
+            $utf8WithoutBom
+        )
         if ($manager -eq 'npm') {
             & npm.cmd install --ignore-scripts --no-audit --no-fund --save-dev $tarball --prefix $consumer
         } else {

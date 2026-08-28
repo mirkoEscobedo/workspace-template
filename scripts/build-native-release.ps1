@@ -78,8 +78,14 @@ try {
             hashes = @($firstHash, $secondHash)
         }
     }
-    $provenance | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $repository 'workspace-template.provenance.json') -Encoding utf8NoBOM
-    $provenance | ConvertTo-Json -Depth 6
+    $provenanceJson = $provenance | ConvertTo-Json -Depth 6
+    $utf8WithoutBom = New-Object System.Text.UTF8Encoding($false)
+    [System.IO.File]::WriteAllText(
+        (Join-Path $repository 'workspace-template.provenance.json'),
+        $provenanceJson + "`n",
+        $utf8WithoutBom
+    )
+    $provenanceJson
 } finally {
     Pop-Location
 }
