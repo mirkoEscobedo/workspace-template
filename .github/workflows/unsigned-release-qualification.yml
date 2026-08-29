@@ -2,6 +2,9 @@ name: unsigned-release-qualification
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - codex/0.9-cleanup
 
 permissions:
   contents: read
