@@ -18,6 +18,9 @@ jobs:
         with:
           node-version: 24
           cache: npm
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
       - run: npm ci --ignore-scripts
       - run: npm run check
       - name: Reproducible unsigned materialization and SBOM

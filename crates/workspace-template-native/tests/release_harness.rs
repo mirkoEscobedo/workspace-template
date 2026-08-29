@@ -1,11 +1,13 @@
 use std::path::PathBuf;
 use std::process::Command;
 
+fn repository() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..")
+}
+
 #[test]
 fn packed_qualification_declares_the_unsigned_development_switch() {
-    let script = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../..")
-        .join("scripts/test-native-packed.ps1");
+    let script = repository().join("scripts/test-native-packed.ps1");
     let inspection = Command::new("powershell")
         .args([
             "-NoProfile",
@@ -19,5 +21,24 @@ fn packed_qualification_declares_the_unsigned_development_switch() {
     assert!(
         inspection.success(),
         "packed qualification must expose -AllowUnsignedDevelopment as a bound switch"
+    );
+}
+
+#[test]
+fn clean_release_workflow_provisions_pnpm_before_packed_qualification() {
+    let workflow = std::fs::read_to_string(
+        repository().join(".github/workflows/unsigned-release-qualification.yml"),
+    )
+    .unwrap();
+    let setup = workflow
+        .find("pnpm/action-setup@v4")
+        .expect("clean release workflow must provision pnpm");
+    let qualification = workflow
+        .find("Packed npm and pnpm development qualification")
+        .unwrap();
+
+    assert!(
+        setup < qualification,
+        "pnpm must exist before qualification"
     );
 }
