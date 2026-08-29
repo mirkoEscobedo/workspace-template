@@ -100,6 +100,27 @@ fn empty_existing_directory_adopts_only_thin_managed_state_and_converges() {
 }
 
 #[test]
+fn non_node_root_with_agentic_tooling_uses_the_local_npm_entry_point() {
+    let root = fixture("agentic-tooling");
+    fs::create_dir_all(root.join(".agentic/tooling")).unwrap();
+    fs::write(
+        root.join(".agentic/tooling/package.json"),
+        "{\"private\":true}\n",
+    )
+    .unwrap();
+
+    let plan = root.join("adopt.json");
+    plan_and_apply(&root, &plan);
+
+    let agents = fs::read_to_string(root.join("AGENTS.md")).unwrap();
+    assert!(
+        agents.contains("npm exec --prefix .agentic/tooling -- workspace-template skills show tdd")
+    );
+    assert!(!agents.contains("Use `workspace-template` as this repository's"));
+    fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
 fn adopt_rejects_a_nonexistent_root_without_creating_it() {
     let parent = fixture("missing-parent");
     let root = parent.join("missing");

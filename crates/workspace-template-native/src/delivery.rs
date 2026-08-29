@@ -242,6 +242,8 @@ fn invocation(root: &Path) -> &'static str {
         "pnpm exec workspace-template"
     } else if root.join("package.json").is_file() {
         "npm exec -- workspace-template"
+    } else if root.join(".agentic/tooling/package.json").is_file() {
+        "npm exec --prefix .agentic/tooling -- workspace-template"
     } else {
         "workspace-template"
     }
