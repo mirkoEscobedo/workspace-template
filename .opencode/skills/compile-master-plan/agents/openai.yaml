@@ -1,6 +1,0 @@
-interface:
-  display_name: "Compile Master Plan"
-  short_description: "Turns a resolved goal into dual-mode executable tickets."
-  default_prompt: "Compile this goal or Wayfinder map into a validated Frontier Loop master plan and ticket pack."
-policy:
-  allow_implicit_invocation: true

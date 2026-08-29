@@ -8,17 +8,38 @@ permissions:
   contents: read
 
 jobs:
-  node:
-    strategy:
-      matrix:
-        node: [24]
+  windows-native:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+      - run: cargo test --workspace --all-targets
+      - run: npm pack --dry-run --json --cache .tmp/npm-cache
+
+  source-invariants:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 24
           cache: npm
       - run: npm ci --ignore-scripts
-      - run: npm run check
-      - run: npm pack --dry-run
+      - name: Reject JavaScript product and generated projections
+        shell: bash
+        run: |
+          test ! -d src
+          test ! -d test
+          test ! -d .agentic
+          test ! -d .agents
+          test ! -d .codex
+          test ! -d .opencode
+          test ! -d assets/presets
+          test ! -d assets/configs
+          ! find scripts -type f -name '*.js' -print -quit | grep -q .

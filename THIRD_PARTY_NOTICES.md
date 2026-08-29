@@ -1,20 +1,44 @@
-# Third-party notices and research acknowledgements
+# Third-party notices
 
-This package's source code, generated templates, and bundled Agent Skills are original and licensed under MIT.
+workspace-template source and bundled Agent Skills are original and licensed under MIT. No third-party skill repository is vendored.
 
-No third-party skill repository is vendored or redistributed in this package. The following projects and specifications informed the comparative research and design vocabulary:
+The native binary includes the following Cargo.lock-resolved crates. Versions and SPDX expressions were verified from Cargo metadata for this release candidate.
 
-- Agent Skills specification and Anthropic skills examples: https://agentskills.io/ and https://github.com/anthropics/skills
-- Matt Pocock skills: https://github.com/mattpocock/skills
-- Superpowers: https://github.com/obra/superpowers
-- GitHub Spec Kit: https://github.com/github/spec-kit
-- BMAD Method: https://github.com/bmad-code-org/BMAD-METHOD
-- Trail of Bits skills: https://github.com/trailofbits/skills
-- wshobson/agents: https://github.com/wshobson/agents
-- `AGENTS.md`: https://agents.md/
-- Flutter, Dart, React, TypeScript, and Rust official documentation
-- Martin Fowler's refactoring catalog and TDD writings
+| Crate | Version | License |
+|---|---:|---|
+| block-buffer | 0.10.4 | MIT OR Apache-2.0 |
+| cfg-if | 1.0.4 | MIT OR Apache-2.0 |
+| cpufeatures | 0.2.17 | MIT OR Apache-2.0 |
+| crypto-common | 0.1.7 | MIT OR Apache-2.0 |
+| digest | 0.10.7 | MIT OR Apache-2.0 |
+| generic-array | 0.14.7 | MIT |
+| hex | 0.4.3 | MIT OR Apache-2.0 |
+| itoa | 1.0.18 | MIT OR Apache-2.0 |
+| libc | 0.2.189 | MIT OR Apache-2.0 |
+| memchr | 2.8.3 | Unlicense OR MIT |
+| proc-macro2 | 1.0.107 | MIT OR Apache-2.0 |
+| quote | 1.0.47 | MIT OR Apache-2.0 |
+| serde | 1.0.229 | MIT OR Apache-2.0 |
+| serde_core | 1.0.229 | MIT OR Apache-2.0 |
+| serde_derive | 1.0.229 | MIT OR Apache-2.0 |
+| serde_json | 1.0.151 | MIT OR Apache-2.0 |
+| sha2 | 0.10.9 | MIT OR Apache-2.0 |
+| syn | 3.0.4 | MIT OR Apache-2.0 |
+| typenum | 1.20.1 | MIT OR Apache-2.0 |
+| unicode-ident | 1.0.24 | (MIT OR Apache-2.0) AND Unicode-3.0 |
+| version_check | 0.9.5 | MIT OR Apache-2.0 |
+| windows-sys | 0.59.0 | MIT OR Apache-2.0 |
+| windows-targets | 0.52.6 | MIT OR Apache-2.0 |
+| windows_aarch64_gnullvm | 0.52.6 | MIT OR Apache-2.0 |
+| windows_aarch64_msvc | 0.52.6 | MIT OR Apache-2.0 |
+| windows_i686_gnu | 0.52.6 | MIT OR Apache-2.0 |
+| windows_i686_gnullvm | 0.52.6 | MIT OR Apache-2.0 |
+| windows_i686_msvc | 0.52.6 | MIT OR Apache-2.0 |
+| windows_x86_64_gnu | 0.52.6 | MIT OR Apache-2.0 |
+| windows_x86_64_gnullvm | 0.52.6 | MIT OR Apache-2.0 |
+| windows_x86_64_msvc | 0.52.6 | MIT OR Apache-2.0 |
+| zmij | 1.0.23 | MIT |
 
-Names and trademarks belong to their respective owners. Links are acknowledgements, not endorsements or claims of compatibility.
+License texts are available from each crate's source distribution in the Cargo registry. Release SBOM generation must reproduce this inventory from the locked graph and fail on a missing or unlicensed component.
 
-The user-provided enterprise framework, local skill archive, and `example.md` were analyzed as private inputs. Their original text and organization-specific content are not redistributed.
+Names and trademarks belong to their owners. References to Agent Skills, AGENTS.md, Codex, OpenCode, Flutter, Dart, JavaScript, React, TypeScript, Rust, npm, and pnpm describe compatibility or design inputs and do not imply endorsement.

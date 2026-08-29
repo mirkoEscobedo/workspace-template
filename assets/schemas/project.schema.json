@@ -1,20 +1,46 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/mirkoEscobedo/workspace-template/schemas/project-v1.json",
+  "$id": "https://github.com/mirkoEscobedo/workspace-template/schemas/project-v2.json",
   "title": "Adaptive Delivery thin project state",
   "type": "object",
   "additionalProperties": false,
   "required": ["version", "workspaceTemplate", "execution", "capabilities", "overrides", "history"],
   "properties": {
-    "version": { "const": 1 },
+    "version": { "const": 2 },
     "workspaceTemplate": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["commit", "sourceCommit", "binarySha256"],
+      "required": [
+        "packageName",
+        "releaseVersion",
+        "sourceCommit",
+        "releaseCommit",
+        "embeddedAssetManifestSha256",
+        "releaseManifestSha256",
+        "artifacts"
+      ],
       "properties": {
-        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "packageName": { "type": "string", "minLength": 1 },
+        "releaseVersion": { "type": "string", "minLength": 1 },
         "sourceCommit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
-        "binarySha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        "releaseCommit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "embeddedAssetManifestSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "releaseManifestSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "artifacts": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["packageName", "rustTarget", "executableSha256", "signingStatus"],
+            "properties": {
+              "packageName": { "type": "string", "minLength": 1 },
+              "rustTarget": { "type": "string", "minLength": 1 },
+              "executableSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+              "signingStatus": { "enum": ["unsigned-development", "authenticode-rfc3161"] }
+            }
+          }
+        }
       }
     },
     "execution": {

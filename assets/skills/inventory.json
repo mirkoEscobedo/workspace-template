@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "authority": "assets/skills",
+  "skills": [
+    { "name": "compile-master-plan", "version": "0.8.0", "entrypoint": "compile-master-plan/SKILL.md", "sha256": "6676d283fbe6deae1274ce41d7d1764943cb0a5f454c70b4e12b51b7860d80b9", "resources": [] },
+    { "name": "delivery-loop", "version": "0.8.0", "entrypoint": "delivery-loop/SKILL.md", "sha256": "226878d740d4736a03d951a3bc78f4beeee1010d755ac67595de29adc22e25e2", "resources": ["assets/delivery-policy.yaml", "evals/evals.json", "evals/trigger-evals.json", "references/state-machine.md"] },
+    { "name": "diagnose", "version": "1.1.0", "entrypoint": "diagnose/SKILL.md", "sha256": "61418a61e60c66b269d4742596cf26941039e40685f75b98b7f07af47c11867c", "resources": [] },
+    { "name": "execute-delivery", "version": "0.8.0", "entrypoint": "execute-delivery/SKILL.md", "sha256": "88b7063f5f60b84a9d58ab3e33def5778ebdac0954d0fa87e7a1fd6426c71c63", "resources": [] },
+    { "name": "implementation-style", "version": "0.6.0", "entrypoint": "implementation-style/SKILL.md", "sha256": "d02c5633addcc8386685c6c937d72b6d4cf3b69a70ef21826a2dca32b31fc197", "resources": ["evals/evals.json", "evals/trigger-evals.json", "references/stack-flutter.md", "references/stack-javascript.md", "references/stack-react.md", "references/stack-rust.md", "references/stack-typescript.md", "references/style-clean.md", "references/style-functional-core.md", "references/style-preserve.md", "references/style-simple.md"] },
+    { "name": "integrate-wave", "version": "0.8.0", "entrypoint": "integrate-wave/SKILL.md", "sha256": "2245e6db9f7a97a8db82d1a99be0cb19876ca8050a19005d8c4d735c90fc8931", "resources": [] },
+    { "name": "process-lifecycle", "version": "0.8.0", "entrypoint": "process-lifecycle/SKILL.md", "sha256": "cfd4a9ad63c7315f49f8b8171d53ebabae1d600a338d1c8e42a7125da0cf7390", "resources": ["references/windows-job-object.md"] },
+    { "name": "repair-change", "version": "0.8.0", "entrypoint": "repair-change/SKILL.md", "sha256": "fbfb250a0d23c97d2d83d3a36e3e899a922cc5ab5255c210406a0c8e4d42433f", "resources": [] },
+    { "name": "review-change", "version": "0.8.0", "entrypoint": "review-change/SKILL.md", "sha256": "702133128d23e677ea8aca82d3fefe6c9d8eda570b3b4156fcb3af3dda27d94e", "resources": ["assets/review-report.schema.json", "evals/evals.json", "evals/trigger-evals.json", "references/evidence-ladder.md"] },
+    { "name": "tdd", "version": "2.0.0", "entrypoint": "tdd/SKILL.md", "sha256": "dcce1e1955f7276e5c55067eaa54faf3f63538962ff900e5aeaaf2a817ea4246", "resources": ["references/deep-modules.md", "references/independent-oracles.md", "references/mocking.md", "references/test-placement.md", "references/tests.md"] },
+    { "name": "test-topology", "version": "0.6.1", "entrypoint": "test-topology/SKILL.md", "sha256": "df68e0922c1ea0dac6468c5438b76d9a22da3a2188f84846f3c4f466030c0be0", "resources": ["assets/architecture-budgets.yaml"] },
+    { "name": "verify", "version": "1.0.0", "entrypoint": "verify/SKILL.md", "sha256": "921797aa4fbff42777fc14500d45b43cf80f98dc11dbce3ced337fc7aacb955c", "resources": [] },
+    { "name": "wayfinder", "version": "0.8.0", "entrypoint": "wayfinder/SKILL.md", "sha256": "a3fb02b392327f96728f2d5ea9dd6209f173d395902f2d2f9e4f0ae0a42a68eb", "resources": ["assets/decision-template.md"] }
+  ]
+}

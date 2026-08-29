@@ -81,7 +81,7 @@ fn unsupported_native_commands_fail_without_node_fallback() {
         let value = json(&output);
         assert_eq!(value["ok"], false, "{command}");
         assert_eq!(
-            value["error"]["code"], "UNSUPPORTED_IN_NATIVE_0_8",
+            value["error"]["code"], "UNSUPPORTED_PORTABLE_CAPABILITY",
             "{command}"
         );
     }
@@ -207,8 +207,11 @@ fn doctor_verifies_readable_sources_match_embedded_assets() {
         value["result"]["embeddedAssets"]["mismatches"],
         serde_json::json!([])
     );
-    assert_eq!(value["result"]["runtimeDebug"]["qualified"], true);
     assert_eq!(value["result"]["runtimeDebug"]["provider"], "microsoft-cdb");
+    assert_eq!(
+        value["result"]["runtimeDebug"]["policy"],
+        "read-only-source-inspection-and-execution-control"
+    );
     assert!(
         value["result"]["embeddedAssets"]["verified"]
             .as_u64()
@@ -262,17 +265,17 @@ fn sealed_adopt_plan_applies_thin_state_and_converges() {
     let project: serde_json::Value =
         serde_json::from_slice(&fs::read(root.join(".agentic/project.json")).expect("thin state"))
             .expect("project JSON");
-    assert_eq!(project["version"], 1);
+    assert_eq!(project["version"], 2);
     assert_eq!(project["execution"]["defaultMode"], "direct");
     assert_eq!(
-        project["workspaceTemplate"]["commit"]
+        project["workspaceTemplate"]["releaseCommit"]
             .as_str()
             .unwrap()
             .len(),
         40
     );
     assert_eq!(
-        project["workspaceTemplate"]["binarySha256"]
+        project["workspaceTemplate"]["artifacts"]["windows-x86_64"]["executableSha256"]
             .as_str()
             .unwrap()
             .len(),
@@ -283,19 +286,13 @@ fn sealed_adopt_plan_applies_thin_state_and_converges() {
     assert!(!agents.contains("workspace-template:begin workspace-template"));
     assert!(!agents.contains("Frontier Loop"));
     assert!(!agents.contains("execute-frontier"));
-    assert!(agents.contains("npm exec --prefix .agentic/tooling -- workspace-template"));
-    let tooling: serde_json::Value = serde_json::from_slice(
-        &fs::read(root.join(".agentic/tooling/package.json")).expect("tooling manifest"),
-    )
-    .expect("tooling JSON");
-    assert!(tooling["devDependencies"]["workspace-template"]
-        .as_str()
-        .unwrap()
-        .starts_with("github:mirkoEscobedo/workspace-template#"));
+    assert!(agents.contains("Use `workspace-template`"));
+    assert!(agents.contains("host or repository owner selects"));
+    assert!(!root.join(".agentic/tooling/package.json").exists());
     let gitignore = fs::read_to_string(root.join(".gitignore")).expect("managed ignore rules");
     assert!(gitignore.contains(".agentic\n"));
     assert!(gitignore.contains("!.agentic/project.json"));
-    assert!(gitignore.contains("!.agentic/tooling/package-lock.json"));
+    assert!(!gitignore.contains("!.agentic/tooling/package-lock.json"));
     assert!(gitignore.contains("!.agentic/history/migration-index.json"));
     assert!(gitignore.contains("!.agentic/resumption/**"));
 
@@ -319,7 +316,6 @@ fn sealed_adopt_can_use_a_local_package_while_recording_distribution_and_source_
     fs::write(root.join("pubspec.yaml"), "name: local_package_canary\n").expect("manifest");
     let plan = root.join("adopt.json");
     let distribution_commit = "1111111111111111111111111111111111111111";
-    let package_spec = "file:C:/disposable/workspace-template-0.8.0.tgz";
     let planned = run_owned(&[
         "adopt".to_owned(),
         "plan".to_owned(),
@@ -328,8 +324,6 @@ fn sealed_adopt_can_use_a_local_package_while_recording_distribution_and_source_
         plan.to_string_lossy().into_owned(),
         "--package-commit".to_owned(),
         distribution_commit.to_owned(),
-        "--package-spec".to_owned(),
-        package_spec.to_owned(),
         "--json".to_owned(),
     ]);
     assert!(planned.status.success());
@@ -344,7 +338,10 @@ fn sealed_adopt_can_use_a_local_package_while_recording_distribution_and_source_
     assert!(applied.status.success());
     let project: serde_json::Value =
         serde_json::from_slice(&fs::read(root.join(".agentic/project.json")).unwrap()).unwrap();
-    assert_eq!(project["workspaceTemplate"]["commit"], distribution_commit);
+    assert_eq!(
+        project["workspaceTemplate"]["releaseCommit"],
+        distribution_commit
+    );
     assert_eq!(
         project["workspaceTemplate"]["sourceCommit"]
             .as_str()
@@ -352,13 +349,7 @@ fn sealed_adopt_can_use_a_local_package_while_recording_distribution_and_source_
             .len(),
         40
     );
-    let tooling: serde_json::Value =
-        serde_json::from_slice(&fs::read(root.join(".agentic/tooling/package.json")).unwrap())
-            .unwrap();
-    assert_eq!(
-        tooling["devDependencies"]["workspace-template"],
-        package_spec
-    );
+    assert!(!root.join(".agentic/tooling/package.json").exists());
     fs::remove_dir_all(root).expect("fixture cleanup");
 }
 
@@ -480,7 +471,7 @@ fn doctor_rejects_project_identity_that_does_not_match_running_binary() {
         serde_json::from_slice(&fs::read(&project_path).unwrap()).unwrap();
     project["workspaceTemplate"]["sourceCommit"] =
         serde_json::json!("0000000000000000000000000000000000000000");
-    project["workspaceTemplate"]["binarySha256"] =
+    project["workspaceTemplate"]["artifacts"]["windows-x86_64"]["executableSha256"] =
         serde_json::json!("0000000000000000000000000000000000000000000000000000000000000000");
     fs::write(
         &project_path,
@@ -616,50 +607,26 @@ fn upgrade_retires_only_hash_matching_generic_assets() {
 }
 
 #[test]
-fn skills_update_changes_dependency_identity_without_copying_skills() {
+fn skills_update_requires_the_package_manager_without_mutation() {
     let root = fixture("skills-update-node");
     fs::write(
         root.join("package.json"),
         "{\n  \"name\": \"pandora-canary\",\n  \"private\": true,\n  \"devDependencies\": { \"existing-tool\": \"1.0.0\" }\n}\n",
     )
     .expect("package manifest");
-    let plan = root.join("skills-update.json");
+    let before = fs::read(root.join("package.json")).unwrap();
     let planned = run_owned(&[
         "skills".to_owned(),
         "update".to_owned(),
-        "plan".to_owned(),
         root.to_string_lossy().into_owned(),
-        "--plan-out".to_owned(),
-        plan.to_string_lossy().into_owned(),
         "--json".to_owned(),
     ]);
-    assert!(
-        planned.status.success(),
-        "{}",
-        String::from_utf8_lossy(&planned.stderr)
+    assert_eq!(planned.status.code(), Some(64));
+    assert_eq!(
+        json(&planned)["error"]["code"],
+        "PACKAGE_MANAGER_UPDATE_REQUIRED"
     );
-    let applied = run_owned(&[
-        "skills".to_owned(),
-        "update".to_owned(),
-        "apply".to_owned(),
-        root.to_string_lossy().into_owned(),
-        "--apply-plan".to_owned(),
-        plan.to_string_lossy().into_owned(),
-        "--json".to_owned(),
-    ]);
-    assert!(
-        applied.status.success(),
-        "{}",
-        String::from_utf8_lossy(&applied.stderr)
-    );
-    let package: serde_json::Value =
-        serde_json::from_slice(&fs::read(root.join("package.json")).unwrap()).unwrap();
-    assert_eq!(package["devDependencies"]["existing-tool"], "1.0.0");
-    let dependency = package["devDependencies"]["workspace-template"]
-        .as_str()
-        .unwrap();
-    assert!(dependency.starts_with("github:mirkoEscobedo/workspace-template#"));
-    assert_eq!(dependency.rsplit('#').next().unwrap().len(), 40);
+    assert_eq!(fs::read(root.join("package.json")).unwrap(), before);
     assert!(!root.join(".agentic/skills").exists());
     assert!(!root.join(".agents/skills").exists());
     fs::remove_dir_all(root).expect("fixture cleanup");
@@ -688,7 +655,7 @@ fn verify_contains_detached_descendants_on_timeout() {
         "verify".to_owned(),
         root.to_string_lossy().into_owned(),
         "--timeout".to_owned(),
-        "750".to_owned(),
+        "1500".to_owned(),
         "--json".to_owned(),
     ]);
     assert_eq!(

@@ -1,32 +1,10 @@
 # Adaptive Delivery
 
-Adaptive Delivery is the normal workspace-template workflow from version 0.7.
-It minimizes process artifacts while retaining explicit evidence and stopping
-rules where consequences justify them.
+Adaptive Delivery chooses the lightest workflow that safely delivers the requested outcome.
 
-## Choose a mode
+Use **Direct** for ordinary features, fixes, refactors, and bounded investigations. It creates no methodology artifacts. Use **Ticketed** when work spans sessions or contains several independently valuable vertical slices; keep one compact outcome plan and one current ticket. Use **Governed** only for irreversible operations, credentials or security authority, financial authority, destructive migrations, native process ownership, or production external effects. Governed work adds a frozen contract, state record, independent review, and authority receipts.
 
-Use **Direct** for ordinary features, fixes, refactors, and bounded
-investigations. Direct work records acceptance criteria, changes, verification,
-review, and the final result in the normal development record. It creates no
-ticket graph, validator program, or repair evidence tree.
-
-Use **Ticketed** when work must survive several sessions or contains several
-independently valuable vertical slices. Keep a compact outcome plan and one
-current ticket. A completed or blocked ticket may be followed by another only
-because the product plan requires it, never to gain more repair attempts.
-
-Use **Governed** only for irreversible operations, credentials or security
-boundaries, financial authority, destructive migrations, native process
-ownership, or production external side effects. Governed work adds a frozen
-acceptance contract, state record, independent review, and required authority
-receipts.
-
-Ambiguity does not imply Governed mode. Admit Wayfinder only when repository
-evidence cannot resolve a genuine product or architecture choice and choosing
-incorrectly would materially alter the outcome.
-
-## Execute the state machine
+Ambiguity alone is not a Governed signal. Admit Wayfinder only when evidence cannot resolve a genuine product or architecture fork and choosing incorrectly would materially change the destination.
 
 ```text
 INTAKE → ROUTED → PLANNED → IMPLEMENTING → VERIFYING → REVIEWING → ACCEPTED
@@ -39,43 +17,12 @@ INTAKE → ROUTED → PLANNED → IMPLEMENTING → VERIFYING → REVIEWING → A
                                                 → abort
 ```
 
-A verification or review failure must identify a concrete defect before
-diagnosis. Diagnosis states a falsifiable causal hypothesis. A repair must test
-a new hypothesis and the same outcome receives no more than two semantic repair
-rounds. An unchanged failing gate may be rerun once only when explicitly marked
-potentially flaky. Repeating a failure without new causal evidence immediately
-selects replanning.
+A concrete defect precedes diagnosis. Diagnosis states a falsifiable cause. A repair tests a new hypothesis, and one outcome receives at most two semantic repair rounds. An unchanged failing gate may be rerun once only when explicitly classified as potentially flaky. Repeating failure without new causal evidence replans immediately.
 
-Infrastructure and tool failures are not implementation defects. Replanning
-must select exactly one terminal direction; it cannot generate a successor
-ticket or decision solely to reset a budget.
+Review begins with acceptance criteria, the exact diff, deterministic tests, and static checks. Escalate to runtime or GUI evidence only when those sources cannot establish correctness. If a required capability is unavailable, return `INSUFFICIENT_EVIDENCE` with an alternate check or explicit manual obligation. Review is read-only and emits exactly `PASS`, `FAIL`, or `INSUFFICIENT_EVIDENCE` plus one permitted transition.
 
-## Review with minimum sufficient evidence
+## Package-owned methodology
 
-The reviewer begins with acceptance criteria, diff inspection, deterministic
-tests, and static checks. Use `runtime-debug` only for runtime-state uncertainty,
-wrong values, lifecycle or concurrency failures, crashes, hangs, or behavior
-source and tests cannot explain. Use `interactive-gui` only when native GUI,
-device, emulator, game, or desktop acceptance lacks a reliable structured
-interface.
+Consumers do not receive copied generic skill, schema, baseline, prompt, or validator trees. Use `workspace-template skills list` to discover embedded methodology and `workspace-template skills show <name>` to retrieve exact instructions and bundled resources. Updating the dependency updates the skill source; sealed `upgrade` migrates only thin consumer state.
 
-The reviewer remains read-only with respect to source. Record the reproducer,
-test environment, relevant frames/variables or GUI actions, and sanitized
-evidence. Convert a finding into a regression test before repair when practical.
-If a required capability is unavailable, report `INSUFFICIENT_EVIDENCE` with an
-alternate check or explicit manual obligation.
-
-Every review emits exactly one of `PASS`, `FAIL`, or
-`INSUFFICIENT_EVIDENCE`, plus the permitted next transition. Review never
-repairs source or expands scope.
-
-## Native 0.8 packaging
-
-Version 0.8 removes the one-release Frontier compatibility shims from the
-canonical package. The native upgrade command treats old graphs and decisions
-as immutable history and retires only hash-matching managed files. A diverged
-managed file is preserved as an override or reported conflict.
-
-Consumer repositories do not receive copied generic skill, schema, baseline,
-or validator trees. They retain product policy, overrides, history pointers,
-and one compact resumption item when unfinished historical work remains.
+Codex, OpenCode, and repository owners select available models, agents, permissions, skills, and capabilities. Adaptive Delivery routes work; it does not select a model or materialize host-agent definitions.

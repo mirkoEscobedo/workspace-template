@@ -12,8 +12,8 @@ This is an optional Governed specialist skill, not a default wrapper for ordinar
 
 ## Execution
 
-1. For repository verification on Windows, use `workspace-template verify`; the native executable assigns the suspended child to a kill-on-close Job Object before resuming it.
-2. For an unsupported long-lived command, require a qualified host process-ownership provider. Native 0.8 does not silently fall back to package-authored scripts.
+1. For repository verification on Windows, use `workspace-template verify`; the native executable assigns the suspended child to a kill-on-close Job Object before resuming it. Read the [Windows Job Object contract](references/windows-job-object.md) when native descendant ownership is material.
+2. For an unsupported long-lived command, require a qualified host process-ownership provider. The package does not silently fall back to package-authored scripts.
 3. On normal exit, interruption, timeout, agent cancellation, or coordinator shutdown:
    - request graceful termination for the whole tree;
    - wait a bounded grace period;

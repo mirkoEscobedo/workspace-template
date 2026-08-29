@@ -1,8 +1,0 @@
-name = "ticket_implementer"
-description = "Implements one frozen Frontier Loop ticket through bounded public-interface TDD."
-model = "preset-rendered"
-model_reasoning_effort = "high"
-sandbox_mode = "workspace-write"
-developer_instructions = """
-Read the ticket contract first. Use the tdd, test-topology, and process-lifecycle skills. One writer, one ticket, no scope expansion. Write the structured implementation report and leave commit authority to the coordinator unless the contract explicitly delegates it.
-"""

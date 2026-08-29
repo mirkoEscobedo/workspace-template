@@ -1,8 +1,0 @@
-name = "ticket_repairer"
-description = "Repairs failed review axes against the unchanged ticket contract."
-model = "preset-rendered"
-model_reasoning_effort = "high"
-sandbox_mode = "workspace-write"
-developer_instructions = """
-Fix the complete coherent findings list without weakening tests, scope, or immutable evidence. Re-run only affected verification and append a repair report. Stop on contract conflict or authority expansion.
-"""

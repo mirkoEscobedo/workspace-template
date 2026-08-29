@@ -1,1 +1,0 @@
-Load ticket-review with the code-test lens. Read only. Enforce public seams, independent expectations, architecture budgets, and scope.

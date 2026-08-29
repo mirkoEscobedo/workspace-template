@@ -6,6 +6,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 
+use crate::{assets, delivery_args, release};
+
 const START: &str = "<!-- workspace-template:adaptive-delivery:start -->";
 const END: &str = "<!-- workspace-template:adaptive-delivery:end -->";
 const IGNORE_START: &str = "# workspace-template:thin-state:start";
@@ -187,7 +189,7 @@ fn managed_agents(existing: &str, invocation: &str) -> String {
     }
     let existing = existing.trim_end();
     let block = format!(
-        "{START}\n## Adaptive Delivery\n\nUse `{invocation}` as this repository's workspace-template entry point. Direct is the default; Ticketed is for multi-session slices; Governed is reserved for enumerated high-consequence authority. Review is read-only, allows at most two semantic repair rounds, and returns `INSUFFICIENT_EVIDENCE` when required inspection is unavailable.\n{END}"
+        "{START}\n## Adaptive Delivery\n\nUse `{invocation}` as this repository's workspace-template entry point. Direct is the default; Ticketed is for multi-session slices; Governed is reserved for enumerated high-consequence authority. Review is read-only, allows at most two semantic repair rounds, and returns `INSUFFICIENT_EVIDENCE` when required inspection is unavailable. Read package-owned methodology with `{invocation} skills list` and `{invocation} skills show <name>`; do not copy generic skills into this repository. The host or repository owner selects available models, agents, permissions, skills, and capabilities.\n{END}"
     );
     if let (Some(start), Some(end)) = (existing.find(START), existing.find(END)) {
         let tail = end + END.len();
@@ -204,7 +206,7 @@ fn managed_agents(existing: &str, invocation: &str) -> String {
 
 fn managed_gitignore(existing: &str) -> String {
     let block = format!(
-        "{IGNORE_START}\n!.agentic/\n.agentic/*\n!.agentic/project.json\n!.agentic/tooling/\n.agentic/tooling/*\n!.agentic/tooling/package.json\n!.agentic/tooling/package-lock.json\n!.agentic/tooling/pnpm-lock.yaml\n!.agentic/history/\n.agentic/history/*\n!.agentic/history/migration-index.json\n!.agentic/resumption/\n!.agentic/resumption/**\n{IGNORE_END}"
+        "{IGNORE_START}\n!.agentic/\n.agentic/*\n!.agentic/project.json\n!.agentic/history/\n.agentic/history/*\n!.agentic/history/migration-index.json\n!.agentic/resumption/\n!.agentic/resumption/**\n{IGNORE_END}"
     );
     if let (Some(start), Some(end)) = (existing.find(IGNORE_START), existing.find(IGNORE_END)) {
         let tail = end + IGNORE_END.len();
@@ -235,58 +237,14 @@ fn operation(
     }))
 }
 
-fn option(args: &[String], name: &str) -> Option<String> {
-    args.windows(2)
-        .find(|pair| pair[0] == name)
-        .map(|pair| pair[1].clone())
-}
-
 fn invocation(root: &Path) -> &'static str {
     if root.join("pnpm-lock.yaml").is_file() {
         "pnpm exec workspace-template"
     } else if root.join("package.json").is_file() {
         "npm exec -- workspace-template"
     } else {
-        "npm exec --prefix .agentic/tooling -- workspace-template"
+        "workspace-template"
     }
-}
-
-fn package_with_dependency(
-    root: &Path,
-    package_spec: &str,
-) -> Result<Option<String>, DeliveryError> {
-    let path = root.join("package.json");
-    if !path.is_file() {
-        return Ok(None);
-    }
-    let bytes = fs::read(&path).map_err(|error| DeliveryError::io("read package.json", error))?;
-    let mut package: Value = serde_json::from_slice(&bytes).map_err(|error| DeliveryError {
-        code: "INVALID_MANIFEST",
-        message: format!("package.json: {error}"),
-        exit_code: 3,
-    })?;
-    let object = package.as_object_mut().ok_or_else(|| DeliveryError {
-        code: "INVALID_MANIFEST",
-        message: "package.json must contain an object".to_owned(),
-        exit_code: 3,
-    })?;
-    let dependencies = object
-        .entry("devDependencies")
-        .or_insert_with(|| json!({}))
-        .as_object_mut()
-        .ok_or_else(|| DeliveryError {
-            code: "INVALID_MANIFEST",
-            message: "package.json devDependencies must be an object".to_owned(),
-            exit_code: 3,
-        })?;
-    dependencies.insert(
-        "workspace-template".to_owned(),
-        Value::String(package_spec.to_owned()),
-    );
-    Ok(Some(format!(
-        "{}\n",
-        serde_json::to_string_pretty(&package).expect("package JSON")
-    )))
 }
 
 fn project_json(
@@ -315,14 +273,14 @@ fn project_json(
             message: format!(".agentic/project.json: {error}"),
             exit_code: 3,
         })?;
-        if value["version"] != 1
+        if !matches!(value["version"].as_u64(), Some(1 | 2))
             || !value["capabilities"].is_object()
             || !value["overrides"].is_object()
             || !value["history"].is_object()
         {
             return Err(DeliveryError {
                 code: "INVALID_MIGRATION_INPUT",
-                message: ".agentic/project.json is not valid thin state v1".to_owned(),
+                message: ".agentic/project.json is not valid thin state v1 or v2".to_owned(),
                 exit_code: 3,
             });
         }
@@ -334,14 +292,27 @@ fn project_json(
     if migration_index {
         history["migrationIndex"] = json!(".agentic/history/migration-index.json");
     }
+    let artifact_key = format!("{}-{}", std::env::consts::OS, std::env::consts::ARCH);
+    let artifacts = json!({
+        artifact_key: {
+            "packageName": "workspace-template",
+            "rustTarget": env!("WT_TARGET"),
+            "executableSha256": binary_sha256,
+            "signingStatus": release::signing_status()
+        }
+    });
     Ok(format!(
         "{}\n",
         serde_json::to_string_pretty(&json!({
-            "version": 1,
+            "version": 2,
             "workspaceTemplate": {
-                "commit": package_commit,
+                "packageName": "workspace-template",
+                "releaseVersion": env!("CARGO_PKG_VERSION"),
                 "sourceCommit": env!("WT_SOURCE_COMMIT"),
-                "binarySha256": binary_sha256
+                "releaseCommit": package_commit,
+                "embeddedAssetManifestSha256": assets::manifest_sha256(),
+                "releaseManifestSha256": assets::release_manifest_sha256(),
+                "artifacts": artifacts
             },
             "execution": {
                 "method": "adaptive",
@@ -473,12 +444,7 @@ fn legacy_retirement(root: &Path) -> Result<Retirement, DeliveryError> {
     Ok((operations, conflicts, Some(migration_index)))
 }
 
-fn build_plan(
-    command: &str,
-    root: &Path,
-    package_commit: &str,
-    package_spec: &str,
-) -> Result<Plan, DeliveryError> {
+fn build_plan(command: &str, root: &Path, package_commit: &str) -> Result<Plan, DeliveryError> {
     let root = canonical(root)?;
     let mut operations = Vec::new();
     let (retirement, conflicts, migration_index) = if command == "upgrade" {
@@ -508,11 +474,6 @@ fn build_plan(
     )? {
         operations.push(item);
     }
-    if let Some(package) = package_with_dependency(&root, package_spec)? {
-        if let Some(item) = operation(&root, "package.json", package)? {
-            operations.push(item);
-        }
-    }
     let agents = fs::read_to_string(root.join("AGENTS.md")).unwrap_or_default();
     if let Some(item) = operation(
         &root,
@@ -524,22 +485,6 @@ fn build_plan(
     let gitignore = fs::read_to_string(root.join(".gitignore")).unwrap_or_default();
     if let Some(item) = operation(&root, ".gitignore", managed_gitignore(&gitignore))? {
         operations.push(item);
-    }
-    if !root.join("package.json").is_file() {
-        let tooling = format!(
-            "{}\n",
-            serde_json::to_string_pretty(&json!({
-                "name": "workspace-template-project-tooling",
-                "private": true,
-                "devDependencies": {
-                    "workspace-template": package_spec
-                }
-            }))
-            .expect("tooling manifest")
-        );
-        if let Some(item) = operation(&root, ".agentic/tooling/package.json", tooling)? {
-            operations.push(item);
-        }
     }
     operations.sort_by(|left, right| left.path.cmp(&right.path));
     let mut plan = Plan {
@@ -853,6 +798,7 @@ fn apply(plan: &Plan, root: &Path) -> Result<Value, DeliveryError> {
 }
 
 pub fn execute(command: &str, args: &[String]) -> Result<(Value, u8), DeliveryError> {
+    delivery_args::validate(command, args)?;
     let subcommand = args
         .first()
         .map(String::as_str)
@@ -864,12 +810,16 @@ pub fn execute(command: &str, args: &[String]) -> Result<(Value, u8), DeliveryEr
         .unwrap_or(".");
     match subcommand {
         "plan" => {
-            let plan_path = option(args, "--plan-out")
+            let plan_path = delivery_args::option(args, "--plan-out")
                 .ok_or_else(|| DeliveryError::usage("plan requires --plan-out <path>"))?;
             let root_path = canonical(Path::new(root))?;
             recover_transactions(&root_path)?;
-            let package_commit = option(args, "--package-commit")
-                .unwrap_or_else(|| env!("WT_SOURCE_COMMIT").to_owned());
+            delivery_args::reject_unapproved_downgrade(
+                &root_path,
+                delivery_args::flag(args, "--allow-downgrade"),
+            )?;
+            let package_commit = delivery_args::option(args, "--package-commit")
+                .unwrap_or_else(release::release_commit);
             if package_commit.len() != 40
                 || !package_commit.bytes().all(|byte| byte.is_ascii_hexdigit())
             {
@@ -877,10 +827,7 @@ pub fn execute(command: &str, args: &[String]) -> Result<(Value, u8), DeliveryEr
                     "--package-commit must be a full 40-character Git SHA",
                 ));
             }
-            let package_spec = option(args, "--package-spec").unwrap_or_else(|| {
-                format!("github:mirkoEscobedo/workspace-template#{package_commit}")
-            });
-            let plan = build_plan(command, &root_path, &package_commit, &package_spec)?;
+            let plan = build_plan(command, &root_path, &package_commit)?;
             let path = PathBuf::from(plan_path);
             if let Some(parent) = path.parent() {
                 fs::create_dir_all(parent)
@@ -905,7 +852,7 @@ pub fn execute(command: &str, args: &[String]) -> Result<(Value, u8), DeliveryEr
             ))
         }
         "apply" => {
-            let plan_path = option(args, "--apply-plan")
+            let plan_path = delivery_args::option(args, "--apply-plan")
                 .ok_or_else(|| DeliveryError::usage("apply requires --apply-plan <path>"))?;
             let bytes = fs::read(&plan_path)
                 .map_err(|error| DeliveryError::io("read sealed plan", error))?;

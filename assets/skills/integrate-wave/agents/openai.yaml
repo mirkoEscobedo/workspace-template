@@ -1,6 +1,0 @@
-interface:
-  display_name: "Integrate Wave"
-  short_description: "Serially lands reviewed candidates with neutral conflict handling."
-  default_prompt: "Integrate these passed candidates in dependency order and run the required landing gates."
-policy:
-  allow_implicit_invocation: false

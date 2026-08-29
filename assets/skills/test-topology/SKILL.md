@@ -11,7 +11,7 @@ metadata:
 ## Before adding tests
 
 1. Measure the target file, case count, fixture/support size, runtime, and recent touch frequency when available.
-2. Read `policies/architecture-budgets.yaml` or the supplied budget file.
+2. Read the repository-owned budget or the packaged [default architecture budgets](assets/architecture-budgets.yaml).
 3. If the file is locked, do not add LOC. Create a new behavior-oriented module or perform a dedicated decomposition.
 4. If the patch adds a new behavior family, place it in a new module even below the hard threshold.
 5. Keep scenario data declarative and extract reusable environment drivers into `support/`.
@@ -29,10 +29,6 @@ When a locked file repeatedly blocks work:
 
 ## Deterministic check
 
-Run:
+Use the repository's own architecture-budget command when one is declared in its instructions or build configuration. Otherwise measure the relevant files with read-only host tooling and compare the results to the supplied budget. workspace-template does not require or copy a consumer-side Python checker.
 
-```bash
-python scripts/check_architecture_budgets.py --root <repo> --config <budget.yaml>
-```
-
-Use `--capture-baseline` to create or refresh a baseline intentionally. Baseline changes require review; they are not an automatic way around a violation.
+Baseline changes require review; they are not an automatic way around a violation.

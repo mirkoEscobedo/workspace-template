@@ -1,18 +1,30 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/mirkoEscobedo/workspace-template/schemas/provenance-v1.json",
-  "title": "workspace-template native executable provenance",
+  "$id": "https://github.com/mirkoEscobedo/workspace-template/schemas/provenance-v2.json",
+  "title": "workspace-template native artifact provenance",
   "type": "object",
   "additionalProperties": false,
-  "required": ["version", "source", "toolchain", "embeddedAssets", "executable", "reproducibleBuild"],
+  "required": ["version", "release", "source", "toolchain", "embeddedAssets", "executable", "reproducibleBuild"],
   "properties": {
-    "version": { "const": 1 },
+    "version": { "const": 2 },
+    "release": {
+      "type": "object",
+      "required": ["version", "packageName", "sourceCommit", "releaseCommit", "releaseManifestSha256", "publicationStatus"],
+      "properties": {
+        "version": { "type": "string" },
+        "packageName": { "type": "string" },
+        "sourceCommit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "releaseCommit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "releaseManifestSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "publicationStatus": { "enum": ["unpublished", "published"] }
+      }
+    },
     "source": {
       "type": "object",
       "required": ["commit", "repository"],
       "properties": {
         "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
-        "repository": { "const": "https://github.com/mirkoEscobedo/workspace-template" }
+        "repository": { "type": "string", "format": "uri" }
       }
     },
     "toolchain": { "type": "object" },
@@ -23,19 +35,33 @@
     },
     "executable": {
       "type": "object",
-      "required": ["path", "target", "sha256"],
+      "required": ["path", "target", "sha256", "size", "signingStatus"],
       "properties": {
         "path": { "const": "bin/workspace-template.exe" },
         "target": { "const": "x86_64-pc-windows-msvc" },
-        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "size": { "type": "integer", "minimum": 1 },
+        "signingStatus": { "enum": ["unsigned-development", "authenticode-rfc3161"] }
       }
     },
     "reproducibleBuild": {
       "type": "object",
-      "required": ["byteIdentical", "buildCount"],
+      "required": ["byteIdentical", "buildCount", "hashes"],
       "properties": {
         "byteIdentical": { "const": true },
-        "buildCount": { "const": 2 }
+        "buildCount": { "const": 2 },
+        "hashes": { "type": "array", "minItems": 2, "items": { "type": "string", "pattern": "^[0-9a-f]{64}$" } }
+      }
+    },
+    "signature": {
+      "type": "object",
+      "required": ["status", "signer", "timestampSigner", "timestampProtocol", "executableSha256"],
+      "properties": {
+        "status": { "const": "Valid" },
+        "signer": { "type": "string", "minLength": 1 },
+        "timestampSigner": { "type": "string", "minLength": 1 },
+        "timestampProtocol": { "const": "RFC3161" },
+        "executableSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
       }
     }
   }

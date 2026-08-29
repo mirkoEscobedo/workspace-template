@@ -1,6 +1,0 @@
-interface:
-  display_name: "Retrofit Agent Docs"
-  short_description: "Adds durable agent documentation structure additively."
-  default_prompt: "Retrofit this docs folder to the Frontier Loop documentation shape without destructive moves."
-policy:
-  allow_implicit_invocation: true

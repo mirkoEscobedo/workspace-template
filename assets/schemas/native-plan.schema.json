@@ -8,7 +8,7 @@
   "properties": {
     "version": { "const": 1 },
     "planId": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
-    "command": { "enum": ["adopt", "upgrade", "skills-update"] },
+    "command": { "enum": ["adopt", "upgrade"] },
     "root": { "type": "string" },
     "sourceFingerprint": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
     "operations": { "type": "array" }

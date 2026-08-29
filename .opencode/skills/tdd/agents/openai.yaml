@@ -1,6 +1,0 @@
-interface:
-  display_name: "TDD"
-  short_description: "Vertical public-interface red-green-refactor with topology checks."
-  default_prompt: "Use vertical TDD for this behavior change and keep tests out of locked megafiles."
-policy:
-  allow_implicit_invocation: true

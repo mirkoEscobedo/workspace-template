@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "releaseVersion": "0.9.0-alpha.0",
+  "packageName": "workspace-template",
+  "publicationStatus": "unpublished",
+  "artifacts": {
+    "windows-x86_64": {
+      "rustTarget": "x86_64-pc-windows-msvc",
+      "signingRequirement": "authenticode-rfc3161",
+      "publicationAllowed": false
+    }
+  }
+}

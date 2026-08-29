@@ -1,6 +1,0 @@
-interface:
-  display_name: "Ticket Review"
-  short_description: "Independent spec, architecture, or operations review."
-  default_prompt: "Review this ticket package with the assigned lens and produce a read-only structured verdict."
-policy:
-  allow_implicit_invocation: false

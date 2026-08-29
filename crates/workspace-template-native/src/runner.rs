@@ -197,5 +197,5 @@ pub fn run(
     _cwd: &Path,
     _timeout: Duration,
 ) -> Result<RunResult, String> {
-    Err("UNSUPPORTED_PLATFORM: native 0.8 supports Windows x64 only".to_owned())
+    Err("UNSUPPORTED_PLATFORM: this release supports Windows x64 only".to_owned())
 }

@@ -1,64 +1,48 @@
-# workspace-template 0.8
+# workspace-template 0.9.0-alpha.0
 
-workspace-template 0.8 is a Windows x64 native CLI and dependency-owned skill package for Adaptive Delivery. Ordinary work defaults to Direct delivery; durable process artifacts appear only when multi-session or high-consequence work actually requires them.
+workspace-template is a registry-free, Windows x64 Rust CLI for Adaptive Delivery. This source tree is preparing the first public alpha; it is not signed or published.
 
-## Distribution
+The package owns methodology, inspection, verification, and sealed thin-state migration. npm/pnpm own dependency installation and lockfiles. Codex, OpenCode, and repository owners choose enabled models, agents, permissions, skills, and capabilities—workspace-template has no model presets or generated host-agent definitions.
 
-Consumers pin an exact Git release commit:
+## Commands
 
-```json
-{
-  "devDependencies": {
-    "workspace-template": "github:mirkoEscobedo/workspace-template#<40-character-release-sha>"
-  }
-}
+```text
+workspace-template help
+workspace-template instructions
+workspace-template route [routing flags]
+workspace-template inspect [root]
+workspace-template doctor [root]
+workspace-template verify [root] [--timeout <milliseconds>]
+workspace-template adopt plan|apply [root] ...
+workspace-template upgrade plan|apply [root] ...
+workspace-template skills list
+workspace-template skills show <name>
+workspace-template skills update
+workspace-template update status [root]
+workspace-template version
 ```
 
-Before that release commit is pushed, qualification uses a locally packed `.tgz`. The package contains a tracked `bin/workspace-template.exe` plus `workspace-template.provenance.json`. It has no downloader, postinstall build, or lifecycle script.
+Every command emits one stable JSON envelope. `--json` explicitly selects the default JSON format and is retained for compatibility. Unknown options, invalid values, and extra positionals fail with a documented usage exit.
 
-Node repositories keep the dependency in their root manifest. Flutter and Rust repositories use `.agentic/tooling/package.json` and its dedicated lockfile. Repositories retain only thin product state: `.agentic/project.json`, policy/overrides, history pointers, resumption truth, and a compact managed block in `AGENTS.md`. Canonical generic skills and schemas remain inside the dependency.
+Routing is Direct by default, Ticketed for multiple vertical slices or multi-session work, and Governed only for enumerated high-consequence authority. An outcome gets at most two semantic repair rounds and one explicitly classified flaky rerun.
 
-## Native commands
+Verification detects one root Flutter, Rust, npm, or pnpm topology. Each command has a timeout and bounded output. Windows children start suspended inside a kill-on-close Job Object so timeout, cancellation, root exit, and detached descendants converge to zero owned processes.
 
-```powershell
-npm exec -- workspace-template instructions --json
-npm exec -- workspace-template route --json
-npm exec -- workspace-template inspect . --json
-npm exec -- workspace-template doctor . --json
-npm exec -- workspace-template verify . --json
-npm exec -- workspace-template adopt plan . --plan-out .agentic/plans/adopt.json --json
-npm exec -- workspace-template adopt apply . --apply-plan .agentic/plans/adopt.json --json
-npm exec -- workspace-template upgrade plan . --plan-out .agentic/plans/upgrade.json --json
-npm exec -- workspace-template upgrade apply . --apply-plan .agentic/plans/upgrade.json --json
-npm exec -- workspace-template skills update plan . --plan-out .agentic/plans/skills.json --json
-```
+Adoption and upgrade use content-hashed sealed plans, repository fingerprints, stale-state rejection, safe relative paths, transaction staging, backup, rollback, and interrupted-run recovery. They write schema-v2 thin state and managed instruction/ignore blocks; they never modify package manifests or run package managers.
 
-Use `pnpm exec workspace-template` for pnpm projects and `npm exec --prefix .agentic/tooling -- workspace-template` for non-JavaScript projects.
+`skills list/show` reads the exact embedded 13-skill inventory. Generic skills are never copied into consumers. `skills update` directs users to update the exact dependency with npm/pnpm and then run sealed upgrade. `update status` compares manifest, lock resolution/integrity, installed package, running binary, and project state without mutation.
 
-`create`, `tooling`, `preset`, `restructure`, and `align` return `UNSUPPORTED_IN_NATIVE_0_8`; they do not fall back to Node.
-
-## Delivery modes
-
-- Direct: ordinary features, fixes, refactors, and bounded investigations. No durable process artifacts.
-- Ticketed: several independently valuable slices or multi-session work. One compact plan and one current ticket.
-- Governed: credentials/security, financial authority, irreversible/destructive work, native process ownership, or external execution. Adds a frozen acceptance contract, state record, independent review, and authority receipts.
-
-Verification and review allow at most two semantic repair rounds. A repeated unchanged failure replans immediately. Review is independent and read-only, and returns `PASS`, `FAIL`, or `INSUFFICIENT_EVIDENCE` with one permitted next transition. Failed checks never generate successor tickets, validator programs, or repair-evidence trees.
-
-## Terminal-native debugging
-
-`runtime-debug` is a semantic capability, not an IDE requirement. This Windows slice qualifies Microsoft CDB for Rust/native launch, attach, symbols, breakpoints, stepping, threads, stacks, bounded variable inspection, controlled detach, and cleanup. JavaScript investigations use the Node Inspector protocol through a terminal adapter. Computer use is reserved for actual GUI acceptance without a structured interface; it is never used to drive VS Code.
-
-If deterministic evidence is insufficient and no qualified provider is available, the correct result is `INSUFFICIENT_EVIDENCE` with an alternate check or explicit manual obligation.
-
-See [Adaptive Delivery](docs/guides/adaptive-delivery.md) for the state machine and evidence policy.
-
-## Development and release gates
+## Development
 
 ```powershell
 npm run check
 npm run pack:check
-npm run test:packed
 ```
 
-The release executable is built twice from a clean source-only commit with remapped paths and deterministic linker settings. The outputs must be byte-identical. The committed provenance records the source commit, toolchain, target, embedded-asset manifest, executable SHA-256, and reproducibility result. Publication, tagging, pushing, and merging are separate authorized actions.
+The retained PowerShell harnesses build reproducible Windows artifacts and qualify packed npm/pnpm consumers. Release materialization produces `bin/workspace-template.exe` and `workspace-template.provenance.json`; neither accepted 0.8 output is kept in the active 0.9 source tree.
+
+See [Adaptive Delivery](docs/guides/adaptive-delivery.md), [native architecture](docs/architecture/native-cli.md), and [pre-publication authority](docs/release-readiness/0.9.0-alpha.0.md).
+
+## Publication gate
+
+Authenticode signing with RFC 3161 timestamping is mandatory before publication. Package namespace/ownership, maintainers, recovery owners, signing custody, tags, releases, registry writes, and dist-tags require separate human authority.

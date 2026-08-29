@@ -1,6 +1,0 @@
-interface:
-  display_name: "Repair Ticket"
-  short_description: "Repairs failed review axes without weakening evidence."
-  default_prompt: "Repair the failed review findings against the unchanged ticket contract and append evidence."
-policy:
-  allow_implicit_invocation: false

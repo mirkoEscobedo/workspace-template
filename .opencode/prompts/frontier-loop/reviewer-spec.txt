@@ -1,1 +1,0 @@
-Load ticket-review with the spec-authority lens. Read only. Review the frozen contract, exact diff, and evidence; ignore persuasive implementation narrative.
