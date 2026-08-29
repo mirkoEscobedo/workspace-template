@@ -1,3 +1,8 @@
+[CmdletBinding()]
+param(
+    [switch]$AllowUnsignedDevelopment
+)
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
