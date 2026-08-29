@@ -138,7 +138,7 @@ try {
         } else {
             Push-Location $consumer
             try {
-                & pnpm.cmd remove --ignore-scripts workspace-template --store-dir $pnpmStore
+                & pnpm.cmd remove workspace-template --store-dir $pnpmStore
                 if ($LASTEXITCODE -ne 0) { throw 'pnpm uninstall canary failed.' }
                 & pnpm.cmd add --offline --ignore-scripts --save-dev $tarball --store-dir $pnpmStore
             } finally { Pop-Location }
@@ -160,6 +160,3 @@ try {
 } finally {
     if (Test-Path -LiteralPath $temporary) { Remove-Item -LiteralPath $temporary -Recurse -Force }
 }
-param(
-    [switch]$AllowUnsignedDevelopment
-)
