@@ -8,6 +8,11 @@
 - Made adopt/upgrade package-manager independent and converted `skills update` to non-mutating package-manager guidance.
 - Added asset closure/no-regrowth tests and Windows cancellation-signal cleanup coverage while retaining timeout and root-exit descendant containment.
 - Added reproducible unsigned build, CycloneDX SBOM, complete locked-crate notices, signature-recording, and packed npm/pnpm qualification gates.
+- Added versioned polyglot workspace graphs, structured consumer overrides, dependency-aware module/affected verification, and conservative graph conflicts.
+- Added empty-directory adoption and embedded-skill routing; permanently redirected `create` to official initializers followed by sealed adoption.
+- Added a bounded debug-session schema and host-provider discovery. Runtime protocol adapters remain visibly unqualified and do not launch targets.
+- Added an experimental Linux process-group runner and CI lane while retaining public platform rejection pending zero-descendant and direct-package qualification.
+- Replaced the generic npm identity with the direct Windows package name `workspace-template-win32-x64`; the executable command remains `workspace-template`.
 - Publication remains blocked on package ownership, signed-byte qualification, isolated-registry/consumer qualification, and explicit human authority.
 
 ## 0.8.0 — 2026-08-28

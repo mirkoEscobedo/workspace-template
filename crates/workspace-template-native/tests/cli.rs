@@ -75,7 +75,7 @@ fn enumerated_high_consequence_work_routes_governed() {
 
 #[test]
 fn unsupported_native_commands_fail_without_node_fallback() {
-    for command in ["create", "tooling", "preset", "restructure", "align"] {
+    for command in ["tooling", "preset", "restructure", "align"] {
         let output = run(&[command, "--json"]);
         assert_eq!(output.status.code(), Some(64), "{command}");
         let value = json(&output);

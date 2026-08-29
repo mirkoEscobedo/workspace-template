@@ -3,13 +3,13 @@ use std::path::{Path, PathBuf};
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 
-use crate::{assets, release};
+use crate::{assets, debug, release};
 
 fn package_root(target: &Path) -> Option<PathBuf> {
     let target_is_package = std::fs::read(target.join("package.json"))
         .ok()
         .and_then(|bytes| serde_json::from_slice::<Value>(&bytes).ok())
-        .is_some_and(|manifest| manifest["name"] == "workspace-template");
+        .is_some_and(|manifest| manifest["name"] == "workspace-template-win32-x64");
     if target_is_package && target.join("assets/skills").is_dir() {
         return Some(target.to_owned());
     }
@@ -122,7 +122,7 @@ fn validate_project(root: &Path, binary_sha256: Option<&str>) -> (Option<Value>,
         errors.push("execution must use adaptive/direct".to_owned());
     }
     let identity = &value["workspaceTemplate"];
-    if identity["packageName"] != "workspace-template" {
+    if identity["packageName"] != "workspace-template-win32-x64" {
         errors.push("workspaceTemplate.packageName does not match the running package".to_owned());
     }
     if identity["releaseVersion"] != env!("CARGO_PKG_VERSION") {
@@ -154,7 +154,7 @@ fn validate_project(root: &Path, binary_sha256: Option<&str>) -> (Option<Value>,
     if !artifact.is_object() {
         errors.push(format!("project has no artifact identity for {platform}"));
     } else {
-        if artifact["packageName"] != "workspace-template" {
+        if artifact["packageName"] != "workspace-template-win32-x64" {
             errors.push("platform artifact package name does not match".to_owned());
         }
         if artifact["rustTarget"] != env!("WT_TARGET") {
@@ -192,9 +192,10 @@ pub fn doctor(root: &Path) -> (Value, bool) {
     };
     errors.extend(mismatches.iter().cloned());
     let runtime_debug = runtime_debug_qualification(source_root.as_deref());
-    if runtime_debug_required(project.as_ref()) {
+    if runtime_debug_required(project.as_ref()) && runtime_debug["qualified"] != true {
         errors.push("required runtime-debug capability is unavailable".to_owned());
     }
+    let debug_providers = debug::providers(root);
     let ok = errors.is_empty();
     (
         json!({
@@ -205,6 +206,7 @@ pub fn doctor(root: &Path) -> (Value, bool) {
             "sourceCommit": env!("WT_SOURCE_COMMIT"),
             "releaseCommit": release::release_commit(),
             "runtimeDebug": runtime_debug,
+            "debugProviders": debug_providers,
             "embeddedAssets": {
                 "manifestSha256": assets::manifest_sha256(),
                 "sourceRoot": source_root,

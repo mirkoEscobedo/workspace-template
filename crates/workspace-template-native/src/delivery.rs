@@ -189,7 +189,7 @@ fn managed_agents(existing: &str, invocation: &str) -> String {
     }
     let existing = existing.trim_end();
     let block = format!(
-        "{START}\n## Adaptive Delivery\n\nUse `{invocation}` as this repository's workspace-template entry point. Direct is the default; Ticketed is for multi-session slices; Governed is reserved for enumerated high-consequence authority. Review is read-only, allows at most two semantic repair rounds, and returns `INSUFFICIENT_EVIDENCE` when required inspection is unavailable. Read package-owned methodology with `{invocation} skills list` and `{invocation} skills show <name>`; do not copy generic skills into this repository. The host or repository owner selects available models, agents, permissions, skills, and capabilities.\n{END}"
+        "{START}\n## Adaptive Delivery\n\nUse `{invocation}` as this repository's workspace-template entry point. Direct is the default; Ticketed is for multi-session slices; Governed is reserved for enumerated high-consequence authority. Review is read-only, allows at most two semantic repair rounds, and returns `INSUFFICIENT_EVIDENCE` when required inspection is unavailable.\n\nLoad package-owned methodology without copying it:\n\n- Behavior changes: `{invocation} skills show tdd` and `{invocation} skills show implementation-style`.\n- Diagnosis: `{invocation} skills show diagnose`.\n- Spawned commands: `{invocation} skills show process-lifecycle`.\n- Completion evidence: `{invocation} skills show verify`.\n- Wayfinder only when a route-changing ambiguity remains.\n- Ticket compilation only after Ticketed or Governed routing.\n\nDiscover the complete inventory with `{invocation} skills list`. Do not copy generic skills into this repository. The host or repository owner selects available models, agents, permissions, skills, and capabilities.\n{END}"
     );
     if let (Some(start), Some(end)) = (existing.find(START), existing.find(END)) {
         let tail = end + END.len();
@@ -295,7 +295,7 @@ fn project_json(
     let artifact_key = format!("{}-{}", std::env::consts::OS, std::env::consts::ARCH);
     let artifacts = json!({
         artifact_key: {
-            "packageName": "workspace-template",
+            "packageName": "workspace-template-win32-x64",
             "rustTarget": env!("WT_TARGET"),
             "executableSha256": binary_sha256,
             "signingStatus": release::signing_status()
@@ -306,7 +306,7 @@ fn project_json(
         serde_json::to_string_pretty(&json!({
             "version": 2,
             "workspaceTemplate": {
-                "packageName": "workspace-template",
+                "packageName": "workspace-template-win32-x64",
                 "releaseVersion": env!("CARGO_PKG_VERSION"),
                 "sourceCommit": env!("WT_SOURCE_COMMIT"),
                 "releaseCommit": package_commit,

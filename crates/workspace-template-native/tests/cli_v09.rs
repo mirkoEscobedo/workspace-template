@@ -120,7 +120,7 @@ fn skills_update_is_a_non_mutating_package_manager_migration_message() {
 #[test]
 fn sealed_adopt_writes_project_state_v2_without_mutating_the_manifest() {
     let root = fixture("adopt-v2");
-    let manifest = "{\n  \"name\": \"fixture\",\n  \"devDependencies\": {\n    \"workspace-template\": \"0.9.0-alpha.0\"\n  }\n}\n";
+    let manifest = "{\n  \"name\": \"fixture\",\n  \"devDependencies\": {\n    \"workspace-template-win32-x64\": \"0.9.0-alpha.0\"\n  }\n}\n";
     fs::write(root.join("package.json"), manifest).unwrap();
     let plan = root.join("adopt.json");
     let planned = run(&[
@@ -175,20 +175,20 @@ fn sealed_adopt_writes_project_state_v2_without_mutating_the_manifest() {
 #[test]
 fn update_status_is_read_only_and_reports_exact_package_identity() {
     let root = fixture("update-status");
-    fs::create_dir_all(root.join("node_modules/workspace-template")).unwrap();
+    fs::create_dir_all(root.join("node_modules/workspace-template-win32-x64")).unwrap();
     fs::write(
         root.join("package.json"),
-        "{\"devDependencies\":{\"workspace-template\":\"0.9.0-alpha.0\"}}\n",
+        "{\"devDependencies\":{\"workspace-template-win32-x64\":\"0.9.0-alpha.0\"}}\n",
     )
     .unwrap();
     fs::write(
         root.join("package-lock.json"),
-        "{\"lockfileVersion\":3,\"packages\":{\"node_modules/workspace-template\":{\"version\":\"0.9.0-alpha.0\",\"integrity\":\"sha512-fixture\"}}}\n",
+        "{\"lockfileVersion\":3,\"packages\":{\"node_modules/workspace-template-win32-x64\":{\"version\":\"0.9.0-alpha.0\",\"integrity\":\"sha512-fixture\"}}}\n",
     )
     .unwrap();
     fs::write(
-        root.join("node_modules/workspace-template/package.json"),
-        "{\"name\":\"workspace-template\",\"version\":\"0.9.0-alpha.0\"}\n",
+        root.join("node_modules/workspace-template-win32-x64/package.json"),
+        "{\"name\":\"workspace-template-win32-x64\",\"version\":\"0.9.0-alpha.0\"}\n",
     )
     .unwrap();
     let before = fs::read(root.join("package.json")).unwrap();
@@ -216,7 +216,7 @@ fn update_status_classifies_non_exact_git_tarball_and_range_specs_without_writin
     ] {
         let root = fixture(name);
         let manifest = format!(
-            "{{\"devDependencies\":{{\"workspace-template\":{}}}}}\n",
+            "{{\"devDependencies\":{{\"workspace-template-win32-x64\":{}}}}}\n",
             serde_json::to_string(spec).unwrap()
         );
         fs::write(root.join("package.json"), &manifest).unwrap();
@@ -293,25 +293,25 @@ fn sealed_delivery_rejects_removed_package_mutation_options() {
 #[test]
 fn update_status_reaches_current_after_exact_install_and_sealed_adoption() {
     let root = fixture("update-current");
-    fs::create_dir_all(root.join("node_modules/workspace-template/bin")).unwrap();
+    fs::create_dir_all(root.join("node_modules/workspace-template-win32-x64/bin")).unwrap();
     fs::write(
         root.join("package.json"),
-        "{\"devDependencies\":{\"workspace-template\":\"0.9.0-alpha.0\"}}\n",
+        "{\"devDependencies\":{\"workspace-template-win32-x64\":\"0.9.0-alpha.0\"}}\n",
     )
     .unwrap();
     fs::write(
         root.join("package-lock.json"),
-        "{\"lockfileVersion\":3,\"packages\":{\"node_modules/workspace-template\":{\"version\":\"0.9.0-alpha.0\",\"integrity\":\"sha512-fixture\"}}}\n",
+        "{\"lockfileVersion\":3,\"packages\":{\"node_modules/workspace-template-win32-x64\":{\"version\":\"0.9.0-alpha.0\",\"integrity\":\"sha512-fixture\"}}}\n",
     )
     .unwrap();
     fs::write(
-        root.join("node_modules/workspace-template/package.json"),
-        "{\"name\":\"workspace-template\",\"version\":\"0.9.0-alpha.0\"}\n",
+        root.join("node_modules/workspace-template-win32-x64/package.json"),
+        "{\"name\":\"workspace-template-win32-x64\",\"version\":\"0.9.0-alpha.0\"}\n",
     )
     .unwrap();
     fs::copy(
         env!("CARGO_BIN_EXE_workspace-template"),
-        root.join("node_modules/workspace-template/bin/workspace-template.exe"),
+        root.join("node_modules/workspace-template-win32-x64/bin/workspace-template.exe"),
     )
     .unwrap();
     let plan = root.join("adopt.json");
@@ -342,20 +342,20 @@ fn update_status_reaches_current_after_exact_install_and_sealed_adoption() {
 #[test]
 fn update_status_reads_pnpm_resolution_and_integrity_without_execution() {
     let root = fixture("pnpm-status");
-    fs::create_dir_all(root.join("node_modules/workspace-template")).unwrap();
+    fs::create_dir_all(root.join("node_modules/workspace-template-win32-x64")).unwrap();
     fs::write(
         root.join("package.json"),
-        "{\"devDependencies\":{\"workspace-template\":\"0.9.0-alpha.0\"}}\n",
+        "{\"devDependencies\":{\"workspace-template-win32-x64\":\"0.9.0-alpha.0\"}}\n",
     )
     .unwrap();
     fs::write(
         root.join("pnpm-lock.yaml"),
-        "lockfileVersion: '9.0'\nimporters:\n  .:\n    devDependencies:\n      workspace-template:\n        specifier: 0.9.0-alpha.0\n        version: 0.9.0-alpha.0\npackages:\n  workspace-template@0.9.0-alpha.0:\n    resolution: {integrity: sha512-fixture}\n",
+        "lockfileVersion: '9.0'\nimporters:\n  .:\n    devDependencies:\n      workspace-template-win32-x64:\n        specifier: 0.9.0-alpha.0\n        version: 0.9.0-alpha.0\npackages:\n  workspace-template-win32-x64@0.9.0-alpha.0:\n    resolution: {integrity: sha512-fixture}\n",
     )
     .unwrap();
     fs::write(
-        root.join("node_modules/workspace-template/package.json"),
-        "{\"name\":\"workspace-template\",\"version\":\"0.9.0-alpha.0\"}\n",
+        root.join("node_modules/workspace-template-win32-x64/package.json"),
+        "{\"name\":\"workspace-template-win32-x64\",\"version\":\"0.9.0-alpha.0\"}\n",
     )
     .unwrap();
     let output = run(&["update", "status", root.to_str().unwrap()]);

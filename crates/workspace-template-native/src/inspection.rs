@@ -32,6 +32,7 @@ pub fn inspect(root: &Path) -> Value {
             "pnpmLock": exists(root, "pnpm-lock.yaml"),
             "cargo": exists(root, "Cargo.toml"),
             "flutter": exists(root, "pubspec.yaml")
-        }
+        },
+        "workspace": crate::workspace_graph::discover(root)
     })
 }

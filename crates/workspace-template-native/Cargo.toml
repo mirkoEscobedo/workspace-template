@@ -13,7 +13,11 @@ path = "src/main.rs"
 
 [dependencies]
 hex.workspace = true
+libc.workspace = true
+glob.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+serde_yaml.workspace = true
 sha2.workspace = true
+toml.workspace = true
 windows-sys.workspace = true

@@ -54,6 +54,8 @@ fn pnpm_remove_uses_only_options_supported_by_the_remove_command() {
     let script =
         std::fs::read_to_string(repository().join("scripts/test-native-packed.ps1")).unwrap();
 
-    assert!(script.contains("& pnpm.cmd remove workspace-template --store-dir $pnpmStore"));
+    assert!(
+        script.contains("& pnpm.cmd remove workspace-template-win32-x64 --store-dir $pnpmStore")
+    );
     assert!(!script.contains("pnpm.cmd remove --ignore-scripts"));
 }

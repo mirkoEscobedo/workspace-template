@@ -6,6 +6,7 @@ use serde::Serialize;
 use serde_json::{json, Value};
 
 mod assets;
+mod debug;
 mod delivery;
 mod delivery_args;
 mod doctor;
@@ -14,6 +15,8 @@ mod release;
 mod runner;
 mod update_status;
 mod verify;
+mod verify_cli;
+mod workspace_graph;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const EXIT_FAILURE: u8 = 1;
@@ -94,7 +97,9 @@ fn help() -> Value {
             "route [--slice-count <positive-integer>] [--multi-session] [governance flags]",
             "inspect [root]",
             "doctor [root]",
-            "verify [root] [--timeout <milliseconds>]",
+            "debug providers [root]",
+            "debug run --spec <session.json>",
+            "verify [root] [--scope root|module|affected|all] [--module <id>] [--affected-from <ref>] [--concurrency <1-8>] [--timeout <milliseconds>]",
             "adopt plan|apply [root]",
             "upgrade plan|apply [root]",
             "skills list",
@@ -198,36 +203,6 @@ fn route(args: &[String]) -> Result<Value, String> {
     }))
 }
 
-fn verify_args(args: &[String]) -> Result<(String, u64), String> {
-    let mut root = None;
-    let mut timeout = 120_000_u64;
-    let mut timeout_seen = false;
-    let mut index = 0;
-    while index < args.len() {
-        match args[index].as_str() {
-            "--timeout" => {
-                if timeout_seen {
-                    return Err("duplicate verify option: --timeout".to_owned());
-                }
-                timeout_seen = true;
-                index += 1;
-                timeout = args
-                    .get(index)
-                    .and_then(|value| value.parse::<u64>().ok())
-                    .filter(|value| *value > 0)
-                    .ok_or_else(|| "--timeout requires positive milliseconds".to_owned())?;
-            }
-            option if option.starts_with('-') => {
-                return Err(format!("unknown verify option: {option}"));
-            }
-            value if root.is_none() => root = Some(value.to_owned()),
-            value => return Err(format!("unexpected verify positional: {value}")),
-        }
-        index += 1;
-    }
-    Ok((root.unwrap_or_else(|| ".".to_owned()), timeout))
-}
-
 fn platform_supported() -> bool {
     platform_supported_for(std::env::consts::OS, std::env::consts::ARCH)
 }
@@ -294,15 +269,19 @@ fn dispatch(args: &[String]) -> (Envelope, u8) {
             }
             Err(failure) => failure,
         },
-        "verify" => match verify_args(tail) {
-            Ok((root, timeout)) => {
-                let (result, ok) = verify::verify(Path::new(&root), timeout);
+        "verify" => match verify_cli::parse(tail) {
+            Ok(options) => {
+                let (result, ok) = verify::verify(&options);
                 (
                     Envelope::success("verify", result),
                     if ok { 0 } else { EXIT_FAILURE },
                 )
             }
             Err(message) => invalid("verify", message),
+        },
+        "debug" => match debug::execute(tail) {
+            Ok((result, exit_code)) => (Envelope::success("debug", result), exit_code),
+            Err(error) => (Envelope::failure("debug", error.code, error.message), error.exit_code),
         },
         "adopt" | "upgrade" => match delivery::execute(command, tail) {
             Ok((result, exit_code)) => (Envelope::success(command, result), exit_code),
@@ -354,7 +333,7 @@ fn dispatch(args: &[String]) -> (Envelope, u8) {
                 "version",
                 json!({
                     "version": VERSION,
-                    "packageName": "workspace-template",
+                    "packageName": "workspace-template-win32-x64",
                     "target": env!("WT_TARGET"),
                     "sourceCommit": env!("WT_SOURCE_COMMIT"),
                     "releaseCommit": release::release_commit(),
@@ -366,7 +345,15 @@ fn dispatch(args: &[String]) -> (Envelope, u8) {
             0,
         ),
         "--version" | "version" => invalid("version", "version does not accept arguments"),
-        "create" | "tooling" | "preset" | "restructure" | "align" | "sync" | "retrofit" => (
+        "create" => (
+            Envelope::failure(
+                command,
+                "OFFICIAL_INITIALIZER_REQUIRED",
+                "use the official language or framework initializer, obtain workspace-template, then run sealed `workspace-template adopt plan` and `workspace-template adopt apply`",
+            ),
+            EXIT_USAGE,
+        ),
+        "tooling" | "preset" | "restructure" | "align" | "sync" | "retrofit" => (
             Envelope::failure(
                 command,
                 "UNSUPPORTED_PORTABLE_CAPABILITY",

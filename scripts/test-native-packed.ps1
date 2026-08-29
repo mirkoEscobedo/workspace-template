@@ -89,7 +89,7 @@ try {
             try { & pnpm.cmd add --offline --ignore-scripts --save-dev $tarball --store-dir $pnpmStore } finally { Pop-Location }
         }
         if ($LASTEXITCODE -ne 0) { throw "$manager packed installation failed." }
-        $installed = Join-Path $consumer 'node_modules\workspace-template\bin\workspace-template.exe'
+        $installed = Join-Path $consumer 'node_modules\workspace-template-win32-x64\bin\workspace-template.exe'
         if (-not (Test-Path -LiteralPath $installed)) { throw "$manager did not install the native executable." }
         if ((Get-Sha256 $installed) -ne $actualHash) {
             throw "$manager installed an executable with the wrong checksum."
@@ -132,19 +132,19 @@ try {
         if ($LASTEXITCODE -ne 0 -or $upgrade.result.operations.Count -ne 0) { throw "$manager second migration was not a no-op." }
 
         if ($manager -eq 'npm') {
-            & npm.cmd uninstall --ignore-scripts workspace-template --prefix $consumer --cache $npmCache
+            & npm.cmd uninstall --ignore-scripts workspace-template-win32-x64 --prefix $consumer --cache $npmCache
             if ($LASTEXITCODE -ne 0) { throw 'npm uninstall canary failed.' }
             & npm.cmd install --offline --ignore-scripts --no-audit --no-fund --save-dev $tarball --prefix $consumer --cache $npmCache
         } else {
             Push-Location $consumer
             try {
-                & pnpm.cmd remove workspace-template --store-dir $pnpmStore
+                & pnpm.cmd remove workspace-template-win32-x64 --store-dir $pnpmStore
                 if ($LASTEXITCODE -ne 0) { throw 'pnpm uninstall canary failed.' }
                 & pnpm.cmd add --offline --ignore-scripts --save-dev $tarball --store-dir $pnpmStore
             } finally { Pop-Location }
         }
         if ($LASTEXITCODE -ne 0) { throw "$manager reinstall canary failed." }
-        $reinstalled = Join-Path $consumer 'node_modules\workspace-template\bin\workspace-template.exe'
+        $reinstalled = Join-Path $consumer 'node_modules\workspace-template-win32-x64\bin\workspace-template.exe'
         if ((Get-Sha256 $reinstalled) -ne $actualHash) { throw "$manager reinstall changed executable identity." }
     }
     [ordered]@{

@@ -11,6 +11,21 @@ pub struct RunResult {
     pub stderr: String,
 }
 
+#[cfg(windows)]
+pub fn ownership() -> &'static str {
+    "windows-job-object"
+}
+
+#[cfg(target_os = "linux")]
+pub fn ownership() -> &'static str {
+    "linux-process-group-experimental"
+}
+
+#[cfg(not(any(windows, target_os = "linux")))]
+pub fn ownership() -> &'static str {
+    "unsupported-platform"
+}
+
 fn drain<R: Read + Send + 'static>(mut reader: R) -> thread::JoinHandle<String> {
     thread::spawn(move || {
         let mut retained = Vec::new();
@@ -190,12 +205,79 @@ mod platform {
 #[cfg(windows)]
 pub use platform::run;
 
-#[cfg(not(windows))]
+#[cfg(target_os = "linux")]
+mod linux {
+    use super::*;
+    use std::os::unix::process::CommandExt;
+
+    pub fn run(
+        command: &str,
+        args: &[String],
+        cwd: &Path,
+        timeout: Duration,
+    ) -> Result<RunResult, String> {
+        let mut process = Command::new(command);
+        process
+            .args(args)
+            .current_dir(cwd)
+            .stdin(Stdio::null())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped());
+        unsafe {
+            process.pre_exec(|| {
+                if libc::setpgid(0, 0) != 0 {
+                    return Err(std::io::Error::last_os_error());
+                }
+                libc::prctl(libc::PR_SET_PDEATHSIG, libc::SIGKILL);
+                Ok(())
+            });
+        }
+        let mut child = process
+            .spawn()
+            .map_err(|error| format!("launch {command}: {error}"))?;
+        let process_group = child.id() as i32;
+        let stdout = drain(child.stdout.take().expect("captured stdout"));
+        let stderr = drain(child.stderr.take().expect("captured stderr"));
+        let started = Instant::now();
+        let (status, timed_out) = loop {
+            match child
+                .try_wait()
+                .map_err(|error| format!("wait for {command}: {error}"))?
+            {
+                Some(status) => break (status.code(), false),
+                None if started.elapsed() >= timeout => {
+                    unsafe {
+                        libc::kill(-process_group, libc::SIGKILL);
+                    }
+                    let status = child
+                        .wait()
+                        .map_err(|error| format!("wait after timeout: {error}"))?;
+                    break (status.code(), true);
+                }
+                None => thread::sleep(Duration::from_millis(10)),
+            }
+        };
+        unsafe {
+            libc::kill(-process_group, libc::SIGKILL);
+        }
+        Ok(RunResult {
+            status,
+            timed_out,
+            stdout: stdout.join().unwrap_or_default(),
+            stderr: stderr.join().unwrap_or_default(),
+        })
+    }
+}
+
+#[cfg(target_os = "linux")]
+pub use linux::run;
+
+#[cfg(not(any(windows, target_os = "linux")))]
 pub fn run(
     _command: &str,
     _args: &[String],
     _cwd: &Path,
     _timeout: Duration,
 ) -> Result<RunResult, String> {
-    Err("UNSUPPORTED_PLATFORM: this release supports Windows x64 only".to_owned())
+    Err("UNSUPPORTED_PLATFORM: no qualified process supervisor exists for this platform".to_owned())
 }

@@ -1,12 +1,49 @@
 {
   "version": 1,
   "releaseVersion": "0.9.0-alpha.0",
-  "packageName": "workspace-template",
+  "packageName": "workspace-template-win32-x64",
   "publicationStatus": "unpublished",
   "artifacts": {
     "windows-x86_64": {
+      "packageName": "workspace-template-win32-x64",
       "rustTarget": "x86_64-pc-windows-msvc",
       "signingRequirement": "authenticode-rfc3161",
+      "qualificationStatus": "qualified-unsigned-development",
+      "publicationAllowed": false
+    },
+    "linux-x86_64": {
+      "packageName": "workspace-template-linux-x64",
+      "rustTarget": "x86_64-unknown-linux-gnu",
+      "signingRequirement": "owner-decision-required",
+      "qualificationStatus": "experimental-process-supervisor",
+      "publicationAllowed": false
+    },
+    "macos-aarch64": {
+      "packageName": "workspace-template-darwin-arm64",
+      "rustTarget": "aarch64-apple-darwin",
+      "signingRequirement": "codesign-notarization-owner-decision-required",
+      "qualificationStatus": "blocked-on-descendant-containment",
+      "publicationAllowed": false
+    },
+    "linux-aarch64": {
+      "packageName": "workspace-template-linux-arm64",
+      "rustTarget": "aarch64-unknown-linux-gnu",
+      "signingRequirement": "owner-decision-required",
+      "qualificationStatus": "not-started",
+      "publicationAllowed": false
+    },
+    "windows-aarch64": {
+      "packageName": "workspace-template-win32-arm64",
+      "rustTarget": "aarch64-pc-windows-msvc",
+      "signingRequirement": "authenticode-rfc3161",
+      "qualificationStatus": "not-started",
+      "publicationAllowed": false
+    },
+    "macos-x86_64": {
+      "packageName": "workspace-template-darwin-x64",
+      "rustTarget": "x86_64-apple-darwin",
+      "signingRequirement": "codesign-notarization-owner-decision-required",
+      "qualificationStatus": "demand-gated",
       "publicationAllowed": false
     }
   }

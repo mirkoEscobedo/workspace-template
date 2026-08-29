@@ -103,7 +103,7 @@ try {
         version = 2
         release = [ordered]@{
             version = '0.9.0-alpha.0'
-            packageName = 'workspace-template'
+            packageName = 'workspace-template-win32-x64'
             sourceCommit = $sourceCommit
             releaseCommit = $sourceCommit
             releaseManifestSha256 = $releaseManifestHash
@@ -166,7 +166,7 @@ try {
         metadata = [ordered]@{
             component = [ordered]@{
                 type = 'application'
-                name = 'workspace-template'
+                name = 'workspace-template-win32-x64'
                 version = '0.9.0-alpha.0'
             }
         }

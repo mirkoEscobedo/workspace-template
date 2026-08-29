@@ -1,5 +1,5 @@
 {
-  "name": "workspace-template",
+  "name": "workspace-template-win32-x64",
   "version": "0.9.0-alpha.0",
   "description": "Windows-native Adaptive Delivery routing, verification, embedded skills, and sealed thin-state migration.",
   "bin": {

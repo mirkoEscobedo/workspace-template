@@ -5,7 +5,7 @@ use sha2::{Digest, Sha256};
 
 use crate::{assets, release};
 
-const PACKAGE_NAME: &str = "workspace-template";
+const PACKAGE_NAME: &str = "workspace-template-win32-x64";
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 fn read_json(path: &Path) -> Option<Value> {
