@@ -12,6 +12,8 @@ Use a fresh context when available. Review the acceptance criteria, exact diff, 
 
 Start with deterministic evidence and source inspection. Escalate only when correctness cannot otherwise be established. Read [references/evidence-ladder.md](references/evidence-ladder.md) before requesting runtime or GUI inspection.
 
+Review evidence against the declared acceptance scope: ordinary iterations need the exact scenario, affected regressions, and relevant static checks; repository-declared broader gates remain required at their boundaries or unknown impact. Check that new native fixtures executed real startup and reporting, rather than only compiling or failing setup. A component pass and a deferred external gate cannot support full acceptance. Qualified process-owner reuse alone does not require additional Governed artifacts; ownership changes and authority boundaries still require their controls.
+
 Return a report matching `assets/review-report.schema.json`:
 
 - `PASS` only when the acceptance criteria are supported and no blocking or important finding remains;

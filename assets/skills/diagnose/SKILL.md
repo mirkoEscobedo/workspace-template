@@ -20,6 +20,8 @@ Capture the expected and observed behavior, exact command or interaction, enviro
 
 Trace to the earliest incorrect state and state one falsifiable hypothesis plus supporting and refuting observations. Request `runtime-debug` for hidden program state, concurrency, crashes, hangs, or lifecycle faults. Request `interactive-gui` only for native GUI/device behavior without a structured seam.
 
-Return `REPAIRING` only for a new supported implementation hypothesis with fewer than two prior semantic repairs. Return `INSPECTING` when a narrow capability can resolve missing evidence. Return `REPLANNING` for infrastructure, external blockers, repeated hypotheses, exhausted budget, false assumptions, material scope change, or infeasibility.
+Return `REPAIRING` only for a new supported implementation hypothesis with fewer than two prior semantic repairs. Return `INSPECTING` when a narrow capability can resolve missing evidence. Return `REPLANNING` for infrastructure, external blockers, repeated hypotheses, exhausted budget, false assumptions, material scope change, or infeasibility in the affected acceptance scope.
+
+When an external gate blocks parent acceptance, keep that scope deferred or in replanning with the concrete blocker and resumption condition. Continue independently eligible local work only when the repository contract permits it; do not classify the external gate as an implementation defect, claim parent `PASS` or acceptance from component evidence, silently reduce its criteria, or reset repair counters.
 
 Do not generate instrumentation scripts, successor tickets, or decision files to extend the attempt budget. Prefer a regression test before repair and remove temporary diagnostic changes.

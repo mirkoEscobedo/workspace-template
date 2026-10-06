@@ -648,14 +648,15 @@ fn verify_contains_detached_descendants_on_timeout() {
     .expect("hanging verifier");
     fs::write(
         root.join("package.json"),
-        "{\n  \"name\": \"job-canary\",\n  \"private\": true,\n  \"scripts\": { \"check\": \"node test/hanging-verification.js\" }\n}\n",
+        "{\n  \"name\": \"job-canary\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"scripts\": { \"check\": \"node test/hanging-verification.js\" }\n}\n",
     )
     .expect("package manifest");
     let output = run_owned(&[
         "verify".to_owned(),
         root.to_string_lossy().into_owned(),
         "--timeout".to_owned(),
-        "1500".to_owned(),
+        // Allow real npm/Node startup before exercising the hanging child.
+        "5000".to_owned(),
         "--json".to_owned(),
     ]);
     assert_eq!(
@@ -668,7 +669,10 @@ fn verify_contains_detached_descendants_on_timeout() {
     assert_eq!(report["result"]["verdict"], "FAIL");
     assert_eq!(report["result"]["steps"][0]["timedOut"], true);
     let recorded: serde_json::Value =
-        serde_json::from_slice(&fs::read(&marker).expect("grandchild marker")).unwrap();
+        serde_json::from_slice(&fs::read(&marker).unwrap_or_else(|error| {
+            panic!("fixture startup did not create the grandchild marker: {error}; {report}")
+        }))
+        .unwrap();
     let pid = recorded["pid"].as_u64().unwrap();
     let probe = Command::new("powershell.exe")
         .args([

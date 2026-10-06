@@ -1,6 +1,5 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Component, Path, PathBuf};
-use std::process::Command;
 
 use serde::Serialize;
 use serde_json::Value;
@@ -647,19 +646,23 @@ fn cycle_conflict(modules: &BTreeMap<String, Module>, edges: &[Edge]) -> Option<
         })
 }
 
-fn git_state(root: &Path) -> GitState {
-    let head = Command::new("git")
-        .args(["-C", &root.to_string_lossy(), "rev-parse", "HEAD"])
-        .output()
-        .ok()
-        .filter(|output| output.status.success())
-        .map(|output| String::from_utf8_lossy(&output.stdout).trim().to_owned());
-    let dirty = Command::new("git")
-        .args(["-C", &root.to_string_lossy(), "status", "--porcelain"])
-        .output()
-        .ok()
-        .filter(|output| output.status.success())
-        .map(|output| !output.stdout.is_empty());
+fn git_state(root: &Path, conflicts: &mut Vec<Conflict>) -> GitState {
+    let mut query = |args: &[&str]| match crate::owned_git::run(
+        root,
+        &args.iter().map(|arg| (*arg).to_owned()).collect::<Vec<_>>(),
+    ) {
+        Ok(result) => (result.status == Some(0)).then_some(result.stdout),
+        Err(error) => {
+            conflicts.push(Conflict {
+                code: "GIT_DISCOVERY_UNQUALIFIED".to_owned(),
+                message: error,
+                paths: vec![".git".to_owned()],
+            });
+            None
+        }
+    };
+    let head = query(&["rev-parse", "HEAD"]).map(|stdout| stdout.trim().to_owned());
+    let dirty = query(&["status", "--porcelain"]).map(|stdout| !stdout.is_empty());
     GitState { head, dirty }
 }
 
@@ -741,6 +744,7 @@ pub fn discover(root: &Path) -> WorkspaceGraph {
     if let Some(cycle) = cycle_conflict(&modules, &edges) {
         conflicts.push(cycle);
     }
+    let git = git_state(&repository, &mut conflicts);
     conflicts.sort_by(|left, right| (&left.code, &left.paths).cmp(&(&right.code, &right.paths)));
     unsafe_symlinks.sort();
     unsafe_symlinks.dedup();
@@ -755,6 +759,6 @@ pub fn discover(root: &Path) -> WorkspaceGraph {
         conflicts,
         unsafe_symlinks,
         fingerprint,
-        git: git_state(&repository),
+        git,
     }
 }

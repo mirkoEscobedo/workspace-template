@@ -70,6 +70,71 @@
       "id": "pandora-fresh-adoption",
       "prompt": "Pandora has no agentic substrate and needs a fresh adoption that preserves its design-system and Storybook policy.",
       "expected_output": "Use thin Direct adoption, preserve product documents, use structured browser evidence before interactive GUI, and copy no generic methodology tree."
+    },
+    {
+      "id": "combined-bounded-repair-verification",
+      "prompt": "Apply delivery-loop, execute-delivery, tdd, verify, and review-change together to a bounded parser fix. The repository allows focused iteration and requires its full suite at final acceptance. The exact public scenario failed for the parser defect, passed after the first repair, and its affected regressions and static checks passed. Another defect now has a new supported hypothesis; the full suite has not run yet.",
+      "expected_output": "Use Direct without process artifacts. Count repairs across the outcome, allow only the remaining semantic repair budget, run the exact new scenario and affected regressions with relevant static checks, and independently review the changed claims. Run the required full suite at final acceptance, not after every small iteration. Report component evidence separately from the pending full gate; never claim full acceptance yet."
+    },
+    {
+      "id": "combined-native-fixture-setup-failure",
+      "prompt": "Use execute-delivery, tdd, verify, and review-change for a new native fixture. It compiles, but executing its startup/reporting scenario fails because the fixture executable path is wrong. The expensive aggregate has not started. The implementation is expected to fix a timeout defect.",
+      "expected_output": "Treat compilation as compile-only evidence and the bad fixture path as setup failure, not the intended timeout RED or GREEN. Correct or classify setup first, execute the real startup and reporting scenario, establish the expected behavior failure, then implement and run the exact scenario before the affected aggregate. Do not spend a semantic implementation repair on setup noise."
+    },
+    {
+      "id": "combined-stale-baseline-focused-iteration",
+      "prompt": "Use delivery-loop, execute-delivery, tdd, verify, and review-change for a second bounded parser repair. A full baseline passed before this small edit, so its covered source inputs have changed. The repository permits focused development iterations and requires full verification at final acceptance. The exact repaired scenario, affected regressions, and relevant static checks now pass; impact remains bounded and final acceptance has not been requested.",
+      "expected_output": "Mark the prior full baseline stale for the changed inputs, report the current focused component passes, and continue eligible focused work without automatically rerunning the full baseline after this repair. Refresh broad evidence when next required or claimed at the declared acceptance boundary. Do not use stale baseline evidence to claim full acceptance, waive mandatory gates, or reset semantic repair counters."
+    },
+    {
+      "id": "combined-unknown-impact",
+      "prompt": "Use delivery-loop, execute-delivery, verify, and review-change for a shared configuration change. Its local scenario passes, but available evidence cannot bound the impact across consumers. No authority or ownership boundary changes.",
+      "expected_output": "Require full verification or the repository's broadest required evidence because impact is unknown. Do not infer a full pass from the local scenario. Keep Direct unless another actual routing signal applies; ambiguity alone creates no Governed artifacts. Report any missing broad gate as an acceptance gap."
+    },
+    {
+      "id": "combined-mandatory-full-gate",
+      "prompt": "Use execute-delivery, verify, and review-change. A small fix passes the exact scenario, affected regressions, and lint. AGENTS.md explicitly requires npm run check before accepting a change; that gate is expensive and has not run.",
+      "expected_output": "Run npm run check at the required acceptance boundary. Efficiency guidance does not waive the explicit repository gate. Report the existing results as component evidence until the full gate passes; a reviewer cannot PASS the full acceptance claim from focused evidence alone."
+    },
+    {
+      "id": "combined-qualified-process-owner",
+      "prompt": "Use delivery-loop, execute-delivery, process-lifecycle, verify, and review-change for one bounded native fixture repair. The existing qualified owner contains and cleans its descendants. This fix changes only fixture input; ownership, cancellation, cleanup, and authority are unchanged, and completion evidence shows zero owned descendants.",
+      "expected_output": "Remain Direct, reuse the qualified owner, execute the exact native scenario before broader affected checks, and retain observed cleanup evidence. Reuse alone requires no new wrapper, Governed contract, lease campaign, or duplicate authority receipt. Introducing or changing ownership or consequential authority would still require the corresponding controls."
+    },
+    {
+      "id": "interruption-exact-recovery",
+      "prompt": "Resume Ticketed work using delivery-loop, compile-master-plan, and execute-delivery after context refresh. The current item identifies scope parser-timeout, candidate abc123, authorization for local edits/tests only, a passing native scenario with its evidence link, a pending required full gate, and next command cargo test --test affected_verification. Canonical repository state still matches abc123. A linked historical transcript is 98 KiB.",
+      "expected_output": "Confirm the current candidate against canonical state and resume the exact affected_verification command without repeating the settled local authorization question. Keep the current summary near 4 KiB or 60 lines, carrying scope, candidate, authorization limits, passes, gaps, blocker/resumption if any, next exact action, and evidence links. Preserve the historical transcript through its link rather than copying it into the current item or generating a size validator. Full acceptance remains pending its gate."
+    },
+    {
+      "id": "direct-settled-authorization",
+      "prompt": "Resume a Direct fix using delivery-loop and execute-delivery. The user already authorized this exact repository scope and local edits/tests. The conversation records the candidate, current evidence, and next focused test; canonical state agrees. No separate confirmation is required for that test.",
+      "expected_output": "Continue the focused test without asking the same authorization question. Keep the current summary in the conversation and create no process artifact. Preserve scope limits and separately required future confirmations."
+    },
+    {
+      "id": "changed-authority-on-resume",
+      "prompt": "Resume with delivery-loop and execute-delivery. The user previously authorized local implementation and tests only. The next proposed action is to sign a release, create a tag, push it, and publish to npm; review evidence is PASS.",
+      "expected_output": "Recognize the changed action and authority boundary. Do not treat prior local authorization or review PASS as permission for signing, tagging, pushing, or publication. Keep the separately required human authority gates explicit and continue eligible authorized local work if any. Record the blocker and resumption condition in the current summary without repeating settled local questions."
+    },
+    {
+      "id": "separate-candidate-and-apply-confirmations",
+      "prompt": "Use delivery-loop and execute-delivery after restart. Authorization to investigate and choose this candidate is settled, but the repository contract separately requires an explicit confirmation for sealed apply. The prepared plan still matches the current candidate and has passed review; apply confirmation is absent.",
+      "expected_output": "Preserve the settled candidate decision and do not ask to investigate again. Retain the separately required apply confirmation as an unresolved gate; plan freshness and review evidence cannot supply it. Resume only work already authorized until that confirmation is provided."
+    },
+    {
+      "id": "superseded-current-status",
+      "prompt": "Use delivery-loop and compile-master-plan to resume a current item that says fixture startup is blocked. New canonical evidence shows the executable path was corrected and startup/reporting now passes for candidate def456. Historical failure logs must remain available; final release qualification is still pending.",
+      "expected_output": "Replace the stale blocker and candidate in the current summary with verified current scope, candidate, pass evidence, remaining release gap, and next exact action. Link and preserve the historical failure evidence rather than appending it to the current item. Revalidate authorization if the candidate change affects its stated scope; do not silently infer full acceptance from startup success."
+    },
+    {
+      "id": "permitted-local-work-with-external-gap",
+      "prompt": "Apply delivery-loop, its state-machine reference, execute-delivery, diagnose, verify, and review-change together. An external hosted gate required for final release is unavailable. The repository contract explicitly permits independent local fixture work before that gate; local edits/tests are already authorized.",
+      "expected_output": "Defer or replan the parent acceptance scope blocked by the hosted gate, then continue independently eligible local fixture work without repeating the settled question. Execute new fixture startup/reporting first, run affected checks, and report local component passes separately. Keep the hosted requirement, concrete blocker, and resumption condition visible in the bounded current summary; do not claim parent PASS or final release acceptance, silently reduce parent criteria, waive the mandatory external gate, or reset repair counters."
+    },
+    {
+      "id": "current-summary-essential-exception",
+      "prompt": "Maintain a Ticketed current item using delivery-loop and compile-master-plan. Its essential active scope, candidate identity, scoped authorizations, evidence links, and exact recovery action require slightly more than 4 KiB; linked history is already preserved separately.",
+      "expected_output": "Keep one current item, compress nonessential text, and justify the essential size exception. Treat 4 KiB or 60 lines as a soft budget, not a hard validation gate; create no validator or duplicate status artifact. Preserve all facts required for safe recovery and keep history linked."
     }
   ]
 }
