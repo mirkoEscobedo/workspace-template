@@ -7,6 +7,8 @@
 
 Stop after any conclusive level.
 
+Conclusive evidence is relative to the declared scope. Check the exact scenario and affected surface first; require the repository's broader acceptance, integration, authority, or release gates when due, or when impact is unknown. Preserve the distinction between component evidence, a visible deferred gate, and full acceptance. An already qualified process owner does not itself require another review or wrapper campaign; changed lifecycle or authority claims need evidence for the changed boundary.
+
 Use `runtime-debug` for crashes, hangs, races, lifecycle faults, wrong runtime values, or hidden state transitions. Keep source read-only; capture the reproducer, environment, relevant frames/variables, and sanitized observations.
 
 Use `interactive-gui` only for native GUI, emulator/device, game, or desktop behavior without a reliable structured interface. Capture reproducible actions and screenshots or equivalent visual evidence. Do not use GUI control as a substitute for available automated checks.

@@ -10,6 +10,8 @@ metadata:
 
 Direct work needs no plan artifact. For Ticketed or Governed work, record the observable destination, authority sources, exclusions, acceptance checks, and a short ordered set of tracer-bullet outcomes. Keep exactly one current item.
 
+Use the `delivery-loop` current-summary fields and soft budget of about 4 KiB or 60 lines. Link preserved history and evidence, replace superseded status, and justify essential exceptions. Do not create a summary validator. Record settled authorization with its scope limits so a restart can recover the next exact action without repeating settled questions; separately required candidate and apply confirmations remain gates.
+
 Each outcome states its public behavior, dependencies that genuinely block it, expected scope, proportionate verification, authority gates, and stop conditions. Expected files are a forecast rather than a frozen write-set authority; material scope expansion returns to replanning.
 
 Do not create executable validators, generic process wrappers, `frontier.json`, self-mutating state writers, successor tickets, or per-review evidence directories. Use repository-owned test/build/lint commands directly. A deterministic legacy ticket-pack validator may be used read-only only when explicitly validating preserved historical artifacts.

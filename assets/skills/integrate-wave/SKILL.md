@@ -19,8 +19,8 @@ This is an optional specialist skill. Direct delivery and serial work on one bra
    - architecture and process gates pass.
 3. Apply or cherry-pick one candidate at a time.
 4. Resolve only mechanical conflicts where both contracts remain unambiguous. Return semantic conflicts to the planner.
-5. Run wave L3 checks after related candidates are composed.
-6. Run L4 where policy requires it, especially Lane 3 landing.
+5. Run the affected composed checks after related candidates are integrated, using the repository's declared integration gates.
+6. Run full verification where repository policy requires it for integration, acceptance, authority, or release, or when composed impact cannot be bounded. Do not infer full acceptance from component passes or defer a mandatory gate silently.
 7. Commit/record each ticket separately unless a predeclared integration branch requires a final integrate ticket.
 8. Update the compact current-work record when one exists; never create or extend a legacy frontier.
 9. Finish with a clean worktree and zero owned processes.

@@ -24,15 +24,15 @@ Do not bulk-write all tests before implementation.
 2. Name the behavior in domain language.
 3. Choose an expected value independent of the production implementation.
 4. Inspect the target test file with `test-topology`. A locked file cannot grow.
-5. Identify the exact L1 command and the expected RED reason.
+5. Identify the exact focused scenario command and the expected RED reason. For a new native fixture, execute the real startup and reporting path before an expensive aggregate; compilation alone does not prove that path.
 
 ## Cycle
 
 1. Write one behavior-focused test through a public interface.
-2. Run it and confirm it fails for the missing or broken behavior, not setup noise.
+2. Run it and confirm it fails for the missing or broken behavior, not setup noise. A compile-only pass is not GREEN; a fixture setup failure is not the intended RED. Fix or classify setup first, then rerun the exact scenario.
 3. Implement the smallest production change that can pass.
 4. Run the exact test to GREEN.
-5. Run the smallest affected set needed to detect local regression.
+5. Run the smallest affected set needed to detect local regression and the relevant static checks. Run broader suites at declared repository boundaries or when impact cannot be bounded, as described by `verify`.
 6. Record the cycle in the implementation report.
 7. Repeat for the next behavior.
 

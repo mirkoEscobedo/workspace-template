@@ -8,7 +8,7 @@ metadata:
 
 # Process Lifecycle
 
-This is an optional Governed specialist skill, not a default wrapper for ordinary foreground tests and builds. Use normal command execution when the host already provides bounded ownership and the command cannot outlive it. When a process may detach, survive cancellation, or control native descendants, prompt instructions are not process isolation and explicit ownership is required.
+This is an optional specialist skill for commands whose lifecycle needs explicit ownership. Use normal command execution when the host already provides bounded ownership and the command cannot outlive it. Reusing an already qualified host or native process owner for a bounded test can remain Direct or Ticketed; reuse alone does not require new Governed artifacts or a wrapper. Introducing or changing ownership, cancellation, cleanup, or consequential authority retains Governed controls. When a process may detach, survive cancellation, or control native descendants, prompt instructions are not process isolation and explicit ownership is required.
 
 ## Execution
 

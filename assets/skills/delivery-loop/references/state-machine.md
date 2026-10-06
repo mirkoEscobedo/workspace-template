@@ -9,8 +9,10 @@ Failure transitions:
 - A concrete verification or review defect enters `DIAGNOSING`.
 - A correctness claim that cannot be established statically enters `INSPECTING`.
 - A supported, new falsifiable hypothesis may enter `REPAIRING`, then returns to `VERIFYING`.
-- False assumptions, material scope change, infeasibility, unavailable required evidence, repeated hypotheses, and exhausted repair budget enter `REPLANNING`.
+- False assumptions, material scope change, infeasibility, unavailable required evidence for an acceptance claim, repeated hypotheses, and exhausted repair budget enter `REPLANNING` for the affected acceptance scope.
 - Replanning terminates with exactly one of `REDIRECTED`, `DEFERRED`, or `ABORTED`. A redirected outcome starts a fresh run; it does not silently reset the current run's counters.
+
+An unavailable external gate defers or replans the acceptance scope it blocks. Independently eligible local work may continue only when the repository contract permits it. Preserve the parent gate, concrete blocker, and resumption condition; do not claim parent `PASS` or `ACCEPTED`, silently reduce its acceptance criteria, or reset repair counters because a component can proceed.
 
 Limits are exact:
 

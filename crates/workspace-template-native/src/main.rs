@@ -11,11 +11,14 @@ mod delivery;
 mod delivery_args;
 mod doctor;
 mod inspection;
+mod owned_git;
 mod release;
 mod runner;
 mod update_status;
 mod verify;
 mod verify_cli;
+mod verify_identity;
+mod verify_report;
 mod workspace_graph;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -92,6 +95,12 @@ fn help() -> Value {
         "usage": "workspace-template <command> [arguments]",
         "output": "json",
         "jsonOption": "--json explicitly selects the default JSON envelope and is accepted once for compatibility",
+        "verification": {
+            "verdict": "Selected-command evidence; PASS does not imply repository acceptance",
+            "coverage": "Explicit verificationCoverage obligations are reported separately; completeGate is a repository declaration, not human authority",
+            "durationUnits": "Monotonic milliseconds including execution and owned cleanup",
+            "inputIdentity": "Optional verificationInputs policy; declared-input identity is separate from graphFingerprint and never skips checks"
+        },
         "commands": [
             "instructions",
             "route [--slice-count <positive-integer>] [--multi-session] [governance flags]",

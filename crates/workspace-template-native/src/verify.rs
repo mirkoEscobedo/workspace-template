@@ -1,12 +1,11 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
-use std::process::Command;
-use std::time::Duration;
+use std::time::Instant;
 
 use serde_json::{json, Value};
 
-use crate::runner;
 use crate::verify_cli::{Options, Scope};
+use crate::verify_report;
 use crate::workspace_graph::{CommandSpec, Module, WorkspaceGraph};
 
 #[cfg(windows)]
@@ -63,7 +62,11 @@ fn root_steps(root: &Path) -> Result<Vec<(String, Vec<String>)>, String> {
     Err("no deterministic verification topology was detected".to_owned())
 }
 
-fn root_verify(root: &Path, timeout_ms: u64) -> (Value, bool) {
+fn root_verify(
+    root: &Path,
+    timeout_ms: u64,
+    identity: &crate::verify_identity::Observation,
+) -> (Value, bool) {
     let commands = match root_steps(root) {
         Ok(commands) => commands,
         Err(error) => {
@@ -76,20 +79,16 @@ fn root_verify(root: &Path, timeout_ms: u64) -> (Value, bool) {
     let mut reports = Vec::new();
     let mut ok = true;
     for (command, args) in commands {
-        match runner::run(&command, &args, root, Duration::from_millis(timeout_ms)) {
-            Ok(result) => {
-                let passed = result.status == Some(0) && !result.timed_out;
-                reports.push(json!({ "command": command, "args": args, "status": result.status, "timedOut": result.timed_out, "stdout": result.stdout, "stderr": result.stderr, "processOwnership": runner::ownership() }));
-                if !passed {
-                    ok = false;
-                    break;
-                }
-            }
-            Err(error) => {
-                reports.push(json!({ "command": command, "args": args, "error": error }));
-                ok = false;
-                break;
-            }
+        let command = CommandSpec {
+            program: command,
+            args,
+            cwd: ".".to_owned(),
+        };
+        let (report, passed) = verify_report::run_step(root, &command, timeout_ms, None, identity);
+        reports.push(report);
+        if !passed {
+            ok = false;
+            break;
         }
     }
     (
@@ -99,16 +98,12 @@ fn root_verify(root: &Path, timeout_ms: u64) -> (Value, bool) {
 }
 
 fn git_paths(root: &Path, args: &[String]) -> Result<Vec<String>, String> {
-    let output = Command::new("git")
-        .arg("-C")
-        .arg(root)
-        .args(args)
-        .output()
-        .map_err(|error| format!("launch git: {error}"))?;
-    if !output.status.success() {
-        return Err(String::from_utf8_lossy(&output.stderr).trim().to_owned());
+    let output = crate::owned_git::run(root, args)?;
+    if output.status != Some(0) {
+        return Err(output.stderr.trim().to_owned());
     }
-    Ok(String::from_utf8_lossy(&output.stdout)
+    Ok(output
+        .stdout
         .lines()
         .map(|line| line.trim().replace('\\', "/"))
         .filter(|line| !line.is_empty())
@@ -204,31 +199,32 @@ fn selected_modules(
     Ok((selected, changes))
 }
 
-fn run_module(root: &Path, module: &Module, timeout_ms: u64) -> (Vec<Value>, bool, bool) {
+fn run_module(
+    root: &Path,
+    module: &Module,
+    timeout_ms: u64,
+    identity: &crate::verify_identity::Observation,
+) -> (Vec<Value>, bool, bool) {
     if module.commands.is_empty() {
         return (Vec::new(), false, true);
     }
     let mut reports = Vec::new();
-    for CommandSpec { program, args, cwd } in &module.commands {
-        let cwd_path = root.join(cwd);
-        match runner::run(program, args, &cwd_path, Duration::from_millis(timeout_ms)) {
-            Ok(result) => {
-                let passed = result.status == Some(0) && !result.timed_out;
-                reports.push(json!({ "module": module.id, "command": program, "args": args, "cwd": cwd, "status": result.status, "timedOut": result.timed_out, "stdout": result.stdout, "stderr": result.stderr, "processOwnership": runner::ownership() }));
-                if !passed {
-                    return (reports, false, false);
-                }
-            }
-            Err(error) => {
-                reports.push(json!({ "module": module.id, "command": program, "args": args, "error": error }));
-                return (reports, false, false);
-            }
+    for command in &module.commands {
+        let (report, passed) =
+            verify_report::run_step(root, command, timeout_ms, Some(&module.id), identity);
+        reports.push(report);
+        if !passed {
+            return (reports, false, false);
         }
     }
     (reports, true, false)
 }
 
-fn workspace_verify(root: &Path, options: &Options) -> (Value, bool) {
+fn workspace_verify(
+    root: &Path,
+    options: &Options,
+    identity: &crate::verify_identity::Observation,
+) -> (Value, bool) {
     let graph = crate::workspace_graph::discover(root);
     if !graph.valid {
         return (
@@ -245,6 +241,12 @@ fn workspace_verify(root: &Path, options: &Options) -> (Value, bool) {
             )
         }
     };
+    if graph.modules.is_empty() && !(options.scope == Scope::Affected && changes.is_empty()) {
+        return (
+            json!({ "verdict": "INSUFFICIENT_EVIDENCE", "errors": ["no deterministic verification modules were detected"], "steps": [] }),
+            false,
+        );
+    }
     let modules: BTreeMap<_, _> = graph
         .modules
         .iter()
@@ -304,7 +306,9 @@ fn workspace_verify(root: &Path, options: &Options) -> (Value, bool) {
                     .map(|id| {
                         let module = modules[id];
                         let id = id.clone();
-                        scope.spawn(move || (id, run_module(root, module, options.timeout_ms)))
+                        scope.spawn(move || {
+                            (id, run_module(root, module, options.timeout_ms, identity))
+                        })
                     })
                     .collect::<Vec<_>>()
                     .into_iter()
@@ -344,12 +348,35 @@ fn workspace_verify(root: &Path, options: &Options) -> (Value, bool) {
 }
 
 pub fn verify(options: &Options) -> (Value, bool) {
+    let started = Instant::now();
     let root = PathBuf::from(&options.root);
-    if options.scope == Scope::Root {
-        root_verify(&root, options.timeout_ms)
-    } else {
-        workspace_verify(&root, options)
-    }
+    let identity = crate::verify_identity::begin(&root);
+    let declaration = match identity.preflight_error() {
+        Some(error) => Err(error.to_owned()),
+        None => verify_report::coverage::read(&root),
+    };
+    let (mut report, ok) = match &declaration {
+        Err(error) => (
+            json!({ "verdict": "INSUFFICIENT_EVIDENCE", "errors": [error], "steps": [] }),
+            false,
+        ),
+        Ok(_) if options.scope == Scope::Root => root_verify(&root, options.timeout_ms, &identity),
+        Ok(_) => workspace_verify(&root, options, &identity),
+    };
+    report["scope"] = json!(match options.scope {
+        Scope::Root => "root",
+        Scope::Module => "module",
+        Scope::Affected => "affected",
+        Scope::All => "all",
+    });
+    report["evidenceLevel"] = json!("deterministic");
+    report["coverage"] = verify_report::coverage::report(
+        declaration.as_ref().ok().and_then(|value| value.as_ref()),
+        report["steps"].as_array().expect("verification steps"),
+    );
+    report["inputIdentity"] = identity.finish(&report);
+    report["durationMs"] = json!(verify_report::duration_ms(started));
+    (report, ok)
 }
 
 #[cfg(test)]
